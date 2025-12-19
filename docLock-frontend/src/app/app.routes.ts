@@ -1,0 +1,80 @@
+import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth';
+
+export const routes: Routes = [
+    {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+    },
+    {
+        path: '',
+        loadComponent: () => import('./layouts/auth-layout/auth-layout').then(m => m.AuthLayoutComponent),
+        children: [
+            {
+                path: 'login',
+                loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent)
+            },
+            {
+                path: 'signup',
+                loadComponent: () => import('./features/auth/signup/signup').then(m => m.SignupComponent)
+            },
+            {
+                path: 'auth/setup',
+                loadComponent: () => import('./features/auth/mpin-setup/mpin-setup').then(m => m.MpinSetupComponent)
+            },
+            {
+                path: 'auth/forgot-password',
+                loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent) // Temporary map to login or created component
+            }
+        ]
+    },
+    {
+        path: '',
+        loadComponent: () => import('./layouts/main-layout/main-layout').then(m => m.MainLayoutComponent),
+        canActivate: [authGuard],
+        children: [
+            {
+                path: 'dashboard',
+                loadComponent: () => import('./features/dashboard/dashboard').then(m => m.DashboardComponent)
+            },
+            {
+                path: 'profile',
+                loadComponent: () => import('./features/profile/profile').then(m => m.ProfileComponent)
+            },
+            {
+                path: 'scan',
+                loadComponent: () => import('./features/qr/qr-scan/qr-scan').then(m => m.QrScanComponent)
+            },
+            {
+                path: 'my-qr',
+                loadComponent: () => import('./features/qr/qr-generate/qr-generate').then(m => m.QrGenerateComponent)
+            },
+            {
+                path: 'people',
+                loadComponent: () => import('./features/people/friend-list/friend-list').then(m => m.FriendListComponent)
+            },
+            {
+                path: 'people/add',
+                loadComponent: () => import('./features/people/add-friend/add-friend').then(m => m.AddFriendComponent)
+            },
+            {
+                path: 'people/shared',
+                loadComponent: () => import('./features/people/shared-docs/shared-docs').then(m => m.SharedDocsComponent)
+            },
+            {
+                path: 'cards',
+                loadComponent: () => import('./features/cards/card-list/card-list').then(m => m.CardListComponent)
+            },
+            {
+                path: 'cards/add',
+                loadComponent: () => import('./features/cards/add-card/add-card').then(m => m.AddCardComponent)
+            },
+            {
+                path: 'documents',
+                loadComponent: () => import('./features/documents/document-list/document-list').then(m => m.DocumentListComponent)
+            },
+
+        ]
+    }
+];

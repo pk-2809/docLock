@@ -1,0 +1,7 @@
+/* Safe area padding for iPhone Home Indicator */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* Material Symbols Font Loading (ensure this is in index.html or we use an SVG set) */
+/* Ideally we should link Google Material Symbols in index.html */

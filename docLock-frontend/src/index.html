@@ -5,17 +5,137 @@
   <meta charset="utf-8">
   <title>DocLock</title>
   <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://r2cdn.perplexity.ai; img-src 'self' data:; connect-src 'self' http://localhost:3000;">
+
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <link rel="manifest" href="manifest.webmanifest">
 </head>
 
 <body>
-  <app-root></app-root>
+  <app-root>
+    <style>
+      body {
+        margin: 0;
+        background-color: #0F172A;
+      }
+
+      .app-loading {
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        background-color: #0F172A;
+        font-family: 'Outfit', sans-serif;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+
+      .logo-container {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin-bottom: 24px;
+        animation: breath 3s infinite ease-in-out;
+      }
+
+      .logo-svg {
+        width: 100%;
+        height: 100%;
+        fill: #3B82F6;
+        /* Blue-500 */
+        filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));
+      }
+
+      .loading-bar-container {
+        width: 140px;
+        height: 4px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .loading-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, transparent, #3B82F6, transparent);
+        transform: translateX(-100%);
+        animation: loading 1.5s infinite;
+      }
+
+      .app-name {
+        margin-top: 16px;
+        color: #F8FAFC;
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        opacity: 0;
+        animation: fadeUp 0.8s ease-out 0.2s forwards;
+      }
+
+      @keyframes breath {
+
+        0%,
+        100% {
+          transform: scale(1);
+          filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));
+        }
+
+        50% {
+          transform: scale(1.05);
+          filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.8));
+        }
+      }
+
+      @keyframes loading {
+        0% {
+          transform: translateX(-100%);
+        }
+
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+    <div class="app-loading">
+      <div class="logo-container">
+        <!-- Shield/Lock Icon SVG -->
+        <svg class="logo-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M12 2C9.243 2 7 4.243 7 7V10H6C4.897 10 4 10.897 4 12V20C4 21.103 4.897 22 6 22H18C19.103 22 20 21.103 20 20V12C20 10.897 19.103 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM12 17C10.896 17 10 16.104 10 15C10 13.896 10.896 13 12 13C13.104 13 14 13.896 14 15C14 16.104 13.104 17 12 17Z" />
+        </svg>
+      </div>
+      <div class="loading-bar-container">
+        <div class="loading-bar"></div>
+      </div>
+      <div class="app-name">docLock</div>
+    </div>
+  </app-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
 </body>
 

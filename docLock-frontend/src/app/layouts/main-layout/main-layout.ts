@@ -9,6 +9,4 @@ import { RouterOutlet, RouterLink } from '@angular/router';
     templateUrl: './main-layout.html',
     styleUrl: './main-layout.css'
 })
-export class MainLayoutComponent {
-    // TODO: Implement navigation logic
-}
+export class MainLayoutComponent { }

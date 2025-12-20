@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { OtpComponent } from '../otp/otp.component';
+import { AuthService } from '../../../core/auth/auth';
 
 @Component({
     selector: 'app-login',
@@ -12,6 +13,9 @@ import { OtpComponent } from '../otp/otp.component';
     styleUrls: ['./login.css']
 })
 export class LoginComponent {
+    private authService = inject(AuthService);
+    private router = inject(Router);
+
     mobileNumber = '';
     showOtp = false;
 
@@ -24,8 +28,6 @@ export class LoginComponent {
     private typingSpeed = 100;
     private deletingSpeed = 50;
     private pauseBetween = 2000;
-
-    constructor(private router: Router) { }
 
     ngOnInit() {
         this.typeEffect();
@@ -75,8 +77,18 @@ export class LoginComponent {
     }
 
     onOtpVerify(code: string) {
-        console.log('OTP Verified:', code);
-        this.showOtp = false;
-        this.router.navigate(['/dashboard']);
+        // Here we simulate the login via our AuthService
+        // The service simulates an API call which would set the cookie
+        this.authService.login(this.mobileNumber, code).subscribe({
+            next: (user) => {
+                console.log('Login successful', user);
+                this.showOtp = false;
+                this.router.navigate(['/dashboard']);
+            },
+            error: (err) => {
+                console.error('Login failed', err);
+                // Handle error (show toast, etc)
+            }
+        });
     }
 }

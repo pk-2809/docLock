@@ -25,7 +25,7 @@ export const routes: Routes = [
             },
             {
                 path: 'auth/forgot-password',
-                loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent) // Temporary map to login or created component
+                loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent)
             }
         ]
     },

@@ -1,4 +1,27 @@
 /* Safe area padding for iPhone Home Indicator */
+main {
+    position: relative;
+    display: block;
+    width: 100%;
+    /* Ensure it takes full available height so absolute children don't collapse it */
+    min-height: 100%;
+    height: 100%;
+    overflow: hidden;
+    /* Hide the sliding elements */
+}
+
+/* 
+ * CRITICAL FIX: Ensure the routed components take full space 
+ * and don't break the absolute positioning context.
+ */
+main>* {
+    display: block;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    /* Smoother animations */
+}
+
 .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 20px);
 }

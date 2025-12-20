@@ -1,0 +1,231 @@
+<!-- QR Scanner Page -->
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="animate-fade-in">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold gradient-text-light mb-3 flex items-center justify-center">
+                <span class="mr-3">📱</span>
+                QR Scanner
+            </h1>
+            <p class="text-white/70 text-lg">Scan QR codes to access documents and contacts</p>
+        </div>
+    </div>
+
+    <!-- Scanner Container -->
+    <div class="animate-scale-in animate-delay-100">
+        <div class="card max-w-md mx-auto relative overflow-hidden">
+            <!-- Scanner Viewport -->
+            <div class="relative">
+                <div class="aspect-square bg-black rounded-2xl overflow-hidden relative">
+                    <!-- Camera Feed Placeholder -->
+                    <div *ngIf="!isScanning && !scanResult" 
+                         class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                        <div class="text-center animate-fade-in">
+                            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center animate-pulse-slow">
+                                <span class="text-3xl">📷</span>
+                            </div>
+                            <p class="text-white/70 font-medium">Ready to scan</p>
+                            <p class="text-white/50 text-sm mt-1">Tap the button below to start</p>
+                        </div>
+                    </div>
+
+                    <!-- Scanning Animation -->
+                    <div *ngIf="isScanning" 
+                         class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900 relative">
+                        <!-- Scanning Grid -->
+                        <div class="absolute inset-4 border-2 border-white/30 rounded-2xl">
+                            <!-- Corner Brackets -->
+                            <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-400 animate-pulse"></div>
+                            <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-400 animate-pulse"></div>
+                            <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-400 animate-pulse"></div>
+                            <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-400 animate-pulse"></div>
+                            
+                            <!-- Scanning Line -->
+                            <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-bounce"></div>
+                        </div>
+                        
+                        <!-- Center Target -->
+                        <div class="w-32 h-32 border-2 border-white/50 rounded-2xl flex items-center justify-center animate-pulse-slow">
+                            <div class="w-16 h-16 border border-white/30 rounded-lg"></div>
+                        </div>
+                        
+                        <!-- Scanning Text -->
+                        <div class="absolute bottom-4 left-0 right-0 text-center">
+                            <p class="text-white font-medium animate-pulse">Scanning for QR codes...</p>
+                            <div class="flex justify-center space-x-1 mt-2">
+                                <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                                <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                                <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scan Result -->
+                    <div *ngIf="scanResult" 
+                         class="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-800 to-teal-900 animate-scale-in">
+                        <div class="text-center p-6">
+                            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-green-400 to-teal-500 rounded-2xl flex items-center justify-center animate-bounce-in">
+                                <span class="text-3xl">✅</span>
+                            </div>
+                            <p class="text-white font-bold text-lg mb-2">QR Code Detected!</p>
+                            <p class="text-white/80 text-sm break-all bg-black/20 p-3 rounded-lg">{{scanResult}}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera Permission Warning -->
+                <div *ngIf="!hasCamera" 
+                     class="absolute inset-0 bg-red-900/90 backdrop-blur-sm flex items-center justify-center rounded-2xl animate-fade-in">
+                    <div class="text-center p-6">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-red-500 rounded-2xl flex items-center justify-center animate-pulse">
+                            <span class="text-2xl">⚠️</span>
+                        </div>
+                        <p class="text-white font-bold mb-2">Camera Access Required</p>
+                        <p class="text-white/80 text-sm">Please allow camera access to scan QR codes</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="p-6 space-y-4">
+                <div class="flex justify-center space-x-4">
+                    <!-- Scan Toggle Button -->
+                    <button *ngIf="!scanResult" 
+                            (click)="toggleScanning()" 
+                            [disabled]="!hasCamera"
+                            class="btn-primary px-8 py-4 text-lg font-bold flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span class="text-2xl">{{isScanning ? '⏹️' : '📱'}}</span>
+                        <span>{{isScanning ? 'Stop Scanning' : 'Start Scanning'}}</span>
+                    </button>
+
+                    <!-- Result Actions -->
+                    <div *ngIf="scanResult" class="flex space-x-3">
+                        <button (click)="clearResult()" 
+                                class="btn-secondary px-6 py-3 flex items-center space-x-2">
+                            <span>🔄</span>
+                            <span>Scan Again</span>
+                        </button>
+                        <button class="btn-primary px-6 py-3 flex items-center space-x-2">
+                            <span>📋</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-3 gap-3 mt-6">
+                    <button class="p-3 glass rounded-xl hover-glow transition-all duration-300 text-center">
+                        <div class="text-2xl mb-1">💡</div>
+                        <div class="text-white/70 text-xs">Flash</div>
+                    </button>
+                    <button class="p-3 glass rounded-xl hover-glow transition-all duration-300 text-center">
+                        <div class="text-2xl mb-1">🔄</div>
+                        <div class="text-white/70 text-xs">Flip</div>
+                    </button>
+                    <button class="p-3 glass rounded-xl hover-glow transition-all duration-300 text-center">
+                        <div class="text-2xl mb-1">📷</div>
+                        <div class="text-white/70 text-xs">Photo</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scan History -->
+    <div class="animate-fade-in animate-delay-200">
+        <div class="card">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <span class="mr-3">📊</span>
+                    Recent Scans
+                </h3>
+                <button class="text-white/60 hover:text-white transition-colors text-sm">
+                    View All
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div *ngFor="let item of scanHistory; let i = index" 
+                     (click)="openScanHistory(item)"
+                     class="flex items-center space-x-4 p-4 rounded-xl glass hover-lift cursor-pointer transition-all duration-300 animate-slide-in-left"
+                     [style.animation-delay]="(i * 0.1) + 's'">
+                    
+                    <div class="w-12 h-12 bg-gradient-to-r {{item.color}} rounded-xl flex items-center justify-center animate-float">
+                        <span class="text-lg">{{item.icon}}</span>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <h4 class="text-white font-medium">{{item.title}}</h4>
+                        <p class="text-white/60 text-sm">{{item.time}}</p>
+                    </div>
+                    
+                    <div class="text-white/40">
+                        <span class="text-lg">→</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="scanHistory.length === 0" 
+                 class="text-center py-8 animate-fade-in">
+                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center animate-float">
+                    <span class="text-2xl">📱</span>
+                </div>
+                <p class="text-white/60">No scans yet</p>
+                <p class="text-white/40 text-sm">Your scan history will appear here</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="animate-fade-in animate-delay-300">
+        <div class="card">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                <span class="mr-3">💡</span>
+                Scanning Tips
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-start space-x-3 animate-slide-in-left">
+                    <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span class="text-blue-400">1</span>
+                    </div>
+                    <div>
+                        <p class="text-white font-medium text-sm">Hold steady</p>
+                        <p class="text-white/60 text-xs">Keep your device steady for better scanning</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3 animate-slide-in-left animate-delay-100">
+                    <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span class="text-green-400">2</span>
+                    </div>
+                    <div>
+                        <p class="text-white font-medium text-sm">Good lighting</p>
+                        <p class="text-white/60 text-xs">Ensure adequate lighting for clear scanning</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3 animate-slide-in-left animate-delay-200">
+                    <div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span class="text-purple-400">3</span>
+                    </div>
+                    <div>
+                        <p class="text-white font-medium text-sm">Proper distance</p>
+                        <p class="text-white/60 text-xs">Keep QR code within the scanning frame</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3 animate-slide-in-left animate-delay-300">
+                    <div class="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span class="text-orange-400">4</span>
+                    </div>
+                    <div>
+                        <p class="text-white font-medium text-sm">Clean lens</p>
+                        <p class="text-white/60 text-xs">Keep camera lens clean for best results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

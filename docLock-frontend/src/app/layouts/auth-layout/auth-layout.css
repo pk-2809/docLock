@@ -1,0 +1,187 @@
+/* Auth Layout Specific Styles */
+
+/* Enhanced container animations */
+.auth-container {
+    animation: authSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes authSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Logo animation enhancements */
+.logo-container {
+    position: relative;
+}
+
+.logo-container::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+    border-radius: 20px;
+    opacity: 0;
+    animation: logoGlow 3s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes logoGlow {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.3;
+        transform: scale(1.05);
+    }
+}
+
+/* Form container enhancements */
+.auth-form {
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-form::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #667eea, transparent);
+    animation: formShimmer 2s ease-in-out infinite;
+}
+
+@keyframes formShimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Background orb animations */
+.floating-orb {
+    animation: floatOrb 6s ease-in-out infinite;
+}
+
+.floating-orb:nth-child(2) {
+    animation-delay: 2s;
+}
+
+.floating-orb:nth-child(3) {
+    animation-delay: 4s;
+}
+
+@keyframes floatOrb {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    33% {
+        transform: translateY(-20px) rotate(120deg);
+    }
+    66% {
+        transform: translateY(10px) rotate(240deg);
+    }
+}
+
+/* Sparkle animation */
+.sparkle {
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Geometric shape animations */
+.geometric-shape {
+    animation: geometricFloat 4s ease-in-out infinite;
+}
+
+@keyframes geometricFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-15px) rotate(180deg);
+    }
+}
+
+/* Footer dots animation */
+.footer-dot {
+    animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+.footer-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.footer-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .auth-container {
+        padding: 1rem;
+    }
+    
+    .logo-container h1 {
+        font-size: 2.5rem;
+    }
+    
+    .auth-form {
+        padding: 1.5rem;
+    }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+    .glass {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .floating-orb,
+    .geometric-shape,
+    .sparkle,
+    .footer-dot {
+        animation: none;
+    }
+    
+    .logo-container::before {
+        animation: none;
+        opacity: 0.2;
+    }
+}

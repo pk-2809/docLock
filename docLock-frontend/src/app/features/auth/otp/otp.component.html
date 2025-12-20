@@ -1,0 +1,42 @@
+<div *ngIf="isOpen" class="fixed inset-0 z-50 flex flex-col justify-end w-full h-full">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" (click)="onClose()"></div>
+
+    <!-- Bottom Sheet -->
+    <div class="relative w-full bg-white rounded-t-3xl p-8 animate-slide-up shadow-2xl z-10">
+        <!-- Handle for mobile -->
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-8"></div>
+
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-8 h-8 text-indigo-600">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Verify it's you</h3>
+            <p class="text-slate-500 text-sm">
+                Enter the 6-digit code sent to<br>
+                <span class="text-slate-900 font-medium">{{ email || 'your email' }}</span>
+            </p>
+        </div>
+
+        <div class="flex gap-2 justify-center mb-8">
+            <input *ngFor="let digit of otp; let i = index" [id]="'otp-' + i" type="text" inputmode="numeric"
+                maxlength="1" [value]="digit" (input)="onInput(i, $event)" (keydown)="onKeyDown(i, $event)"
+                class="w-10 h-12 sm:w-12 sm:h-14 bg-slate-100 border-2 border-transparent rounded-xl text-center text-slate-900 text-xl font-bold focus:outline-none focus:border-indigo-500 focus:bg-white transition-all caret-indigo-500">
+        </div>
+
+        <button (click)="onVerify()" [disabled]="otp.join('').length !== 6"
+            class="w-full bg-[#3d42c3] hover:bg-[#3236a8] text-white font-bold text-sm tracking-wider uppercase py-4 rounded-xl shadow-lg shadow-indigo-600/20 transform active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mb-4">
+            Verify Code
+        </button>
+
+        <div class="text-center">
+            <button class="text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors">
+                Resend Code
+            </button>
+        </div>
+    </div>
+</div>

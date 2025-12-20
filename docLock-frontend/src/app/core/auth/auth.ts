@@ -34,6 +34,7 @@ export class AuthService {
    */
   checkSession(): Observable<User | null> {
     this.isLoading.set(true);
+    this.setUser();
 
     return this.http.get<User>('/api/auth/session').pipe(
       tap(user => {
@@ -47,6 +48,16 @@ export class AuthService {
         this.isLoading.set(false);
       })
     );
+  }
+
+  setUser() {
+    const user = {
+      id: 'eu39e39ei03e3e3',
+      name: 'Pranav',
+      email: 'pranav@gmail.com',
+      mobile: '9839839483'
+    }
+    this.user.set(user);
   }
 
   /**

@@ -1,4 +1,5 @@
-<div *ngIf="isOpen" class="fixed inset-0 z-50 flex flex-col justify-end w-full h-full">
+@if (isOpen) {
+<div class="fixed inset-0 z-50 flex flex-col justify-end w-full h-full">
     <!-- Backdrop -->
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" (click)="onClose()"></div>
 
@@ -22,10 +23,13 @@
             </p>
         </div>
 
+        @if (!isVerifying) {
         <div class="flex gap-2 justify-center mb-8">
-            <input *ngFor="let digit of otp; let i = index" [id]="'otp-' + i" type="text" inputmode="numeric"
-                maxlength="1" [value]="digit" (input)="onInput(i, $event)" (keydown)="onKeyDown(i, $event)"
+            @for (digit of otp; track i; let i = $index) {
+            <input #otpInput type="text" inputmode="numeric" maxlength="1" [value]="digit" (input)="onInput(i, $event)"
+                (keydown)="onKeyDown(i, $event)"
                 class="w-10 h-12 sm:w-12 sm:h-14 bg-slate-100 border-2 border-transparent rounded-xl text-center text-slate-900 text-xl font-bold focus:outline-none focus:border-indigo-500 focus:bg-white transition-all caret-indigo-500">
+            }
         </div>
 
         <button (click)="onVerify()" [disabled]="otp.join('').length !== 6"
@@ -38,5 +42,18 @@
                 Resend Code
             </button>
         </div>
+        } @else {
+        <!-- Verifying State -->
+        <div class="flex flex-col items-center justify-center py-8 animate-fade-in">
+            <div class="relative w-16 h-16 mb-4">
+                <div class="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin">
+                </div>
+            </div>
+            <p class="text-lg font-bold text-slate-900 mb-1">Verifying...</p>
+            <p class="text-slate-500 text-sm">Please wait while we check your code</p>
+        </div>
+        }
     </div>
 </div>
+}

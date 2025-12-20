@@ -79,16 +79,17 @@ export class LoginComponent {
     onOtpVerify(code: string) {
         // Here we simulate the login via our AuthService
         // The service simulates an API call which would set the cookie
-        this.authService.login(this.mobileNumber, code).subscribe({
-            next: (user) => {
-                console.log('Login successful', user);
-                this.showOtp = false;
-                this.router.navigate(['/dashboard']);
-            },
-            error: (err) => {
-                console.error('Login failed', err);
-                // Handle error (show toast, etc)
-            }
-        });
+        // this.authService.login(this.mobileNumber, code).subscribe({
+        //     next: (user) => {
+        //         console.log('Login successful', user);
+        //         this.showOtp = false;
+        this.authService.setUser();
+        this.router.navigate(['/dashboard']);
+        //     },
+        //     error: (err) => {
+        //         console.error('Login failed', err);
+        //         // Handle error (show toast, etc)
+        //     }
+        // });
     }
 }

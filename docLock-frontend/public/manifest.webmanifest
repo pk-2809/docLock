@@ -1,19 +1,9 @@
 {
   "name": "docLock",
   "short_name": "docLock",
-  "theme_color": "#0F172A",
-  "background_color": "#0F172A",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
-  "orientation": "portrait",
-  "categories": [
-    "productivity",
-    "utilities",
-    "finance",
-    "personal"
-  ],
-  "description": "Securely manage and share your personal documents.",
   "icons": [
     {
       "src": "icons/icon-72x72.png",

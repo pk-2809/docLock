@@ -1,0 +1,338 @@
+/* Auth Components Enhanced Styles */
+
+/* Typewriter cursor animation */
+.typewriter-cursor {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0;
+    }
+}
+
+/* Enhanced input field animations */
+.input-enhanced {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-enhanced:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(61, 66, 195, 0.15);
+}
+
+/* Input field glow effect */
+.input-glow {
+    position: relative;
+}
+
+.input-glow::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(45deg, transparent, rgba(61, 66, 195, 0.3), transparent);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.input-glow:focus-within::before {
+    opacity: 1;
+}
+
+/* Floating label effect */
+.floating-label-container {
+    position: relative;
+}
+
+.floating-label {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(148, 163, 184, 0.7);
+    font-size: 14px;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    padding: 0 4px;
+}
+
+.floating-label.active {
+    top: -8px;
+    left: 12px;
+    font-size: 12px;
+    color: #3d42c3;
+    background: #1e293b;
+    font-weight: 600;
+}
+
+/* Feature icons hover animation */
+.feature-icon {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.feature-icon:hover {
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 10px 25px rgba(61, 66, 195, 0.4);
+}
+
+.feature-icon::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, rgba(61, 66, 195, 0.3), rgba(99, 102, 241, 0.3));
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.feature-icon:hover::before {
+    opacity: 1;
+}
+
+/* Button shimmer effect */
+.btn-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.btn-shimmer:hover::before {
+    left: 100%;
+}
+
+/* Button press effect */
+.btn-press {
+    transition: all 0.1s ease;
+}
+
+.btn-press:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 2px 8px rgba(61, 66, 195, 0.3);
+}
+
+/* Button loading state */
+.btn-loading {
+    position: relative;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success checkmark animation */
+.success-check {
+    animation: checkmarkPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes checkmarkPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(-180deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.3) rotate(-90deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* SVG Icon Animations */
+.icon-bounce {
+    animation: iconBounce 0.6s ease-out;
+}
+
+@keyframes iconBounce {
+    0% {
+        transform: scale(0.3);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Enhanced icon hover states */
+svg {
+    transition: all 0.2s ease;
+}
+
+.hover-lift svg:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Progress indicator animation */
+.progress-dot {
+    transition: all 0.3s ease;
+}
+
+.progress-dot.active {
+    background: #3d42c3;
+    transform: scale(1.2);
+}
+
+/* Form field focus animation */
+.field-focus {
+    position: relative;
+}
+
+.field-focus::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #3d42c3;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.field-focus:focus-within::after {
+    width: 100%;
+}
+
+/* Benefits list animation */
+.benefit-item {
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideInBenefit 0.4s ease-out forwards;
+}
+
+.benefit-item:nth-child(1) { animation-delay: 0.1s; }
+.benefit-item:nth-child(2) { animation-delay: 0.2s; }
+.benefit-item:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes slideInBenefit {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Security badge pulse */
+.security-pulse {
+    animation: securityGlow 2s ease-in-out infinite;
+}
+
+@keyframes securityGlow {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+/* Link hover effect */
+.link-hover {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.link-hover::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #3d42c3;
+    transition: width 0.3s ease;
+}
+
+.link-hover:hover::after {
+    width: 100%;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    .feature-icon {
+        transform: none;
+    }
+    
+    .feature-icon:hover {
+        transform: translateY(-1px) scale(1.02);
+    }
+    
+    .input-enhanced:focus {
+        transform: none;
+        box-shadow: 0 4px 15px rgba(61, 66, 195, 0.1);
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .feature-icon,
+    .success-check,
+    .benefit-item,
+    .security-pulse {
+        animation: none;
+        transition: none;
+    }
+    
+    .feature-icon:hover,
+    .input-enhanced:focus {
+        transform: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .input-enhanced {
+        border: 2px solid #ffffff;
+    }
+    
+    .btn-shimmer {
+        border: 2px solid #ffffff;
+    }
+    
+    .field-focus::after {
+        background: #ffffff;
+        height: 3px;
+    }
+}

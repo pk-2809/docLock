@@ -23,7 +23,7 @@
             </p>
         </div>
 
-        @if (!isVerifying) {
+        @if (!isLoading) {
         <div class="flex gap-2 justify-center mb-8">
             @for (digit of otp; track i; let i = $index) {
             <input #otpInput type="text" inputmode="numeric" maxlength="1" [value]="digit" (input)="onInput(i, $event)"

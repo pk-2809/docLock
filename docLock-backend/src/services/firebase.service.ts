@@ -1,21 +1,36 @@
+import * as admin from 'firebase-admin';
 import { auth, db, isFirebaseInitialized } from '../config/firebase';
+import { CustomError } from '../middleware/errorHandler';
+
+interface UserData {
+    name: string;
+    mobile: string;
+    role: string;
+    createdAt?: string;
+}
 
 export class FirebaseService {
     /**
      * Verifies the Firebase ID Token sent from the client.
      */
-    static async verifyIdToken(idToken: string) {
+    static async verifyIdToken(idToken: string): Promise<admin.auth.DecodedIdToken | { uid: string; phone_number: string } | null> {
         if (!isFirebaseInitialized) {
             // MOCK MODE: Accept any non-empty token
             console.log('[Mock] Verifying ID Token');
             return idToken ? { uid: 'mock-user-123', phone_number: '1234567890' } : null;
         }
 
+        console.log('🔐 Verifying ID Token:', idToken ? idToken.substring(0, 15) + '...' : 'NULL');
+
         try {
             const decodedToken = await auth.verifyIdToken(idToken);
             return decodedToken;
         } catch (error) {
-            console.error('Error verifying ID token:', error);
+            console.error('❌ Error verifying ID token:', error);
+            if (error && typeof error === 'object' && 'code' in error) {
+                console.error('   Code:', (error as any).code);
+                console.error('   Message:', (error as any).message);
+            }
             return null;
         }
     }
@@ -42,7 +57,7 @@ export class FirebaseService {
     /**
      * Verifies the Session Cookie.
      */
-    static async verifySessionCookie(sessionCookie: string) {
+    static async verifySessionCookie(sessionCookie: string): Promise<admin.auth.DecodedIdToken | { uid: string } | null> {
         if (!isFirebaseInitialized) {
             if (sessionCookie === 'mock-session-cookie-xyz-123') {
                 return { uid: 'mock-user-123' };
@@ -73,8 +88,17 @@ export class FirebaseService {
             const usersRef = db.collection('users');
             const snapshot = await usersRef.where('mobile', '==', mobile).limit(1).get();
             return !snapshot.empty;
-        } catch (error) {
-            console.error('Error checking user existence:', error);
+        } catch (error: unknown) {
+            const firestoreError = error as { code?: number; message?: string };
+
+            // Handle Firestore NOT_FOUND - service account may need a moment to sync permissions
+            if (firestoreError.code === 5) {
+                console.error('⚠️  Firestore access issue - service account permissions may be syncing');
+                console.error('   If this persists, re-download serviceAccountKey.json from Firebase Console');
+                return false;
+            }
+
+            console.error('Error checking user:', error);
             return false;
         }
     }
@@ -82,10 +106,10 @@ export class FirebaseService {
     /**
      * Creates a new user document in Firestore.
      */
-    static async createUser(uid: string, data: any) {
+    static async createUser(uid: string, data: UserData): Promise<void> {
         if (!isFirebaseInitialized) {
             console.log('[Mock] Creating User', { uid, data });
-            return true;
+            return;
         }
 
         try {
@@ -93,17 +117,25 @@ export class FirebaseService {
                 ...data,
                 createdAt: new Date().toISOString()
             });
-            return true;
-        } catch (error) {
+        } catch (error: unknown) {
+            const firestoreError = error as { code?: number; message?: string };
+
+            // Handle Firestore NOT_FOUND - usually permissions or service account sync issue
+            if (firestoreError.code === 5) {
+                console.error('⚠️  Firestore access denied (Code 5)');
+                console.error('   Try: Re-download serviceAccountKey.json from Firebase Console');
+                throw new CustomError('Firestore access error. Re-download service account key.', 503);
+            }
+
             console.error('Error creating user:', error);
-            throw error;
+            throw new CustomError('Failed to create user', 500);
         }
     }
 
     /**
      * Gets user data by UID.
      */
-    static async getUser(uid: string) {
+    static async getUser(uid: string): Promise<UserData | null> {
         if (!isFirebaseInitialized) {
             console.log('[Mock] Getting User', uid);
             return { name: 'Mock User', mobile: '9999999999', role: 'user' };
@@ -111,9 +143,19 @@ export class FirebaseService {
 
         try {
             const doc = await db.collection('users').doc(uid).get();
-            if (doc.exists) return doc.data();
+            if (doc.exists) {
+                return doc.data() as UserData;
+            }
             return null;
-        } catch (error) {
+        } catch (error: unknown) {
+            const firestoreError = error as { code?: number; message?: string };
+
+            // Handle Firestore NOT_FOUND error (database doesn't exist)
+            if (firestoreError.code === 5 || (firestoreError.message && firestoreError.message.includes('NOT_FOUND'))) {
+                console.error('❌ Firestore Database NOT_FOUND Error when getting user');
+                return null;
+            }
+
             console.error('Error getting user:', error);
             return null;
         }

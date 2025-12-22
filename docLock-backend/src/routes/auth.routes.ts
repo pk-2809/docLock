@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
+import { validateMobile, validateSignup, validateIdToken } from '../middleware/validator';
 
 const router = Router();
 
-router.post('/check-user', AuthController.checkUser);
-router.post('/login-verify', AuthController.verifyLogin);
-router.post('/signup', AuthController.signup);
+router.post('/check-user', validateMobile, AuthController.checkUser);
+router.post('/login-verify', validateIdToken, AuthController.verifyLogin);
+router.post('/signup', validateSignup, AuthController.signup);
 router.post('/logout', AuthController.logout);
 router.get('/session', AuthController.checkSession);
 

@@ -116,27 +116,23 @@
             }
         </div>
 
-        <!-- Enhanced Submit Button -->
-        <button type="submit" [disabled]="!signupForm.form.valid"
-            class="w-full bg-[#3d42c3] hover:bg-[#3236a8] text-white font-bold text-sm tracking-wider uppercase py-4 rounded-xl shadow-lg shadow-indigo-900/20 transform active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:shadow-indigo-900/30 hover:-translate-y-0.5 mt-8 relative overflow-hidden group">
-            <!-- Button Shimmer Effect -->
-            <div
-                class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700">
-            </div>
+        <!-- Recaptcha Container (Invisible) - Must exist for Firebase Phone Auth -->
+        <div id="signup-recaptcha-container" style="display: none;"></div>
 
+        <button type="submit" [disabled]="!signupForm.form.valid || authService.isLoading()"
+            class="w-full bg-[#3d42c3] hover:bg-[#3236a8] text-white font-bold text-sm tracking-wider uppercase py-4 rounded-xl shadow-lg shadow-indigo-900/20 transform active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:shadow-indigo-900/30 hover:-translate-y-0.5 mt-8 relative overflow-hidden group">
             <span class="relative z-10 flex items-center justify-center">
-                @if (!signupForm.form.valid) {
-                <span>Complete the form</span>
-                }
-                @if (signupForm.form.valid) {
-                <span class="flex items-center">
-                    Get OTP
-                    <svg class="w-4 h-4 ml-2 animate-pulse-subtle" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                    </svg>
-                </span>
+                @if (authService.isLoading()) {
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                Creating...
+                } @else {
+                Get OTP
                 }
             </span>
         </button>
@@ -171,6 +167,7 @@
         </div>
     </form>
 
-    <app-otp [isOpen]="showOtp" [email]="mobileNumber" (close)="onOtpClose()" (verify)="onOtpVerify($event)">
+    <app-otp [isOpen]="showOtp" [email]="mobileNumber" [isLoading]="authService.isLoading()" (close)="onOtpClose()"
+        (verify)="onOtpVerify($event)">
     </app-otp>
 </div>

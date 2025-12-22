@@ -1,9 +1,11 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, type OnInit, type AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, type NavigationExtras } from '@angular/router';
 import { OtpComponent } from '../otp/otp.component';
 import { AuthService } from '../../../core/auth/auth';
+import { ToastService } from '../../../core/services/toast.service';
+import type { RecaptchaVerifier } from 'firebase/auth';
 
 @Component({
     selector: 'app-login',
@@ -12,28 +14,39 @@ import { AuthService } from '../../../core/auth/auth';
     templateUrl: './login.html',
     styleUrls: ['./login.css']
 })
-export class LoginComponent {
-    private authService = inject(AuthService);
-    private router = inject(Router);
+export class LoginComponent implements OnInit, AfterViewInit {
+    readonly authService = inject(AuthService); // Public by default
+    private readonly router = inject(Router);
+    private readonly toast = inject(ToastService);
 
+    // Standard properties for ngModel
     mobileNumber = '';
     showOtp = false;
+    readonly currentText = signal<string>('');
+
+    private recaptchaVerifier: RecaptchaVerifier | null = null;
 
     // Typewriter properties
-    currentText = signal('');
-    private phrases = ['GO PAPERLESS', 'ONE SCAN ACCESS', 'STAY SECURE.'];
+    private readonly phrases = ['GO PAPERLESS', 'ONE SCAN ACCESS', 'STAY SECURE.'] as const;
     private phraseIndex = 0;
     private charIndex = 0;
     private isDeleting = false;
-    private typingSpeed = 100;
-    private deletingSpeed = 50;
-    private pauseBetween = 2000;
+    private readonly typingSpeed = 100;
+    private readonly deletingSpeed = 50;
+    private readonly pauseBetween = 2000;
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.typeEffect();
     }
 
-    typeEffect() {
+    ngAfterViewInit(): void {
+        // Initialize Recaptcha
+        setTimeout(() => {
+            this.recaptchaVerifier = this.authService.initRecaptcha('recaptcha-container');
+        }, 1000);
+    }
+
+    private typeEffect(): void {
         const currentPhrase = this.phrases[this.phraseIndex];
 
         if (this.isDeleting) {
@@ -58,38 +71,92 @@ export class LoginComponent {
         setTimeout(() => this.typeEffect(), delta);
     }
 
-    onMobileInput(event: any) {
+    onMobileInput(event: Event): void {
+        const input = event.target as HTMLInputElement;
         // Enforce numeric input only
-        const input = event.target;
         input.value = input.value.replace(/[^0-9]/g, '');
         this.mobileNumber = input.value;
     }
 
-    onLogin() {
-        if (this.mobileNumber.length === 10) {
-            console.log('OTP Request', { mobile: this.mobileNumber });
-            this.showOtp = true;
+    onLogin(): void {
+        const mobile = this.mobileNumber;
+
+        if (mobile.length !== 10) {
+            return;
         }
+
+        this.authService.isLoading.set(true);
+
+        // 1. Check if user exists
+        this.authService.checkUser(mobile).subscribe({
+            next: async (res) => {
+                if (res.exists) {
+                    // User exists -> Login Flow -> Trigger OTP
+                    try {
+                        if (!this.recaptchaVerifier) {
+                            this.recaptchaVerifier = this.authService.initRecaptcha('recaptcha-container');
+                            // Wait longer for reCAPTCHA to fully initialize
+                            await new Promise<void>(resolve => setTimeout(() => resolve(), 1000));
+                        }
+
+                        if (!this.recaptchaVerifier) {
+                            throw new Error('reCAPTCHA verifier could not be initialized. Please refresh the page.');
+                        }
+
+                        console.log('🚀 Triggering OTP...');
+                        await this.authService.triggerOtp(mobile, this.recaptchaVerifier);
+                        this.showOtp = true;
+                        this.toast.showSuccess('OTP sent successfully! Check your phone.');
+                    } catch (err: unknown) {
+                        console.error('❌ OTP Error', err);
+                        const errorMessage = err instanceof Error ? err.message : 'Failed to send OTP. Please try again.';
+                        this.toast.showError(errorMessage);
+                    }
+                } else {
+                    // User New -> Signup Flow
+                    // Navigate to Signup with State
+                    const navigationExtras: NavigationExtras = {
+                        state: { mobile, key: res.key }
+                    };
+                    this.router.navigate(['/signup'], navigationExtras);
+                    this.toast.show('Please create an account to continue.', 'info');
+                }
+                this.authService.isLoading.set(false);
+            },
+            error: (err) => {
+                console.error('Check User Failed', err);
+                this.toast.showError('Connection failed. Please check your internet.');
+                this.authService.isLoading.set(false);
+            }
+        });
     }
 
-    onOtpClose() {
+    onOtpClose(): void {
         this.showOtp = false;
     }
 
-    onOtpVerify(code: string) {
-        // Here we simulate the login via our AuthService
-        // The service simulates an API call which would set the cookie
-        // this.authService.login(this.mobileNumber, code).subscribe({
-        //     next: (user) => {
-        //         console.log('Login successful', user);
-        //         this.showOtp = false;
-        this.authService.setUser();
-        this.router.navigate(['/dashboard']);
-        //     },
-        //     error: (err) => {
-        //         console.error('Login failed', err);
-        //         // Handle error (show toast, etc)
-        //     }
-        // });
+    async onOtpVerify(code: string): Promise<void> {
+        try {
+            // 1. Verify OTP with Firebase
+            const idToken = await this.authService.verifyOtp(code);
+
+            // 2. Complete Login with Backend
+            this.authService.completeLogin(idToken).subscribe({
+                next: () => {
+                    this.showOtp = false;
+                    this.toast.showSuccess('Welcome back!');
+                    this.router.navigate(['/dashboard']);
+                },
+                error: (err) => {
+                    console.error('Backend Login Failed', err);
+                    const errorMessage = err?.error?.error || 'Login failed. Please try again.';
+                    this.toast.showError(errorMessage);
+                }
+            });
+        } catch (error) {
+            console.error('OTP Verification Error', error);
+            const errorMessage = error instanceof Error ? error.message : 'Invalid OTP. Please try again.';
+            this.toast.showError(errorMessage);
+        }
     }
 }

@@ -1,30 +1,105 @@
-/* Safe area padding for iPhone Home Indicator */
-main {
+/* Glass Navigation */
+.glass-nav {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Nav Item Styling */
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    /* slate-400 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    display: block;
-    width: 100%;
-    /* Ensure it takes full available height so absolute children don't collapse it */
-    min-height: 100%;
-    height: 100%;
-    overflow: hidden;
-    /* Hide the sliding elements */
+    padding: 0.5rem;
+    border-radius: 0.75rem;
 }
 
-/* 
- * CRITICAL FIX: Ensure the routed components take full space 
- * and don't break the absolute positioning context.
- */
-main>* {
-    display: block;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    /* Smoother animations */
+.nav-item:active {
+    transform: scale(0.95);
 }
 
-.pb-safe {
-    padding-bottom: env(safe-area-inset-bottom, 20px);
+.nav-item.active {
+    color: #818cf8;
+    /* indigo-400 */
+    transform: translateY(-2px);
 }
 
-/* Material Symbols Font Loading (ensure this is in index.html or we use an SVG set) */
-/* Ideally we should link Google Material Symbols in index.html */
+.nav-item.active .icon-container {
+    background: rgba(129, 140, 248, 0.1);
+    box-shadow: 0 0 20px rgba(129, 140, 248, 0.2);
+}
+
+.icon-container {
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+/* FAB Menu Styling */
+.fab-item {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+}
+
+.fab-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s;
+}
+
+.fab-label {
+    background: rgba(30, 41, 59, 0.9);
+    backdrop-filter: blur(8px);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.fab-item:hover .fab-icon {
+    transform: scale(1.1);
+}
+
+.fab-item:hover .fab-label {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Reveal Animation Stagger for FAB items */
+/* We can use CSS only for stagger or simple *ngIf classes */
+.is-open .fab-item:nth-child(1) {
+    transition-delay: 50ms;
+}
+
+.is-open .fab-item:nth-child(2) {
+    transition-delay: 100ms;
+}
+
+.is-open .fab-item:nth-child(3) {
+    transition-delay: 150ms;
+}
+
+.is-open .fab-item:nth-child(4) {
+    transition-delay: 200ms;
+}

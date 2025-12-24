@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, of, finalize, map, switchMap, throwError } from 'rxjs';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, Auth } from 'firebase/auth';
 import { firebaseAuth } from './firebase';
+import { environment } from '../../../environments/environment';
 
 export interface User {
   uid: string;
@@ -20,7 +21,7 @@ export class AuthService {
 
   private auth = firebaseAuth;
   private confirmationResult: ConfirmationResult | undefined;
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = `${environment.apiUrl}/api/auth`;
 
   // Reactive State
   readonly user = signal<User | null>(null);
@@ -47,7 +48,7 @@ export class AuthService {
         return null;
       }
 
-      console.log(`✅ Found reCAPTCHA container: ${elementId}`);
+
 
       // Clear previous verifier if exists
       container.innerHTML = '';
@@ -62,11 +63,11 @@ export class AuthService {
       }
 
       // Create new reCAPTCHA verifier with proper configuration
-      console.log('🔄 Creating reCAPTCHA verifier...');
+
       const verifier = new RecaptchaVerifier(this.auth, elementId, {
         'size': 'invisible',
         'callback': () => {
-          console.log('✅ reCAPTCHA verified successfully');
+
         },
         'expired-callback': () => {
           console.warn('⚠️ reCAPTCHA expired - will be re-verified automatically');
@@ -75,7 +76,7 @@ export class AuthService {
 
       // Render the verifier - this is required even for invisible
       verifier.render().then((widgetId) => {
-        console.log('✅ reCAPTCHA rendered successfully, widget ID:', widgetId);
+
       }).catch((error) => {
         console.error('❌ reCAPTCHA render error:', error);
         // Still return verifier - it might work despite render error
@@ -111,11 +112,11 @@ export class AuthService {
     }
 
     const formattedMobile = mobile.startsWith('+') ? mobile : `+91${mobile}`;
-    console.log('📱 Attempting to send OTP to:', formattedMobile);
+
 
     try {
       this.confirmationResult = await signInWithPhoneNumber(this.auth, formattedMobile, verifier);
-      console.log('OTP sent successfully!');
+
     } catch (error: unknown) {
       console.error('OTP Trigger Error:', error);
 
@@ -197,8 +198,8 @@ export class AuthService {
    */
   completeSignup(name: string, idToken: string, key: string): Observable<User> {
     const url = `${this.apiUrl}/signup`;
-    console.log('🔗 Calling Signup API:', url);
-    console.log('🔑 ID Token Length:', idToken?.length);
+
+
 
     this.isLoading.set(true);
     return this.http.post<{ status: string; uid: string }>(url, { name, idToken, key }, { withCredentials: true }).pipe(

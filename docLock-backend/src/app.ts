@@ -25,7 +25,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+    origin: ['http://localhost:4200', 'https://doclock-96a20.web.app', 'https://doclock-96a20.firebaseapp.com', 'https://docklock.web.app', 'https://my-doclock.web.app'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -40,8 +40,8 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Health Check
 app.get('/health', (_req: Request, res: Response) => {
-    res.json({ 
-        status: 'ok', 
+    res.json({
+        status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });
@@ -51,7 +51,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.get('/health/firestore', async (_req: Request, res: Response): Promise<void> => {
     try {
         const { db, isFirebaseInitialized } = await import('./config/firebase.js');
-        
+
         if (!isFirebaseInitialized) {
             res.status(503).json({
                 status: 'unavailable',
@@ -65,7 +65,7 @@ app.get('/health/firestore', async (_req: Request, res: Response): Promise<void>
         try {
             const testRef = db.collection('_health').doc('test');
             await testRef.get();
-            
+
             res.json({
                 status: 'ok',
                 firestore: 'connected',
@@ -73,7 +73,7 @@ app.get('/health/firestore', async (_req: Request, res: Response): Promise<void>
             });
         } catch (error: unknown) {
             const firestoreError = error as { code?: number; message?: string };
-            
+
             if (firestoreError.code === 5) {
                 res.status(503).json({
                     status: 'error',
@@ -84,7 +84,7 @@ app.get('/health/firestore', async (_req: Request, res: Response): Promise<void>
                 });
                 return;
             }
-            
+
             throw error;
         }
     } catch (error) {

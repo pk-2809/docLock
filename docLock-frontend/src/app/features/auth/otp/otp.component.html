@@ -19,28 +19,41 @@
             <h3 class="text-xl font-bold text-slate-900 mb-2">Verify it's you</h3>
             <p class="text-slate-500 text-sm">
                 Enter the 6-digit code sent to<br>
-                <span class="text-slate-900 font-medium">{{ email || 'your email' }}</span>
+                <span class="text-slate-900 font-medium">{{ maskedLabel }}</span>
             </p>
         </div>
 
         @if (!isLoading) {
-        <div class="flex gap-2 justify-center mb-8">
+        <div class="flex gap-2 justify-center mb-8 relative">
+            <!-- Invisible input for autocomplete -->
+            <input type="text" autocomplete="one-time-code" class="absolute inset-0 opacity-0 -z-10"
+                (input)="onInput(0, $event)">
+
             @for (digit of otp; track i; let i = $index) {
-            <input #otpInput type="text" inputmode="numeric" maxlength="1" [value]="digit" (input)="onInput(i, $event)"
-                (keydown)="onKeyDown(i, $event)"
+            <input #otpInput type="password" inputmode="numeric" maxlength="1" [value]="digit"
+                (input)="onInput(i, $event)" (keydown)="onKeyDown(i, $event)" [class.border-red-500]="isError"
+                [class.text-red-500]="isError"
                 class="w-10 h-12 sm:w-12 sm:h-14 bg-slate-100 border-2 border-transparent rounded-xl text-center text-slate-900 text-xl font-bold focus:outline-none focus:border-indigo-500 focus:bg-white transition-all caret-indigo-500">
             }
         </div>
 
-        <button (click)="onVerify()" [disabled]="otp.join('').length !== 6"
-            class="w-full bg-[#3d42c3] hover:bg-[#3236a8] text-white font-bold text-sm tracking-wider uppercase py-4 rounded-xl shadow-lg shadow-indigo-600/20 transform active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mb-4">
-            Verify Code
-        </button>
-
-        <div class="text-center">
-            <button class="text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors">
+        <!-- Timer / Resend Button -->
+        <div class="text-center mb-4 min-h-[24px]">
+            @if (isResending) {
+            <div class="inline-flex justify-center">
+                <div class="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            } @else if (canResend && resendAttempts < maxResendAttempts) { <button (click)="onResend()"
+                class="text-indigo-600 font-bold text-sm hover:underline">
                 Resend Code
-            </button>
+                </button>
+                } @else if (resendAttempts >= maxResendAttempts) {
+                <p class="text-red-500 text-sm font-medium">Max resend attempts reached</p>
+                } @else {
+                <p class="text-slate-500 text-sm font-medium">
+                    Resend code in <span class="text-indigo-600">{{ resendTimer }}s</span>
+                </p>
+                }
         </div>
         } @else {
         <!-- Verifying State -->

@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "doclock-96a20"
+  },
+  "targets": {
+    "doclock-96a20": {
+      "hosting": {
+        "production": [
+          "docklock"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

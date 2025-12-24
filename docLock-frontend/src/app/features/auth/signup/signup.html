@@ -168,6 +168,6 @@
     </form>
 
     <app-otp [isOpen]="showOtp" [email]="mobileNumber" [isLoading]="authService.isLoading()" (close)="onOtpClose()"
-        (verify)="onOtpVerify($event)">
+        (verify)="onOtpVerify($event)" (resend)="onGetOtp()">
     </app-otp>
 </div>

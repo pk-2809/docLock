@@ -15,18 +15,69 @@ export class OtpComponent implements OnChanges {
     @Input() isLoading = false; // Controlled by Parent
     @Output() close = new EventEmitter<void>();
     @Output() verify = new EventEmitter<string>();
+    @Output() resend = new EventEmitter<void>();
 
     @ViewChildren('otpInput') otpInputs!: QueryList<ElementRef>;
 
+    get maskedLabel(): string {
+        if (!this.email) return 'your number';
+        if (this.email.includes('@')) return this.email; // Fallback for email if used
+        // Mask mobile: +91 ******1234
+        // Assuming format might be +919876543210 or 9876543210
+        const clean = this.email.replace(/[^0-9]/g, '');
+        const last4 = clean.slice(-4);
+        return `******${last4}`;
+    }
+
     otp: string[] = ['', '', '', '', '', ''];
+
+    // Resend Logic
+    resendTimer = 30; // seconds
+    canResend = false;
+    resendAttempts = 0;
+    maxResendAttempts = 3;
+    intervalId: any;
+
+    // UI State
+    isError = false;
+    isResending = false;
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
-            // Auto-focus first input when opened
-            this.otp = ['', '', '', '', '', '']; // Reset
+            // Reset everything on open
+            this.otp = ['', '', '', '', '', ''];
+            this.startTimer();
             setTimeout(() => {
                 this.focusInput(0);
             }, 100);
+        } else {
+            this.stopTimer();
+        }
+    }
+
+    ngOnDestroy() {
+        this.stopTimer();
+    }
+
+    startTimer() {
+        this.resendTimer = 30;
+        this.canResend = false;
+        this.stopTimer(); // clear existing
+
+        this.intervalId = setInterval(() => {
+            if (this.resendTimer > 0) {
+                this.resendTimer--;
+            } else {
+                this.canResend = true;
+                this.stopTimer();
+            }
+        }, 1000);
+    }
+
+    stopTimer() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
         }
     }
 
@@ -34,8 +85,15 @@ export class OtpComponent implements OnChanges {
     onInput(index: number, event: Event) {
         if (this.isLoading) return;
 
+        // Clear Error on Typing
+        if (this.isError) {
+            this.isError = false;
+        }
+
         const input = event.target as HTMLInputElement;
         const value = input.value;
+
+        // ... (rest of onInput)
 
         // Reset input value to avoid double chars if Angular cycle is slow
         input.value = '';
@@ -118,7 +176,37 @@ export class OtpComponent implements OnChanges {
 
     onClose() {
         if (!this.isLoading) {
+            this.stopTimer();
             this.close.emit();
+        }
+    }
+
+    onResend() {
+        if (this.canResend && this.resendAttempts < this.maxResendAttempts) {
+            this.initiateResend();
+            this.resend.emit();
+        }
+    }
+
+    // Public Control Methods (Called by Parent)
+    triggerError() {
+        this.isError = true;
+        this.otp = ['', '', '', '', '', '']; // Clear OTP
+        setTimeout(() => this.focusInput(0), 100);
+    }
+
+    initiateResend() {
+        this.isResending = true;
+    }
+
+    finalizeResend(success: boolean) {
+        this.isResending = false;
+        if (success) {
+            this.resendAttempts++;
+            this.startTimer();
+            // Clear inputs
+            this.otp = ['', '', '', '', '', ''];
+            this.focusInput(0);
         }
     }
 }

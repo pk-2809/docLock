@@ -1,4 +1,4 @@
-import { Component, inject, signal, type OnInit, type AfterViewInit } from '@angular/core';
+import { Component, inject, signal, ViewChild, type OnInit, type AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, type NavigationExtras } from '@angular/router';
@@ -134,36 +134,52 @@ export class SignupComponent implements OnInit, AfterViewInit {
         this.showOtp = false;
     }
 
-    async onOtpVerify(code: string): Promise<void> {
-        try {
-            // Ensure we have a signup key before proceeding
-            const key = this.signupKey;
-            if (!key) {
-                this.toast.showError('Signup authorization missing. Please try again.');
-                this.showOtp = false;
-                return;
-            }
+    @ViewChild(OtpComponent) otpComponent!: OtpComponent;
 
-            // 1. Verify OTP
+    async onGetOtp(): Promise<void> {
+        if (!this.mobileNumber || !this.recaptchaVerifier) return;
+
+        this.otpComponent.initiateResend();
+
+        try {
+            await this.authService.triggerOtp(this.mobileNumber, this.recaptchaVerifier);
+            this.toast.showSuccess('OTP resent successfully!');
+            this.otpComponent.finalizeResend(true);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to resend OTP.';
+            this.toast.showError(errorMessage);
+            this.otpComponent.finalizeResend(false);
+        }
+    }
+
+    async onOtpVerify(code: string): Promise<void> {
+        // Ensure we have a signup key before proceeding
+        if (!this.signupKey) return;
+
+        try {
+            // 1. Verify OTP with Firebase
             const idToken = await this.authService.verifyOtp(code);
 
-            // 2. Create Account (Send User Data + Token + Key)
-            const name = this.name;
-            this.authService.completeSignup(name, idToken, key).subscribe({
+            // 2. Complete Signup with Backend
+            this.authService.completeSignup(this.name, idToken, this.signupKey).subscribe({
                 next: () => {
                     this.showOtp = false;
                     this.toast.showSuccess('Account created successfully!');
                     this.router.navigate(['/dashboard']);
                 },
                 error: (err) => {
-                    console.error('Signup Backend Error', err);
+                    console.error('Signup Failed', err);
                     const errorMessage = err?.error?.error || 'Signup failed. Please try again.';
                     this.toast.showError(errorMessage);
+                    this.otpComponent.triggerError();
                 }
             });
         } catch (error) {
             console.error('OTP Verification Error', error);
-            this.toast.showError('Invalid OTP. Please try again.');
+            const errorMessage = error instanceof Error ? error.message : 'Invalid OTP. Please try again.';
+            this.toast.showError(errorMessage);
+            this.otpComponent.triggerError();
         }
     }
 }
+

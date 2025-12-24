@@ -39,8 +39,8 @@ export class AuthController {
         res.cookie('session', sessionCookie, {
             maxAge: expiresIn,
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true, // Required for SameSite: None
+            sameSite: 'none', // Required for cross-site (web.app -> run.app)
         });
 
         res.json({ status: 'success', uid: decodedToken.uid });
@@ -85,15 +85,19 @@ export class AuthController {
         res.cookie('session', sessionCookie, {
             maxAge: expiresIn,
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true, // Required for SameSite: None
+            sameSite: 'none', // Required for cross-site (web.app -> run.app)
         });
 
         res.json({ status: 'success', uid: decodedToken.uid });
     });
 
     static logout = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
-        res.clearCookie('session');
+        res.clearCookie('session', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+        });
         res.json({ status: 'success' });
     });
 

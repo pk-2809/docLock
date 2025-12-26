@@ -6,11 +6,22 @@ import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
+import peopleRoutes from './routes/people.routes';
+import notificationRoutes from './routes/notification.routes';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
 const app = express();
+
+app.use((req, _res, next) => {
+    console.log(`[DEBUG] Incoming Request: ${req.method} ${req.path}`);
+    next();
+});
+
+// ... existing middleware ...
+
+
 
 // Security Middleware
 app.use(helmet({
@@ -25,7 +36,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-    origin: ['http://localhost:4200', 'https://doclock-96a20.web.app', 'https://doclock-96a20.firebaseapp.com', 'https://docklock.web.app', 'https://my-doclock.web.app'],
+    origin: ['http://localhost:4200', 'https://doclock-96a20.web.app', 'https://doclock-96a20.firebaseapp.com', 'https://docklock.web.app', 'https://docklock.firebaseapp.com'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -37,6 +48,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// API Routes
+console.log('Mounting API routes...');
+app.use('/api/auth', authRoutes);
+app.use('/api/people', peopleRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health Check
 app.get('/health', (_req: Request, res: Response) => {
@@ -96,8 +113,7 @@ app.get('/health/firestore', async (_req: Request, res: Response): Promise<void>
     }
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
+
 
 // 404 Handler
 app.use((req: Request, res: Response) => {

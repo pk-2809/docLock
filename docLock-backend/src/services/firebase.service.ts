@@ -160,4 +160,23 @@ export class FirebaseService {
             return null;
         }
     }
+    /**
+     * Updates user data in Firestore.
+     */
+    static async updateUser(uid: string, data: Partial<UserData> & { mpin?: string }): Promise<void> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Updating User', { uid, data });
+            return;
+        }
+
+        try {
+            await db.collection('users').doc(uid).update({
+                ...data,
+                updatedAt: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error('Error updating user:', error);
+            throw new CustomError('Failed to update user profile', 500);
+        }
+    }
 }

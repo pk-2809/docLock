@@ -3,6 +3,7 @@ import { FirebaseService } from '../services/firebase.service';
 import { TokenService } from '../services/token.service';
 import { CustomError } from '../middleware/errorHandler';
 import { asyncHandler } from '../middleware/errorHandler';
+import { NotificationService } from '../services/notification.service';
 
 export class AuthController {
     static checkUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -132,5 +133,55 @@ export class AuthController {
                 ...user
             }
         });
+    });
+    static updateProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const sessionCookie = req.cookies.session || '';
+
+        if (!sessionCookie) {
+            throw new CustomError('Unauthorized', 401);
+        }
+
+        // Verify session
+        const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
+        if (!decodedClaims) {
+            throw new CustomError('Unauthorized - Invalid Session', 401);
+        }
+
+        const updates = req.body;
+
+        // Basic validation - only allow specific fields
+        const allowedUpdates = ['mpin', 'name', 'mobile', 'profileImage'];
+        const cleanUpdates: any = {};
+
+        for (const key of Object.keys(updates)) {
+            if (allowedUpdates.includes(key)) {
+                cleanUpdates[key] = updates[key];
+            }
+        }
+
+        if (Object.keys(cleanUpdates).length === 0) {
+            throw new CustomError('No valid updates provided', 400);
+        }
+
+        await FirebaseService.updateUser(decodedClaims.uid, cleanUpdates);
+
+        // Notification Triggers
+        if (cleanUpdates.mpin) {
+            await NotificationService.createNotification(decodedClaims.uid, {
+                title: 'Security Update',
+                message: 'Your MPIN has been updated successfully.',
+                icon: 'lock'
+            });
+        }
+
+        if (cleanUpdates.profileImage) {
+            await NotificationService.createNotification(decodedClaims.uid, {
+                title: 'Profile Updated',
+                message: 'You have updated your profile picture.',
+                icon: 'user'
+            });
+        }
+
+        res.json({ status: 'success' });
     });
 }

@@ -5,6 +5,7 @@ import { Router, RouterModule, type NavigationExtras } from '@angular/router';
 import { OtpComponent } from '../otp/otp.component';
 import { AuthService } from '../../../core/auth/auth';
 import { ToastService } from '../../../core/services/toast.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import type { RecaptchaVerifier } from 'firebase/auth';
 
 interface RouterState {
@@ -23,6 +24,7 @@ export class SignupComponent implements OnInit, AfterViewInit {
     readonly authService = inject(AuthService);
     private readonly router = inject(Router);
     private readonly toast = inject(ToastService);
+    private readonly notificationService = inject(NotificationService);
 
     // Form properties (for ngModel binding)
     name = '';
@@ -165,7 +167,12 @@ export class SignupComponent implements OnInit, AfterViewInit {
                 next: () => {
                     this.showOtp = false;
                     this.toast.showSuccess('Account created successfully!');
-                    this.router.navigate(['/dashboard']);
+
+                    // Fetch notifications then navigate
+                    this.notificationService.fetchNotifications().subscribe({
+                        next: () => this.router.navigate(['/dashboard']),
+                        error: () => this.router.navigate(['/dashboard'])
+                    });
                 },
                 error: (err) => {
                     console.error('Signup Failed', err);

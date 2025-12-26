@@ -1,1 +1,77 @@
-<p>mpin-setup works!</p>
+<!-- Backdrop (handled by parent or inherent if we want self-contained) -->
+<!-- But since it's a component used in profile, we'll style the container itself as the sheet content -->
+
+<div class="flex flex-col h-full relative">
+    <!-- Header with Close Button -->
+    <div class="flex items-center justify-between mb-2 px-2 relative z-10">
+        <h2 class="text-xl font-bold text-white">Security PIN</h2>
+        <button (click)="cancel()"
+            class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer relative z-20">
+            <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div class="flex-1 flex flex-col items-center justify-end -mt-8">
+        <p class="text-slate-400 text-xs sm:text-sm mb-4 animate-fade-in text-center" style="animation-delay: 100ms;">
+            {{ step() === 'enter' ? 'Create a 4-digit PIN' : 'Confirm your 4-digit PIN' }}
+        </p>
+
+        <!-- Indicators -->
+        <div class="flex gap-4 sm:gap-6">
+            <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all duration-300" [ngClass]="{
+                     'bg-indigo-500 scale-125': (step() === 'enter' ? mpin.length : confirmMpin.length) >= 1,
+                     'bg-slate-700': (step() === 'enter' ? mpin.length : confirmMpin.length) < 1
+                 }"></div>
+            <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all duration-300" [ngClass]="{
+                     'bg-indigo-500 scale-125': (step() === 'enter' ? mpin.length : confirmMpin.length) >= 2,
+                     'bg-slate-700': (step() === 'enter' ? mpin.length : confirmMpin.length) < 2
+                 }"></div>
+            <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all duration-300" [ngClass]="{
+                     'bg-indigo-500 scale-125': (step() === 'enter' ? mpin.length : confirmMpin.length) >= 3,
+                     'bg-slate-700': (step() === 'enter' ? mpin.length : confirmMpin.length) < 3
+                 }"></div>
+            <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all duration-300" [ngClass]="{
+                     'bg-indigo-500 scale-125': (step() === 'enter' ? mpin.length : confirmMpin.length) >= 4,
+                     'bg-slate-700': (step() === 'enter' ? mpin.length : confirmMpin.length) < 4
+                 }"></div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="h-6 mb-4 sm:mb-8">
+            <p *ngIf="error()" class="text-red-400 text-xs sm:text-sm font-bold animate-bounce text-center">{{ error()
+                }}
+            </p>
+        </div>
+
+        <!-- Keypad -->
+        <div class="grid grid-cols-3 gap-4 sm:gap-6 w-full max-w-70 sm:max-w-xs mb-4">
+            <button *ngFor="let key of keys" (click)="onKeyPress(key)" [disabled]="key === -1" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold transition-all mx-auto
+                           focus:outline-none active:scale-95 select-none" [ngClass]="{
+                        'bg-slate-800 hover:bg-slate-700 text-white shadow-lg': key !== -1 && key !== -2,
+                        'text-indigo-400 hover:bg-indigo-500/10': key === -2,
+                        'opacity-0 pointer-events-none': key === -1
+                    }">
+                <span *ngIf="key !== -2">{{ key }}</span>
+                <svg *ngIf="key === -2" class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a1 1 0 001.414 0L19 12l-8.172-8.172a1 1 0 00-1.414 0L3 12z">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Cancel / Loader -->
+        <div class="mt-4 mb-8">
+            <button *ngIf="!isLoading()" (click)="reset()"
+                class="text-slate-500 text-xs sm:text-sm font-bold uppercase tracking-wider hover:text-white transition-colors">
+                Reset
+            </button>
+            <div *ngIf="isLoading()"
+                class="w-6 h-6 sm:w-8 sm:h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin">
+            </div>
+        </div>
+    </div>
+</div>

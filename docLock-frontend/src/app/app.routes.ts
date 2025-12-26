@@ -19,16 +19,14 @@ export const routes: Routes = [
                 path: 'signup',
                 loadComponent: () => import('./features/auth/signup/signup').then(m => m.SignupComponent)
             },
-            {
-                path: 'auth/setup',
-                loadComponent: () => import('./features/auth/mpin-setup/mpin-setup').then(m => m.MpinSetupComponent)
-            },
+
             {
                 path: 'auth/forgot-password',
                 loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent)
             }
         ]
     },
+
     {
         path: '',
         loadComponent: () => import('./layouts/main-layout/main-layout').then(m => m.MainLayoutComponent),
@@ -51,11 +49,11 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/qr/qr-generate/qr-generate').then(m => m.QrGenerateComponent)
             },
             {
-                path: 'people',
+                path: 'friends',
                 loadComponent: () => import('./features/people/friend-list/friend-list').then(m => m.FriendListComponent)
             },
             {
-                path: 'people/add',
+                path: 'add-friend',
                 loadComponent: () => import('./features/people/add-friend/add-friend').then(m => m.AddFriendComponent)
             },
             {
@@ -73,6 +71,10 @@ export const routes: Routes = [
             {
                 path: 'documents',
                 loadComponent: () => import('./features/documents/document-list/document-list').then(m => m.DocumentListComponent)
+            },
+            {
+                path: 'notifications',
+                loadComponent: () => import('./features/notifications/notifications').then(m => m.NotificationsComponent)
             },
 
         ]

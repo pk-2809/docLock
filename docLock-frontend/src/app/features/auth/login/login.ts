@@ -5,6 +5,7 @@ import { Router, RouterModule, type NavigationExtras } from '@angular/router';
 import { OtpComponent } from '../otp/otp.component';
 import { AuthService } from '../../../core/auth/auth';
 import { ToastService } from '../../../core/services/toast.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import type { RecaptchaVerifier } from 'firebase/auth';
 
 @Component({
@@ -18,6 +19,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     readonly authService = inject(AuthService); // Public by default
     private readonly router = inject(Router);
     private readonly toast = inject(ToastService);
+    private readonly notificationService = inject(NotificationService);
 
     // Standard properties for ngModel
     mobileNumber = '';
@@ -163,7 +165,12 @@ export class LoginComponent implements OnInit, AfterViewInit {
                 next: () => {
                     this.showOtp = false;
                     this.toast.showSuccess('Welcome back!');
-                    this.router.navigate(['/dashboard']);
+
+                    // Fetch notifications then navigate
+                    this.notificationService.fetchNotifications().subscribe({
+                        next: () => this.router.navigate(['/dashboard']),
+                        error: () => this.router.navigate(['/dashboard']) // Navigate even if fetch fails
+                    });
                 },
                 error: (err) => {
                     console.error('Backend Login Failed', err);

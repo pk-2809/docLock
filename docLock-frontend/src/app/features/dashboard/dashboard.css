@@ -49,36 +49,6 @@
     scrollbar-width: none;
 }
 
-
-/* Welcome section enhancements */
-.welcome-section {
-    position: relative;
-    overflow: hidden;
-}
-
-.welcome-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
-    animation: welcomeShimmer 3s ease-in-out infinite;
-}
-
-@keyframes welcomeShimmer {
-
-    0%,
-    100% {
-        transform: translateX(-100%);
-    }
-
-    50% {
-        transform: translateX(100%);
-    }
-}
-
 /* Stats card animations */
 .stat-card {
     position: relative;

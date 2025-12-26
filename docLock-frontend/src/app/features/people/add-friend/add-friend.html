@@ -1,1 +1,63 @@
-<p>add-friend works!</p>
+<div class="min-h-screen bg-slate-900 text-white p-4 relative">
+    <!-- Header -->
+    <header class="flex items-center gap-4 mb-8 pt-2">
+        <a routerLink="/friends"
+            class="w-10 h-10 rounded-full glass-card flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </a>
+        <h1 class="text-xl font-bold tracking-tight">Add Friend</h1>
+    </header>
+
+    <div class="glass-card p-6 animate-slide-in-up">
+        <div class="mb-6 text-center">
+            <div
+                class="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+            </div>
+            <h2 class="text-lg font-bold text-white mb-2">Connect with People</h2>
+            <p class="text-sm text-slate-400">Paste a user's profile link below to add them to your secure circle.</p>
+        </div>
+
+        <!-- Input -->
+        <div class="mb-6">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Profile URL</label>
+            <input type="text" [(ngModel)]="profileUrl"
+                class="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
+                placeholder="https://doclock.app/profile/user123">
+            <p *ngIf="profileUrl && !isValidUrl()" class="text-red-400 text-xs mt-2 animate-fade-in">
+                Invalid Profile URL format.
+            </p>
+        </div>
+
+        <!-- Feedback -->
+        <div *ngIf="error()"
+            class="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3 animate-fade-in">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {{ error() }}
+        </div>
+
+        <div *ngIf="success()"
+            class="mb-6 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center gap-3 animate-fade-in">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            {{ success() }}
+        </div>
+
+        <!-- Action -->
+        <button (click)="addFriend()" [disabled]="isLoading() || !isValidUrl()"
+            class="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-600 font-bold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+            <span *ngIf="!isLoading()">Add Friend</span>
+            <div *ngIf="isLoading()" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin">
+            </div>
+        </button>
+    </div>
+</div>

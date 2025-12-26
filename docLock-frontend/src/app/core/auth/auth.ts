@@ -10,6 +10,7 @@ export interface User {
   name?: string;
   mobile?: string;
   role?: string;
+  profileImage?: string;
   createdAt?: string;
 }
 
@@ -27,10 +28,10 @@ export class AuthService {
   readonly user = signal<User | null>(null);
   readonly isLoading = signal<boolean>(true);
   readonly isAuthenticated = computed(() => !!this.user());
+  readonly showLogoutPopup = signal<boolean>(false);
 
   constructor() {
     this.auth.languageCode = 'en';
-    this.checkSession().subscribe();
   }
 
   initRecaptcha(elementId: string): RecaptchaVerifier | null {
@@ -245,6 +246,10 @@ export class AuthService {
         this.isLoading.set(false);
       })
     );
+  }
+
+  updateProfile(data: { mpin?: string; profileImage?: string; name?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/update-profile`, data, { withCredentials: true });
   }
 
   // Legacy/Deprecated methods - kept for backward compatibility

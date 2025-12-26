@@ -1,1 +1,68 @@
-<p>friend-list works!</p>
+<div class="h-[calc(100dvh-6rem)] bg-slate-900 flex flex-col overflow-hidden">
+    <!-- Header (Fixed) -->
+    <header class="flex-none p-4 pt-6 mb-2 flex items-center justify-between z-10 bg-slate-900">
+        <h1 class="text-xl font-bold tracking-tight">My Friends</h1>
+        <a routerLink="/add-friend"
+            class="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 hover:from-violet-500 hover:to-indigo-500 transition-all transform hover:scale-105">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+        </a>
+    </header>
+
+    <!-- Scrollable Content Area -->
+    <div class="flex-1 overflow-y-auto px-4 pb-4">
+        <!-- Loading State -->
+        <div *ngIf="isLoading()" class="flex justify-center py-12">
+            <div class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin">
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading() && friends().length === 0"
+            class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+            <div class="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-slate-600 mb-4">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-300">No friends yet</h3>
+            <p class="text-slate-500 text-sm mt-1">Add friends to share documents securely.</p>
+        </div>
+
+        <!-- Friends List -->
+        <div *ngIf="!isLoading() && friends().length > 0" class="space-y-3 animate-fade-in">
+            <div *ngFor="let friend of friends()" class="glass-card p-4 flex items-center justify-between group">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 overflow-hidden">
+                        <img *ngIf="friend.profileImage" [src]="friend.profileImage" class="w-full h-full object-cover">
+                        <span *ngIf="!friend.profileImage" class="text-lg font-bold">{{ friend.name.charAt(0) }}</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-base text-white">{{ friend.name }}</h4>
+                        <p class="text-xs text-slate-500">Added {{ friend.addedAt | date }}</p>
+                    </div>
+                </div>
+
+                <button (click)="confirmDelete(friend.uid)"
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-red-500 hover:bg-slate-800 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Sheet -->
+    <app-confirmation-sheet *ngIf="showConfirmation()" title="Remove Friend"
+        message="Are you sure you want to remove this friend? They will be removed from your secure circle."
+        confirmText="Yes, Remove" cancelText="Cancel" type="danger" (confirm)="onDeleteConfirmed()"
+        (cancel)="closeConfirmation()">
+    </app-confirmation-sheet>
+</div>

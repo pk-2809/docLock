@@ -56,18 +56,13 @@
             <div class="relative group">
                 <input type="tel" id="mobile" name="mobile" [(ngModel)]="mobileNumber" required #mobileInput="ngModel"
                     pattern="[0-9]{10}" maxlength="10" (input)="onMobileInput($event)"
-                    class="w-full bg-slate-800 border-2 border-transparent rounded-xl px-4 py-4 text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all duration-300 font-medium tracking-wide hover:bg-slate-700 focus:bg-slate-700 focus:scale-[1.02]"
+                    class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl px-4 py-4 text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-slate-700 transition-all duration-300 font-medium tracking-wide hover:border-slate-600"
                     placeholder="Enter your 10-digit number">
-
-                <!-- Animated Border -->
-                <div
-                    class="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-500 transition-all duration-300 group-focus-within:w-full">
-                </div>
 
                 <!-- Success Icon with Animation -->
                 @if (mobileInput.valid && mobileNumber.length === 10) {
-                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-400 animate-scale-in">
-                    <svg class="w-5 h-5 animate-pulse-subtle" fill="currentColor" viewBox="0 0 20 20">
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-400">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                             clip-rule="evenodd"></path>
@@ -78,7 +73,7 @@
 
             <!-- Enhanced Validation Message -->
             @if (mobileInput.invalid && (mobileInput.dirty || mobileInput.touched || loginForm.submitted)) {
-            <div class="text-red-400 text-sm font-medium bg-red-900/20 p-2 rounded-lg border border-red-500/30">
+            <div class="text-red-400 text-sm font-medium bg-red-900/20 p-3 rounded-2xl border border-red-500/30">
                 @if (mobileInput.errors?.['required']) {
                 <span class="flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -105,7 +100,7 @@
 
         <!-- Enhanced Submit Button -->
         <button type="submit" [disabled]="!loginForm.form.valid || authService.isLoading()"
-            class="w-full bg-[#3d42c3] hover:bg-[#3236a8] text-white font-bold text-sm tracking-wider uppercase py-4 rounded-xl shadow-lg shadow-indigo-900/20 transform active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:shadow-indigo-900/30 hover:-translate-y-0.5 relative overflow-hidden group">
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm tracking-wider uppercase py-4 rounded-2xl shadow-lg shadow-indigo-600/20 transform active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:shadow-indigo-600/30 hover:-translate-y-0.5 relative overflow-hidden group">
             <!-- Button Shimmer Effect -->
             <div
                 class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700">
@@ -125,8 +120,8 @@
                 <span>Enter Mobile Number</span>
                 } @else {
                 <span>Get OTP</span>
-                <svg class="w-4 h-4 ml-2 animate-pulse-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                 </svg>
                 }
             </span>

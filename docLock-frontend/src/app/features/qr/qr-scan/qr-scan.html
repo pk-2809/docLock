@@ -1,33 +1,43 @@
 <!-- QR Scanner Page -->
-<div class="space-y-6">
+<div class="min-h-screen bg-slate-50 p-4 pb-28">
     <!-- Page Header -->
-    <div class="animate-fade-in">
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold gradient-text-light mb-3 flex items-center justify-center">
-                <span class="mr-3">📱</span>
+    <header class="flex items-center justify-center mb-8 pt-2">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-slate-800 mb-2 flex items-center justify-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3.75v3.75H13.5V13.5z"/>
+                    </svg>
+                </div>
                 QR Scanner
             </h1>
-            <p class="text-white/70 text-lg">Scan QR codes to access documents and contacts</p>
+            <p class="text-slate-500 text-sm">Scan QR codes to access documents and contacts</p>
         </div>
-    </div>
+    </header>
 
     <!-- Scanner Container -->
-    <div class="animate-scale-in animate-delay-100">
-        <div class="card max-w-md mx-auto relative overflow-hidden">
+    <div class="max-w-md mx-auto mb-8">
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
             <!-- Scanner Viewport -->
             <div class="relative">
-                <div class="aspect-square bg-black rounded-2xl overflow-hidden relative">
+                <div class="aspect-square bg-slate-900 rounded-2xl overflow-hidden relative">
                     <!-- Camera Feed Placeholder -->
                     @if (!isScanning && !scanResult) {
                     <div
-                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                        <div class="text-center animate-fade-in">
+                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+                        <div class="text-center">
                             <div
-                                class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center animate-pulse-slow">
-                                <span class="text-3xl">📷</span>
+                                class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center">
+                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/>
+                                </svg>
                             </div>
-                            <p class="text-white/70 font-medium">Ready to scan</p>
-                            <p class="text-white/50 text-sm mt-1">Tap the button below to start</p>
+                            <p class="text-white font-medium">Ready to scan</p>
+                            <p class="text-white/70 text-sm mt-1">Tap the button below to start</p>
                         </div>
                     </div>
                     }
@@ -35,43 +45,43 @@
                     <!-- Scanning Animation -->
                     @if (isScanning) {
                     <div
-                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900 relative">
+                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-900 to-violet-900 relative">
                         <!-- Scanning Grid -->
                         <div class="absolute inset-4 border-2 border-white/30 rounded-2xl">
                             <!-- Corner Brackets -->
                             <div
-                                class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-400 animate-pulse">
+                                class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-indigo-400 animate-pulse">
                             </div>
                             <div
-                                class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-400 animate-pulse">
+                                class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-indigo-400 animate-pulse">
                             </div>
                             <div
-                                class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-400 animate-pulse">
+                                class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-indigo-400 animate-pulse">
                             </div>
                             <div
-                                class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-400 animate-pulse">
+                                class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-indigo-400 animate-pulse">
                             </div>
 
                             <!-- Scanning Line -->
                             <div
-                                class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-bounce">
+                                class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-indigo-400 to-transparent animate-bounce">
                             </div>
                         </div>
 
                         <!-- Center Target -->
                         <div
-                            class="w-32 h-32 border-2 border-white/50 rounded-2xl flex items-center justify-center animate-pulse-slow">
+                            class="w-32 h-32 border-2 border-white/50 rounded-2xl flex items-center justify-center">
                             <div class="w-16 h-16 border border-white/30 rounded-lg"></div>
                         </div>
 
                         <!-- Scanning Text -->
                         <div class="absolute bottom-4 left-0 right-0 text-center">
-                            <p class="text-white font-medium animate-pulse">Scanning for QR codes...</p>
+                            <p class="text-white font-medium">Scanning for QR codes...</p>
                             <div class="flex justify-center space-x-1 mt-2">
-                                <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                                <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"
+                                <div class="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
+                                <div class="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"
                                     style="animation-delay: 0.2s;"></div>
-                                <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"
+                                <div class="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"
                                     style="animation-delay: 0.4s;"></div>
                             </div>
                         </div>
@@ -81,11 +91,13 @@
                     <!-- Scan Result -->
                     @if (scanResult) {
                     <div
-                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-800 to-teal-900 animate-scale-in">
+                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-800 to-teal-900">
                         <div class="text-center p-6">
                             <div
-                                class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-green-400 to-teal-500 rounded-2xl flex items-center justify-center animate-bounce-in">
-                                <span class="text-3xl">✅</span>
+                                class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center">
+                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
                             </div>
                             <p class="text-white font-bold text-lg mb-2">QR Code Detected!</p>
                             <p class="text-white/80 text-sm break-all bg-black/20 p-3 rounded-lg">{{scanResult}}</p>
@@ -97,11 +109,13 @@
                 <!-- Camera Permission Warning -->
                 @if (!hasCamera) {
                 <div
-                    class="absolute inset-0 bg-red-900/90 backdrop-blur-sm flex items-center justify-center rounded-2xl animate-fade-in">
+                    class="absolute inset-0 bg-red-900/90 backdrop-blur-sm flex items-center justify-center rounded-2xl">
                     <div class="text-center p-6">
                         <div
-                            class="w-16 h-16 mx-auto mb-4 bg-red-500 rounded-2xl flex items-center justify-center animate-pulse">
-                            <span class="text-2xl">⚠️</span>
+                            class="w-16 h-16 mx-auto mb-4 bg-red-500 rounded-2xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                            </svg>
                         </div>
                         <p class="text-white font-bold mb-2">Camera Access Required</p>
                         <p class="text-white/80 text-sm">Please allow camera access to scan QR codes</p>
@@ -111,26 +125,36 @@
             </div>
 
             <!-- Control Buttons -->
-            <div class="p-6 space-y-4">
-                <div class="flex justify-center space-x-4">
+            <div class="mt-6 space-y-4">
+                <div class="flex justify-center">
                     <!-- Scan Toggle Button -->
                     @if (!scanResult) {
                     <button (click)="toggleScanning()" [disabled]="!hasCamera"
-                        class="btn-primary px-8 py-4 text-lg font-bold flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span class="text-2xl">{{isScanning ? '⏹️' : '📱'}}</span>
+                        class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/20 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            @if (isScanning) {
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/>
+                            } @else {
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>
+                            }
+                        </svg>
                         <span>{{isScanning ? 'Stop Scanning' : 'Start Scanning'}}</span>
                     </button>
                     }
 
                     <!-- Result Actions -->
                     @if (scanResult) {
-                    <div class="flex space-x-3">
-                        <button (click)="clearResult()" class="btn-secondary px-6 py-3 flex items-center space-x-2">
-                            <span>🔄</span>
+                    <div class="flex gap-3">
+                        <button (click)="clearResult()" class="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-2xl flex items-center gap-2 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                            </svg>
                             <span>Scan Again</span>
                         </button>
-                        <button class="btn-primary px-6 py-3 flex items-center space-x-2">
-                            <span>📋</span>
+                        <button class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-2xl flex items-center gap-2 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/>
+                            </svg>
                             <span>Copy</span>
                         </button>
                     </div>
@@ -139,17 +163,29 @@
 
                 <!-- Quick Actions -->
                 <div class="grid grid-cols-3 gap-3 mt-6">
-                    <button class="p-3 glass rounded-xl hover-glow transition-all duration-300 text-center">
-                        <div class="text-2xl mb-1">💡</div>
-                        <div class="text-white/70 text-xs">Flash</div>
+                    <button class="p-3 bg-slate-50 hover:bg-slate-100 rounded-2xl transition-colors text-center border border-slate-200">
+                        <div class="w-6 h-6 mx-auto mb-1 text-slate-600">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+                            </svg>
+                        </div>
+                        <div class="text-slate-600 text-xs font-medium">Flash</div>
                     </button>
-                    <button class="p-3 glass rounded-xl hover-glow transition-all duration-300 text-center">
-                        <div class="text-2xl mb-1">🔄</div>
-                        <div class="text-white/70 text-xs">Flip</div>
+                    <button class="p-3 bg-slate-50 hover:bg-slate-100 rounded-2xl transition-colors text-center border border-slate-200">
+                        <div class="w-6 h-6 mx-auto mb-1 text-slate-600">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                            </svg>
+                        </div>
+                        <div class="text-slate-600 text-xs font-medium">Flip</div>
                     </button>
-                    <button class="p-3 glass rounded-xl hover-glow transition-all duration-300 text-center">
-                        <div class="text-2xl mb-1">📷</div>
-                        <div class="text-white/70 text-xs">Photo</div>
+                    <button class="p-3 bg-slate-50 hover:bg-slate-100 rounded-2xl transition-colors text-center border border-slate-200">
+                        <div class="w-6 h-6 mx-auto mb-1 text-slate-600">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
+                            </svg>
+                        </div>
+                        <div class="text-slate-600 text-xs font-medium">Photo</div>
                     </button>
                 </div>
             </div>
@@ -157,14 +193,18 @@
     </div>
 
     <!-- Scan History -->
-    <div class="animate-fade-in animate-delay-200">
-        <div class="card">
+    <div class="mb-8">
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-white flex items-center">
-                    <span class="mr-3">📊</span>
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
                     Recent Scans
                 </h3>
-                <button class="text-white/60 hover:text-white transition-colors text-sm">
+                <button class="text-slate-400 hover:text-slate-600 transition-colors text-sm font-medium">
                     View All
                 </button>
             </div>
@@ -172,21 +212,22 @@
             <div class="space-y-3">
                 @for (item of scanHistory; track i; let i = $index) {
                 <div (click)="openScanHistory(item)"
-                    class="flex items-center space-x-4 p-4 rounded-xl glass hover-lift cursor-pointer transition-all duration-300 animate-slide-in-left"
-                    [style.animation-delay]="(i * 0.1) + 's'">
+                    class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 cursor-pointer transition-all border border-slate-100 hover:border-slate-200">
 
                     <div
-                        class="w-12 h-12 bg-gradient-to-r {{item.color}} rounded-xl flex items-center justify-center animate-float">
+                        class="w-12 h-12 bg-gradient-to-r {{item.color}} rounded-2xl flex items-center justify-center">
                         <span class="text-lg">{{item.icon}}</span>
                     </div>
 
                     <div class="flex-1">
-                        <h4 class="text-white font-medium">{{item.title}}</h4>
-                        <p class="text-white/60 text-sm">{{item.time}}</p>
+                        <h4 class="text-slate-800 font-medium">{{item.title}}</h4>
+                        <p class="text-slate-500 text-sm">{{item.time}}</p>
                     </div>
 
-                    <div class="text-white/40">
-                        <span class="text-lg">→</span>
+                    <div class="text-slate-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
                     </div>
                 </div>
                 }
@@ -194,65 +235,71 @@
 
             <!-- Empty State -->
             @if (scanHistory.length === 0) {
-            <div class="text-center py-8 animate-fade-in">
+            <div class="text-center py-8">
                 <div
-                    class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center animate-float">
-                    <span class="text-2xl">📱</span>
+                    class="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-3xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3.75v3.75H13.5V13.5z"/>
+                    </svg>
                 </div>
-                <p class="text-white/60">No scans yet</p>
-                <p class="text-white/40 text-sm">Your scan history will appear here</p>
+                <p class="text-slate-500 font-medium">No scans yet</p>
+                <p class="text-slate-400 text-sm">Your scan history will appear here</p>
             </div>
             }
         </div>
     </div>
 
     <!-- Tips Section -->
-    <div class="animate-fade-in animate-delay-300">
-        <div class="card">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center">
-                <span class="mr-3">💡</span>
-                Scanning Tips
-            </h3>
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189 6.01 6.01 0 001.041-.927 4.5 4.5 0 00.419-1.469V8.25A4.5 4.5 0 0010.5 3.75c-1.036 0-2.024.174-2.947.516A4.5 4.5 0 005.25 8.25v2.879a4.5 4.5 0 00.419 1.469c.271.356.62.664 1.041.927.42.263.895.398 1.39.516A6.01 6.01 0 0012 12.75zM12 18a3.75 3.75 0 01-3.75-3.75V8.25a3.75 3.75 0 117.5 0v6A3.75 3.75 0 0112 18z"/>
+                </svg>
+            </div>
+            Scanning Tips
+        </h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex items-start space-x-3 animate-slide-in-left">
-                    <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span class="text-blue-400">1</span>
-                    </div>
-                    <div>
-                        <p class="text-white font-medium text-sm">Hold steady</p>
-                        <p class="text-white/60 text-xs">Keep your device steady for better scanning</p>
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="text-indigo-600 font-bold text-sm">1</span>
                 </div>
-
-                <div class="flex items-start space-x-3 animate-slide-in-left animate-delay-100">
-                    <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span class="text-green-400">2</span>
-                    </div>
-                    <div>
-                        <p class="text-white font-medium text-sm">Good lighting</p>
-                        <p class="text-white/60 text-xs">Ensure adequate lighting for clear scanning</p>
-                    </div>
+                <div>
+                    <p class="text-slate-800 font-medium text-sm">Hold steady</p>
+                    <p class="text-slate-500 text-xs">Keep your device steady for better scanning</p>
                 </div>
+            </div>
 
-                <div class="flex items-start space-x-3 animate-slide-in-left animate-delay-200">
-                    <div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span class="text-purple-400">3</span>
-                    </div>
-                    <div>
-                        <p class="text-white font-medium text-sm">Proper distance</p>
-                        <p class="text-white/60 text-xs">Keep QR code within the scanning frame</p>
-                    </div>
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-600 font-bold text-sm">2</span>
                 </div>
+                <div>
+                    <p class="text-slate-800 font-medium text-sm">Good lighting</p>
+                    <p class="text-slate-500 text-xs">Ensure adequate lighting for clear scanning</p>
+                </div>
+            </div>
 
-                <div class="flex items-start space-x-3 animate-slide-in-left animate-delay-300">
-                    <div class="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span class="text-orange-400">4</span>
-                    </div>
-                    <div>
-                        <p class="text-white font-medium text-sm">Clean lens</p>
-                        <p class="text-white/60 text-xs">Keep camera lens clean for best results</p>
-                    </div>
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="text-violet-600 font-bold text-sm">3</span>
+                </div>
+                <div>
+                    <p class="text-slate-800 font-medium text-sm">Proper distance</p>
+                    <p class="text-slate-500 text-xs">Keep QR code within the scanning frame</p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="text-orange-600 font-bold text-sm">4</span>
+                </div>
+                <div>
+                    <p class="text-slate-800 font-medium text-sm">Clean lens</p>
+                    <p class="text-slate-500 text-xs">Keep camera lens clean for best results</p>
                 </div>
             </div>
         </div>

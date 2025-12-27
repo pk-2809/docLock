@@ -1,4 +1,4 @@
-<div class="h-[calc(100dvh-6rem)] bg-gradient-to-br from-indigo-50 via-white to-rose-50 flex flex-col overflow-hidden">
+<div class="h-[calc(100dvh-6rem)] bg-gradient-to-br from-pink-100 via-pink-50 to-slate-50 flex flex-col overflow-hidden">
     <!-- Header (Fixed) -->
     <header class="flex-none p-6 pt-8 mb-2 flex items-center justify-between z-10">
         <div>
@@ -8,10 +8,10 @@
 
         <!-- Add Button (Send Style) -->
         <a routerLink="/add-friend"
-            class="h-12 bg-rose-500 rounded-2xl p-1.5 flex items-center gap-3 pr-4 shadow-lg shadow-rose-500/20 hover:scale-105 transition-transform active:scale-95">
-            <div class="h-full aspect-square bg-white rounded-xl flex items-center justify-center text-rose-500">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+            class="h-12 bg-indigo-500 rounded-2xl p-1.5 flex items-center gap-3 pr-4 shadow-lg shadow-indigo-500/20 hover:scale-105 transition-transform active:scale-95">
+            <div class="h-full aspect-square bg-white rounded-xl flex items-center justify-center text-indigo-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                 </svg>
             </div>
             <span class="text-white font-bold text-sm tracking-wide">Add Friend</span>
@@ -31,11 +31,10 @@
         <!-- Empty State -->
         @if (!isLoading() && friends().length === 0) {
         <div class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-            <div class="w-24 h-24 rounded-full bg-white shadow-sm flex items-center justify-center text-rose-200 mb-4">
+            <div class="w-24 h-24 rounded-3xl bg-white shadow-sm flex items-center justify-center text-indigo-200 mb-4">
                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                    </path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
                 </svg>
             </div>
             <h3 class="text-lg font-bold text-slate-800">No friends yet</h3>
@@ -48,11 +47,11 @@
         <div class="space-y-4 animate-fade-in">
             @for (friend of friends(); track friend.uid; let i = $index) {
             <div
-                class="bg-white rounded-[2rem] p-4 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.04)] transition-all border border-slate-100 hover:border-rose-100">
+                class="bg-white rounded-3xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all border border-slate-100 hover:border-indigo-100">
                 <div class="flex items-center gap-4">
                     <!-- Icon Profile (Pink Gradient Square) -->
-                    <div class="w-14 h-14 rounded-[1.2rem] flex items-center justify-center text-xl font-bold overflow-hidden shrink-0 text-white shadow-lg shadow-rose-500/20"
-                        [ngClass]="i % 2 === 0 ? 'bg-gradient-to-br from-rose-400 to-pink-500' : 'bg-gradient-to-br from-indigo-400 to-violet-500'">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold overflow-hidden shrink-0 text-white shadow-lg"
+                        [ngClass]="i % 2 === 0 ? 'bg-gradient-to-br from-indigo-400 to-violet-500 shadow-indigo-500/20' : 'bg-gradient-to-br from-rose-400 to-pink-500 shadow-rose-500/20'">
                         @if (friend.profileImage) {
                         <img [src]="friend.profileImage" class="w-full h-full object-cover">
                         }
@@ -72,9 +71,9 @@
                 <!-- Action Menu (Bin Icon) -->
                 <button (click)="confirmDelete(friend.uid)"
                     class="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
                     </svg>
                 </button>
             </div>

@@ -75,11 +75,28 @@ export class DocumentListComponent implements OnInit {
             { id: 'root', name: 'My Documents', path: 'root' }
         ];
 
-        if (this.currentFolder) {
-            items.push({
-                id: this.currentFolder.id,
-                name: this.currentFolder.name,
-                path: this.currentFolder.id
+        if (this.currentFolderId) {
+            // Build complete path by traversing up the folder hierarchy
+            const pathFolders: Folder[] = [];
+            let currentId: string | null = this.currentFolderId;
+            
+            while (currentId) {
+                const folder = this.folders.find(f => f.id === currentId);
+                if (folder) {
+                    pathFolders.unshift(folder);
+                    currentId = folder.parentId;
+                } else {
+                    break;
+                }
+            }
+
+            // Add all folders in the path to breadcrumbs
+            pathFolders.forEach(folder => {
+                items.push({
+                    id: folder.id,
+                    name: folder.name,
+                    path: folder.id
+                });
             });
         }
 

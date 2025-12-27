@@ -23,7 +23,14 @@ export class ProfileComponent {
     user = this.authService.user;
     isUploading = signal(false);
 
-    // Mock stats
+    // Computed stats for template
+    get stats() {
+        const u = this.user();
+        return {
+            documents: u?.documentsCount || 0,
+            storageUsed: u?.storageUsed || 0
+        };
+    }
     // Mock stats removed - using user signal directly
 
 

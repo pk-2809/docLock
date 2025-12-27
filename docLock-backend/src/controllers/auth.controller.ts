@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import { Readable } from 'stream';
+import { GoogleDriveService } from '../services/google-drive.service';
 import { FirebaseService } from '../services/firebase.service';
 import { TokenService } from '../services/token.service';
 import { CustomError } from '../middleware/errorHandler';
@@ -148,13 +150,50 @@ export class AuthController {
         }
 
         const updates = req.body;
+        const file = req.file;
 
         // Basic validation - only allow specific fields
         const allowedUpdates = ['mpin', 'name', 'mobile', 'profileImage'];
         const cleanUpdates: any = {};
 
+        // Handle File Upload if present
+        if (file) {
+            try {
+                // Convert buffer to stream
+                const stream = new Readable();
+                stream.push(file.buffer);
+                stream.push(null);
+
+                // Upload to Drive
+                // Use a specific folder for profiles if needed, for now root or specific id
+                // TODO: Store folder ID in env or config
+                const uploadResult = await GoogleDriveService.uploadFile(
+                    stream,
+                    `profile_${decodedClaims.uid}_${Date.now()}`,
+                    file.mimetype,
+                    { encrypt: false, makePublic: true }
+                );
+
+                cleanUpdates.profileImage = uploadResult.webContentLink; // Use webContentLink for direct display/download if public
+
+                // If the user already had a profile image from Drive (checked by URL pattern usually), 
+                // we might want to delete the old one to save space. 
+                // Skipped for now to strictly follow "MVP" speed, but good practice later.
+
+            } catch (error) {
+                console.error('Drive Upload Failed:', error);
+                throw new CustomError('Failed to upload profile image', 500);
+            }
+        } else if (updates.profileImage) {
+            // Handle base64 fallback or existing logic if any, but prefer file upload now.
+            // If the frontend still sends base64, we might want to support it or deprecate it.
+            // For now, let's treat it as a direct URL update if provided (rare).
+            cleanUpdates.profileImage = updates.profileImage;
+        }
+
+
         for (const key of Object.keys(updates)) {
-            if (allowedUpdates.includes(key)) {
+            if (allowedUpdates.includes(key) && key !== 'profileImage') {
                 cleanUpdates[key] = updates[key];
             }
         }
@@ -182,6 +221,33 @@ export class AuthController {
             });
         }
 
-        res.json({ status: 'success' });
+        res.json({ status: 'success', updates: cleanUpdates });
+    });
+
+
+    static deleteAccount = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const sessionCookie = req.cookies.session || '';
+
+        if (!sessionCookie) {
+            throw new CustomError('Unauthorized', 401);
+        }
+
+        // Verify session
+        const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
+        if (!decodedClaims) {
+            throw new CustomError('Unauthorized - Invalid Session', 401);
+        }
+
+        // Perform cascading delete
+        await FirebaseService.deleteUserAndData(decodedClaims.uid);
+
+        // Clear session cookie
+        res.clearCookie('session', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+        });
+
+        res.json({ status: 'success', message: 'Account deleted successfully' });
     });
 }

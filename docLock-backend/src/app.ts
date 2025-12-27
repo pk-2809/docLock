@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
 import peopleRoutes from './routes/people.routes';
 import notificationRoutes from './routes/notification.routes';
+import documentRoutes from './routes/document.routes';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -24,10 +25,13 @@ app.use(helmet({
             imgSrc: ["'self'", "data:", "https:"],
         },
     },
+    crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+const frontendUrls = process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : ['http://localhost:4200'];
+
 app.use(cors({
-    origin: ['http://localhost:4200', 'https://doclock-96a20.web.app', 'https://doclock-96a20.firebaseapp.com', 'https://docklock.web.app', 'https://docklock.firebaseapp.com'],
+    origin: frontendUrls,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -44,6 +48,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use('/api/auth', authRoutes);
 app.use('/api/people', peopleRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/documents', documentRoutes);
 
 // Health Check
 app.get('/health', (_req: Request, res: Response) => {

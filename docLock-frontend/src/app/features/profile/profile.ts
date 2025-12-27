@@ -1,15 +1,17 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth';
 import { ToastService } from '../../core/services/toast.service';
 
+import { ConfirmationSheetComponent } from '../../shared/components/confirmation-sheet/confirmation-sheet';
 import { MpinSetupComponent } from '../auth/mpin-setup/mpin-setup';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, RouterLink, MpinSetupComponent],
+    imports: [CommonModule, RouterLink, MpinSetupComponent, ConfirmationSheetComponent, FormsModule],
     templateUrl: './profile.html',
     styleUrl: './profile.css'
 })
@@ -22,10 +24,7 @@ export class ProfileComponent {
     isUploading = signal(false);
 
     // Mock stats
-    stats = {
-        storageUsed: 65,
-        documents: 124,
-    };
+    // Mock stats removed - using user signal directly
 
 
 
@@ -35,25 +34,24 @@ export class ProfileComponent {
         if (input.files && input.files.length > 0) {
             const file = input.files[0];
 
-            // Limit size to 500KB
-            if (file.size > 500 * 1024) {
-                this.toastService.showError('Image size must be less than 500KB'); // Use Toast
+            // Limit size to 5MB (matches backend)
+            if (file.size > 5 * 1024 * 1024) {
+                this.toastService.showError('Image size must be less than 5MB');
                 return;
             }
 
             this.isUploading.set(true); // Start loading
 
-            const reader = new FileReader();
-            reader.onload = () => {
-                const base64String = reader.result as string;
-                this.updateProfileImage(base64String);
-            };
-            reader.readAsDataURL(file);
+            // Upload directly
+            this.updateProfileImage(file);
         }
     }
 
-    updateProfileImage(base64Image: string) {
-        this.authService.updateProfile({ profileImage: base64Image }).subscribe({
+    updateProfileImage(file: File) {
+        const formData = new FormData();
+        formData.append('profileImage', file);
+
+        this.authService.updateProfile(formData).subscribe({
             next: () => {
                 // Force session refresh to show new image immediately
                 this.authService.checkSession().subscribe(() => {
@@ -62,9 +60,52 @@ export class ProfileComponent {
                 });
             },
             error: (err) => {
-                console.error('Failed to update profile image', err);
-                this.toastService.showError('Failed to update profile image'); // Error Toast
+                console.error('Failed to update profile', err);
+                this.toastService.showError('Failed to update profile'); // Error Toast
                 this.isUploading.set(false); // Stop loading
+            }
+        });
+    }
+
+    isEditingName = signal(false);
+    newName = signal('');
+    isSavingName = signal(false);
+
+    toggleEditName() {
+        this.newName.set(this.user()?.name || '');
+        this.isEditingName.set(true);
+    }
+
+    cancelEditName() {
+        this.isEditingName.set(false);
+        this.newName.set('');
+    }
+
+    saveName() {
+        if (!this.newName() || this.newName().trim() === '') {
+            this.toastService.showError('Name cannot be empty');
+            return;
+        }
+
+        if (this.newName() === this.user()?.name) {
+            this.isEditingName.set(false);
+            return;
+        }
+
+        this.isSavingName.set(true);
+
+        this.authService.updateProfile({ name: this.newName() }).subscribe({
+            next: () => {
+                this.authService.checkSession().subscribe(() => {
+                    this.isSavingName.set(false);
+                    this.isEditingName.set(false);
+                    this.toastService.showSuccess('Name updated successfully');
+                });
+            },
+            error: (err) => {
+                console.error('Failed to update name', err);
+                this.toastService.showError('Failed to update name');
+                this.isSavingName.set(false);
             }
         });
     }
@@ -97,5 +138,36 @@ export class ProfileComponent {
     closeMpinSheet() {
         this.showMpinSheet = false;
         document.body.style.overflow = 'auto'; // Unlock scroll
+    }
+
+    showDeleteSheet = false;
+    isDeleting = false; // Add loading state for delete
+
+    initiateDeleteAccount() {
+        this.showDeleteSheet = true;
+    }
+
+    closeDeleteSheet() {
+        if (this.isDeleting) return;
+        this.showDeleteSheet = false;
+    }
+
+    confirmDeleteAccount() {
+        this.isDeleting = true;
+        this.authService.deleteAccount().subscribe({
+            next: () => {
+                this.isDeleting = false;
+                this.showDeleteSheet = false;
+                this.toastService.showSuccess('Account deleted successfully');
+                this.router.navigate(['/login']);
+                this.authService.user.set(null); // Clear local user state
+            },
+            error: (err) => {
+                console.error('Failed to delete account', err);
+                this.isDeleting = false;
+                this.showDeleteSheet = false;
+                this.toastService.showError('Failed to delete account');
+            }
+        });
     }
 }

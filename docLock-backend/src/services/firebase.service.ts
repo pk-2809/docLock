@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import { auth, db, isFirebaseInitialized } from '../config/firebase';
+import { GoogleDriveService } from './google-drive.service';
 import { CustomError } from '../middleware/errorHandler';
 
 interface UserData {
@@ -7,6 +8,8 @@ interface UserData {
     mobile: string;
     role: string;
     createdAt?: string;
+    storageUsed?: number;
+    documentsCount?: number;
 }
 
 export class FirebaseService {
@@ -115,6 +118,8 @@ export class FirebaseService {
         try {
             await db.collection('users').doc(uid).set({
                 ...data,
+                storageUsed: 0,
+                documentsCount: 0,
                 createdAt: new Date().toISOString()
             });
         } catch (error: unknown) {
@@ -177,6 +182,132 @@ export class FirebaseService {
         } catch (error) {
             console.error('Error updating user:', error);
             throw new CustomError('Failed to update user profile', 500);
+        }
+    }
+
+
+    /**
+     * Deletes a user and all their associated data (Cascading Delete).
+     */
+    static async deleteUserAndData(uid: string): Promise<void> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Deleting User and Data', uid);
+            return;
+        }
+
+        try {
+            // 1. Remove user from all friends' lists (Collection Group Query)
+            const friendsSnapshot = await db.collectionGroup('friends').where('uid', '==', uid).get();
+            const batch = db.batch();
+
+            friendsSnapshot.docs.forEach((doc) => {
+                batch.delete(doc.ref);
+            });
+
+            await batch.commit();
+            console.log(`Removed user ${uid} from ${friendsSnapshot.size} friend lists.`);
+
+            // 2. Delete user's documents subcollection
+            // Note: Cloud Firestore does not inherently support recursive delete via SDK for large collections.
+            // For this app's scale, we'll list and delete. For production, use Firebase CLI or callable function.
+            const documentsSnapshot = await db.collection('users').doc(uid).collection('documents').get();
+            const docBatch = db.batch();
+
+            // Delete files from Google Drive concurrently
+            const driveDeletePromises: Promise<void>[] = [];
+
+            documentsSnapshot.docs.forEach((doc) => {
+                const data = doc.data();
+                if (data.fileId) {
+                    driveDeletePromises.push(GoogleDriveService.deleteFile(data.fileId));
+                }
+                docBatch.delete(doc.ref);
+            });
+
+            await Promise.allSettled(driveDeletePromises);
+            await docBatch.commit();
+            console.log(`Deleted ${documentsSnapshot.size} documents for user ${uid} from Drive and Firestore.`);
+
+
+            // 3. Delete User Document
+            await db.collection('users').doc(uid).delete();
+
+            // 4. Delete Auth User
+            await auth.deleteUser(uid);
+
+        } catch (error) {
+            console.error('Error deleting user data:', error);
+            throw new CustomError('Failed to delete account', 500);
+        }
+    }
+
+    /**
+     * Adds a document reference to the user's subcollection.
+     */
+    static async addDocument(uid: string, docData: any): Promise<any> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Adding Document', { uid, docData });
+            return { id: 'mock-doc-id-' + Date.now(), ...docData };
+        }
+
+        try {
+            const docRef = await db.collection('users').doc(uid).collection('documents').add({
+                ...docData,
+                createdAt: new Date().toISOString()
+            });
+
+            // Update document count and storage used (atomic increment)
+            await db.collection('users').doc(uid).update({
+                documentsCount: admin.firestore.FieldValue.increment(1),
+                // Assuming docData has size in bytes
+                storageUsed: admin.firestore.FieldValue.increment(docData.size || 0)
+            });
+
+            return { id: docRef.id, ...docData };
+        } catch (error) {
+            console.error('Error adding document:', error);
+            throw new CustomError('Failed to save document metadata', 500);
+        }
+    }
+
+    /**
+     * Gets all documents for a user.
+     */
+    static async getDocuments(uid: string): Promise<any[]> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Getting Documents', uid);
+            return [];
+        }
+
+        try {
+            const snapshot = await db.collection('users').doc(uid).collection('documents').orderBy('createdAt', 'desc').get();
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error('Error getting documents:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Deletes a document reference from Firestore.
+     */
+    static async deleteDocument(uid: string, docId: string, size: number = 0): Promise<void> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Deleting Document', { uid, docId });
+            return;
+        }
+
+        try {
+            await db.collection('users').doc(uid).collection('documents').doc(docId).delete();
+
+            // Decrement stats
+            await db.collection('users').doc(uid).update({
+                documentsCount: admin.firestore.FieldValue.increment(-1),
+                storageUsed: admin.firestore.FieldValue.increment(-size)
+            });
+        } catch (error) {
+            console.error('Error deleting document:', error);
+            throw new CustomError('Failed to delete document metadata', 500);
         }
     }
 }

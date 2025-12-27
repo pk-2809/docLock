@@ -12,6 +12,8 @@ export interface User {
   role?: string;
   profileImage?: string;
   createdAt?: string;
+  storageUsed?: number;
+  documentsCount?: number;
 }
 
 @Injectable({
@@ -248,8 +250,12 @@ export class AuthService {
     );
   }
 
-  updateProfile(data: { mpin?: string; profileImage?: string; name?: string }): Observable<any> {
+  updateProfile(data: FormData | { mpin?: string; profileImage?: string; name?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/update-profile`, data, { withCredentials: true });
+  }
+
+  deleteAccount(): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete-account`, { withCredentials: true });
   }
 
   // Legacy/Deprecated methods - kept for backward compatibility

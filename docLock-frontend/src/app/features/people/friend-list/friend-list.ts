@@ -39,8 +39,11 @@ export class FriendListComponent implements OnInit {
         });
     }
 
-    confirmDelete(friendId: string) {
-        this.friendToDelete.set(friendId);
+    friendNameToDelete = signal('');
+
+    confirmDelete(friend: any) {
+        this.friendToDelete.set(friend.uid);
+        this.friendNameToDelete.set(friend.name);
         this.showConfirmation.set(true);
     }
 

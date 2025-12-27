@@ -1,19 +1,15 @@
 import { Router } from 'express';
-import { addFriend, getFriends, deleteFriend } from '../controllers/people.controller';
+import { addFriend, getFriends, deleteFriend, getPublicProfile } from '../controllers/people.controller';
 import { authenticate } from '../middleware/auth'; // Assuming authenticate middleware exists
 
 const router = Router();
-console.log('People routes loaded');
-
 // Protect all routes
-router.use((req, _res, next) => {
-    console.log(`[DEBUG] People Router Hit: ${req.method} ${req.path}`);
-    next();
-});
 router.use(authenticate);
 
+console.log('Mounting routes...');
+router.get('/user/:userId', getPublicProfile);
 router.get('/', getFriends);
 router.post('/add', addFriend);
 router.delete('/:friendId', deleteFriend);
-
+// no default export here, it is at the end
 export default router;

@@ -25,6 +25,7 @@ export const addFriend = async (req: AuthRequest, res: Response): Promise<void> 
 
         // 1. Verify Target User Exists
         const targetUserDoc = await db.collection('users').doc(targetUserId).get();
+        console.log(targetUserDoc);
         if (!targetUserDoc.exists) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -60,6 +61,43 @@ export const addFriend = async (req: AuthRequest, res: Response): Promise<void> 
             console.error('Add Friend Error:', error);
             res.status(500).json({ error: 'Internal Server Error' });
         }
+    }
+}
+
+
+export const getPublicProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { userId } = req.params;
+        const currentUserId = req.user?.uid;
+
+        if (!currentUserId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+
+        if (currentUserId === userId) {
+            res.status(400).json({ error: 'You cannot add yourself!' });
+            return;
+        }
+
+        const userDoc = await db.collection('users').doc(userId).get();
+        console.log(userDoc);
+        if (!userDoc.exists) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
+
+        const userData = userDoc.data();
+
+        res.status(200).json({
+            uid: userId,
+            name: userData?.name || 'Unknown User',
+            profileImage: userData?.profileImage || null
+        });
+
+    } catch (error) {
+        console.error('Get Public Profile Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 };
 

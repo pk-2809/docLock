@@ -11,7 +11,6 @@ export interface AuthRequest extends Request {
 
 export const authenticate = async (req: AuthRequest, _res: Response, next: NextFunction): Promise<void> => {
     try {
-        console.log('[DEBUG] Authenticating...');
         const sessionCookie = req.cookies.session || '';
 
         if (!sessionCookie) {
@@ -28,11 +27,9 @@ export const authenticate = async (req: AuthRequest, _res: Response, next: NextF
             ...decodedClaims,
             uid: decodedClaims.uid
         };
-        console.log('[DEBUG] Auth Success:', req.user.uid);
 
         next();
     } catch (error) {
-        console.log('[DEBUG] Auth Failed:', error);
         next(error);
     }
 };

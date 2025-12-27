@@ -14,15 +14,6 @@ dotenv.config();
 
 const app = express();
 
-app.use((req, _res, next) => {
-    console.log(`[DEBUG] Incoming Request: ${req.method} ${req.path}`);
-    next();
-});
-
-// ... existing middleware ...
-
-
-
 // Security Middleware
 app.use(helmet({
     contentSecurityPolicy: {
@@ -50,7 +41,6 @@ app.use(compression());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // API Routes
-console.log('Mounting API routes...');
 app.use('/api/auth', authRoutes);
 app.use('/api/people', peopleRoutes);
 app.use('/api/notifications', notificationRoutes);
@@ -78,7 +68,6 @@ app.get('/health/firestore', async (_req: Request, res: Response): Promise<void>
             return;
         }
 
-        // Try to access Firestore to verify it's working
         try {
             const testRef = db.collection('_health').doc('test');
             await testRef.get();
@@ -112,8 +101,6 @@ app.get('/health/firestore', async (_req: Request, res: Response): Promise<void>
         });
     }
 });
-
-
 
 // 404 Handler
 app.use((req: Request, res: Response) => {

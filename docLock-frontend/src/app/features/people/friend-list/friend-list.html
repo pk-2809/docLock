@@ -1,4 +1,4 @@
-<div class="h-[calc(100dvh-6rem)] bg-gradient-to-br from-pink-100 via-pink-50 to-slate-50 flex flex-col overflow-hidden">
+<div class="h-[calc(100dvh-6rem)] bg-pink-50 flex flex-col overflow-hidden">
     <!-- Header (Fixed) -->
     <header class="flex-none p-6 pt-8 mb-2 flex items-center justify-between z-10">
         <div>
@@ -6,15 +6,12 @@
             <p class="text-sm text-slate-500 font-medium">Connect & Share</p>
         </div>
 
-        <!-- Add Button (Send Style) -->
+        <!-- Add Friend Button (Small and Minimal) -->
         <a routerLink="/add-friend"
-            class="h-12 bg-indigo-500 rounded-2xl p-1.5 flex items-center gap-3 pr-4 shadow-lg shadow-indigo-500/20 hover:scale-105 transition-transform active:scale-95">
-            <div class="h-full aspect-square bg-white rounded-xl flex items-center justify-center text-indigo-500">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-                </svg>
-            </div>
-            <span class="text-white font-bold text-sm tracking-wide">Add Friend</span>
+            class="group flex items-center justify-center w-10 h-10 bg-[#ec4899] hover:bg-pink-600 text-white rounded-2xl shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 transition-all hover:scale-105 active:scale-95">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
         </a>
     </header>
 
@@ -31,7 +28,7 @@
         <!-- Empty State -->
         @if (!isLoading() && friends().length === 0) {
         <div class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-            <div class="w-24 h-24 rounded-3xl bg-white shadow-sm flex items-center justify-center text-indigo-200 mb-4">
+            <div class="w-24 h-24 rounded-3xl bg-pink-100 shadow-sm flex items-center justify-center text-[#ec4899] mb-4">
                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
@@ -49,9 +46,9 @@
             <div
                 class="bg-white rounded-3xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all border border-slate-100 hover:border-indigo-100">
                 <div class="flex items-center gap-4">
-                    <!-- Icon Profile (Pink Gradient Square) -->
+                    <!-- Icon Profile (Solid Colors) -->
                     <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold overflow-hidden shrink-0 text-white shadow-lg"
-                        [ngClass]="i % 2 === 0 ? 'bg-gradient-to-br from-indigo-400 to-violet-500 shadow-indigo-500/20' : 'bg-gradient-to-br from-rose-400 to-pink-500 shadow-rose-500/20'">
+                        [ngClass]="i % 2 === 0 ? 'bg-[#6366f1] shadow-indigo-500/20' : 'bg-[#ec4899] shadow-pink-500/20'">
                         @if (friend.profileImage) {
                         <img [src]="friend.profileImage" class="w-full h-full object-cover">
                         }

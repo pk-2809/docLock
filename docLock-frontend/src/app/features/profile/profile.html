@@ -1,4 +1,4 @@
-<div class="profile-container min-h-screen bg-gradient-to-br from-violet-100 via-violet-50 to-slate-50 text-slate-900 p-4">
+<div class="profile-container min-h-screen bg-slate-50 text-slate-900 p-4">
     <!-- Header -->
     <!-- Header -->
     <header class="relative flex items-center justify-center mb-8 pt-2">
@@ -15,7 +15,7 @@
 
         <!-- Share Button -->
         <button (click)="copyProfileLink()"
-            class="absolute right-0 w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-indigo-500 hover:text-indigo-600 transition-all hover:scale-105 active:scale-95 hover:shadow-md">
+            class="absolute right-0 w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-[#22c55e] hover:text-green-600 transition-all hover:scale-105 active:scale-95 hover:shadow-md">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
@@ -26,7 +26,7 @@
     <!-- Unified Profile Card -->
     <section class="mt-14 mb-8 px-2 animate-fade-in relative z-10 w-full max-w-sm mx-auto">
         <div
-            class="bg-gradient-to-b from-indigo-500 to-violet-600 rounded-[2.5rem] p-6 pb-8 shadow-xl shadow-indigo-200/50 relative text-white text-center pt-16">
+            class="bg-[#22c55e] rounded-[2.5rem] p-6 pb-8 shadow-xl shadow-green-200/50 relative text-white text-center pt-16">
 
             <!-- Floating Avatar (Top Center) -->
             <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full p-1.5 bg-white shadow-lg cursor-pointer group"
@@ -59,7 +59,7 @@
                     <!-- Loading Overlay -->
                     @if (isUploading()) {
                     <div class="absolute inset-0 bg-white/80 flex items-center justify-center">
-                        <div class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin">
+                        <div class="w-6 h-6 border-2 border-[#22c55e] border-t-transparent rounded-full animate-spin">
                         </div>
                     </div>
                     }
@@ -71,19 +71,19 @@
 
             <!-- User Details -->
             <h2 class="text-2xl font-bold mb-1">{{ (user()?.name) || 'User' }}</h2>
-            <p class="text-indigo-100/80 text-sm font-medium mb-8 font-mono tracking-wide">{{ (user()?.mobile) || 'No
+            <p class="text-green-100/80 text-sm font-medium mb-8 font-mono tracking-wide">{{ (user()?.mobile) || 'No
                 mobile' }}</p>
 
             <!-- Stats Row -->
-            <div class="grid grid-cols-2 gap-8 mb-8 border-t border-indigo-400/30 pt-6">
+            <div class="grid grid-cols-2 gap-8 mb-8 border-t border-green-400/30 pt-6">
                 <div class="text-center">
                     <p class="text-3xl font-bold mb-1">{{ stats.documents }}</p>
-                    <p class="text-xs text-indigo-200 uppercase tracking-wider font-bold">Total Docs</p>
+                    <p class="text-xs text-green-200 uppercase tracking-wider font-bold">Total Docs</p>
                 </div>
-                <div class="text-center border-l border-indigo-400/30">
+                <div class="text-center border-l border-green-400/30">
                     <p class="text-3xl font-bold mb-1">{{ stats.storageUsed }}<span
                             class="text-base ml-1 opacity-70">%</span></p>
-                    <p class="text-xs text-indigo-200 uppercase tracking-wider font-bold">Used</p>
+                    <p class="text-xs text-green-200 uppercase tracking-wider font-bold">Used</p>
                 </div>
             </div>
 
@@ -93,7 +93,7 @@
                     [style.width.%]="stats.storageUsed">
                 </div>
             </div>
-            <p class="text-[10px] text-indigo-200 mt-2 text-right w-full">Storage Left: {{ 100 - stats.storageUsed }}%
+            <p class="text-[10px] text-green-200 mt-2 text-right w-full">Storage Left: {{ 100 - stats.storageUsed }}%
             </p>
 
         </div>
@@ -109,7 +109,7 @@
                 class="w-full p-4 flex items-center justify-between group hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0">
                 <div class="flex items-center gap-4">
                     <div
-                        class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-[#22c55e] group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
@@ -121,7 +121,7 @@
                     </div>
                 </div>
                 <div
-                    class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
+                    class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-green-50 group-hover:text-[#22c55e] transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"></path>
                     </svg>
@@ -133,7 +133,7 @@
                 class="w-full p-4 flex items-center justify-between group hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 block">
                 <div class="flex items-center gap-4">
                     <div
-                        class="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-500 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-[#22c55e] group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
@@ -146,7 +146,7 @@
                     </div>
                 </div>
                 <div
-                    class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-violet-50 group-hover:text-violet-500 transition-colors">
+                    class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-green-50 group-hover:text-[#22c55e] transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"></path>
                     </svg>

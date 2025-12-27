@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 interface Folder {
@@ -25,6 +25,15 @@ interface Document {
     url?: string;
 }
 
+interface Card {
+    id: string;
+    name: string;
+    type: string;
+    number: string;
+    expiryDate: string;
+    createdAt: Date;
+}
+
 interface BreadcrumbItem {
     id: string;
     name: string;
@@ -39,7 +48,8 @@ interface BreadcrumbItem {
     styleUrl: './document-list.css'
 })
 export class DocumentListComponent implements OnInit {
-    viewMode: 'home' | 'folders' = 'home';
+    private route = inject(ActivatedRoute);
+    viewMode: 'home' | 'folders' | 'cards' | 'qrs' = 'home';
     currentFolderId: string | null = null;
     searchQuery = '';
     showCreateFolderModal = false;
@@ -51,18 +61,35 @@ export class DocumentListComponent implements OnInit {
     documentName = '';
     showFabMenu = false; // FAB menu state
     
+    // Card related properties
+    showAddCardModal = false;
+    newCardName = '';
+    newCardNumber = '';
+    newCardExpiry = '';
+    newCardType = 'Credit Card';
+    
     // Auto-detected folder properties
     public detectedIcon = 'folder';
-    public detectedColor = 'from-slate-500 to-slate-600';
+    public detectedColor = 'bg-slate-500';
 
     // Start with empty folders - user creates everything
     folders: Folder[] = [];
 
     // Start with empty documents - user uploads everything
     documents: Document[] = [];
+    
+    // Start with empty cards - user adds everything
+    cards: Card[] = [];
 
     ngOnInit() {
-        // Initialize component with empty state
+        // Check for query parameters to set initial view mode
+        this.route.queryParams.subscribe(params => {
+            if (params['view'] === 'cards') {
+                this.viewMode = 'cards';
+            } else if (params['view'] === 'qrs') {
+                this.viewMode = 'qrs';
+            }
+        });
     }
 
     get currentFolder(): Folder | null {
@@ -146,13 +173,15 @@ export class DocumentListComponent implements OnInit {
         this.showFabMenu = !this.showFabMenu;
     }
 
-    setViewMode(mode: 'home' | 'folders') {
+    setViewMode(mode: 'home' | 'folders' | 'cards' | 'qrs') {
         this.viewMode = mode;
         if (mode === 'home') {
             this.currentFolderId = null;
         } else if (mode === 'folders') {
             this.currentFolderId = null;
         }
+        // Handle cards and qrs views - for now they work like folders
+        // You can implement specific logic for cards and QRs later
     }
 
     openFolder(folderId: string) {
@@ -196,73 +225,73 @@ export class DocumentListComponent implements OnInit {
             {
                 keywords: ['id', 'ids', 'identity', 'passport', 'license', 'driving', 'voter', 'aadhaar', 'aadhar', 'pan', 'identification'],
                 icon: 'identification',
-                color: 'from-blue-500 to-blue-600'
+                color: 'bg-blue-500'
             },
             // Education
             {
                 keywords: ['education', 'school', 'college', 'university', 'marksheet', 'certificate', 'degree', 'diploma', 'academic', 'transcript', 'result'],
                 icon: 'academic-cap',
-                color: 'from-emerald-500 to-emerald-600'
+                color: 'bg-emerald-500'
             },
             // Medical/Health
             {
                 keywords: ['medical', 'health', 'hospital', 'doctor', 'prescription', 'report', 'test', 'medicine', 'healthcare', 'clinic'],
                 icon: 'heart',
-                color: 'from-red-500 to-red-600'
+                color: 'bg-red-500'
             },
             // Banking/Finance
             {
                 keywords: ['bank', 'banking', 'finance', 'financial', 'statement', 'loan', 'credit', 'debit', 'account', 'money', 'payment'],
                 icon: 'building-library',
-                color: 'from-violet-500 to-violet-600'
+                color: 'bg-violet-500'
             },
             // Insurance
             {
                 keywords: ['insurance', 'policy', 'claim', 'coverage', 'premium', 'life insurance', 'health insurance', 'car insurance'],
                 icon: 'shield-check',
-                color: 'from-amber-500 to-amber-600'
+                color: 'bg-amber-500'
             },
             // Legal
             {
                 keywords: ['legal', 'law', 'court', 'agreement', 'contract', 'will', 'property', 'deed', 'lawyer', 'attorney'],
                 icon: 'scale',
-                color: 'from-slate-500 to-slate-600'
+                color: 'bg-slate-500'
             },
             // Work/Professional
             {
                 keywords: ['work', 'job', 'office', 'professional', 'career', 'employment', 'company', 'business', 'corporate'],
                 icon: 'briefcase',
-                color: 'from-indigo-500 to-indigo-600'
+                color: 'bg-indigo-500'
             },
             // Personal
             {
                 keywords: ['personal', 'private', 'family', 'home', 'household', 'personal documents'],
                 icon: 'user',
-                color: 'from-pink-500 to-pink-600'
+                color: 'bg-pink-500'
             },
             // Travel
             {
                 keywords: ['travel', 'trip', 'vacation', 'flight', 'hotel', 'booking', 'ticket', 'visa', 'tourism'],
                 icon: 'airplane',
-                color: 'from-sky-500 to-sky-600'
+                color: 'bg-sky-500'
             },
             // Tax
             {
                 keywords: ['tax', 'taxes', 'income tax', 'return', 'filing', 'itr', 'tds', 'gst'],
                 icon: 'calculator',
-                color: 'from-orange-500 to-orange-600'
+                color: 'bg-orange-500'
             },
             // Property/Real Estate
             {
                 keywords: ['property', 'real estate', 'house', 'home', 'apartment', 'rent', 'lease', 'mortgage'],
                 icon: 'home',
-                color: 'from-green-500 to-green-600'
+                color: 'bg-green-500'
             },
             // Vehicle
             {
                 keywords: ['vehicle', 'car', 'bike', 'motorcycle', 'auto', 'registration', 'rc', 'vehicle documents'],
                 icon: 'truck',
-                color: 'from-gray-500 to-gray-600'
+                color: 'bg-gray-500'
             }
         ];
 
@@ -277,7 +306,7 @@ export class DocumentListComponent implements OnInit {
 
         // Default fallback
         this.detectedIcon = 'folder';
-        this.detectedColor = 'from-slate-500 to-slate-600';
+        this.detectedColor = 'bg-slate-500';
     }
 
     // Called when user types in folder name input
@@ -286,7 +315,7 @@ export class DocumentListComponent implements OnInit {
             this.detectFolderProperties(this.newFolderName);
         } else {
             this.detectedIcon = 'folder';
-            this.detectedColor = 'from-slate-500 to-slate-600';
+            this.detectedColor = 'bg-slate-500';
         }
     }
 
@@ -299,7 +328,7 @@ export class DocumentListComponent implements OnInit {
         this.showFabMenu = false; // Close FAB menu
         // Reset detected properties
         this.detectedIcon = 'folder';
-        this.detectedColor = 'from-slate-500 to-slate-600';
+        this.detectedColor = 'bg-slate-500';
     }
 
     closeCreateFolderModal() {
@@ -309,7 +338,7 @@ export class DocumentListComponent implements OnInit {
         this.showLocationDropdown = false;
         // Reset detected properties
         this.detectedIcon = 'folder';
-        this.detectedColor = 'from-slate-500 to-slate-600';
+        this.detectedColor = 'bg-slate-500';
     }
 
     toggleLocationDropdown() {
@@ -379,7 +408,7 @@ export class DocumentListComponent implements OnInit {
             size: `${(this.selectedFile.size / (1024 * 1024)).toFixed(1)} MB`,
             date: new Date(),
             icon: 'document',
-            color: 'from-blue-500 to-indigo-500',
+            color: 'bg-blue-500',
             folderId: this.currentFolderId // Can be null for root level
         };
 
@@ -448,5 +477,59 @@ export class DocumentListComponent implements OnInit {
             'document': 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z'
         };
         return icons[iconName] || icons['folder'];
+    }
+
+    // Card Management Methods
+    openAddCardModal() {
+        this.showAddCardModal = true;
+        this.newCardName = '';
+        this.newCardNumber = '';
+        this.newCardExpiry = '';
+        this.newCardType = 'Credit Card';
+        this.showFabMenu = false;
+    }
+
+    closeAddCardModal() {
+        this.showAddCardModal = false;
+        this.newCardName = '';
+        this.newCardNumber = '';
+        this.newCardExpiry = '';
+        this.newCardType = 'Credit Card';
+    }
+
+    addCard() {
+        if (!this.newCardName.trim() || !this.newCardNumber.trim()) return;
+
+        const newCard: Card = {
+            id: Date.now().toString(),
+            name: this.newCardName.trim(),
+            type: this.newCardType,
+            number: this.newCardNumber.trim(),
+            expiryDate: this.newCardExpiry,
+            createdAt: new Date()
+        };
+
+        this.cards.push(newCard);
+        this.closeAddCardModal();
+    }
+
+    deleteCard(cardId: string) {
+        const index = this.cards.findIndex(c => c.id === cardId);
+        if (index > -1) {
+            this.cards.splice(index, 1);
+        }
+    }
+
+    // Enhanced delete methods for folders and documents
+    confirmDeleteFolder(folder: Folder) {
+        if (confirm(`Are you sure you want to delete "${folder.name}" and all its contents?`)) {
+            this.deleteFolder(folder);
+        }
+    }
+
+    confirmDeleteDocument(doc: Document) {
+        if (confirm(`Are you sure you want to delete "${doc.name}"?`)) {
+            this.deleteDocument(doc);
+        }
     }
 }

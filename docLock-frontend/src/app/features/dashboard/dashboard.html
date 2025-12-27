@@ -1,4 +1,4 @@
-<div class="dashboard-container min-h-screen bg-gradient-to-br from-indigo-100 via-indigo-50 to-slate-50 pb-24 text-slate-900 p-4">
+<div class="dashboard-container min-h-screen bg-slate-50 pb-24 text-slate-900 p-4">
     <!-- Header Section -->
     <header class="flex justify-between items-center mb-8 pt-2">
         <div class="welcome-section">
@@ -44,11 +44,11 @@
 
     <!-- Storage Widget (Donut Chart visual) -->
     <section class="mb-8">
-        <div class="bg-white rounded-2xl p-6 relative overflow-hidden shadow-sm border border-slate-100">
+        <div class="bg-white rounded-3xl p-6 relative overflow-hidden shadow-lg border border-slate-100">
             <div class="flex justify-between items-start relative z-10">
                 <div>
                     <h3 class="text-lg font-bold mb-1 text-slate-900">Storage Used</h3>
-                    <p class="text-3xl font-black mb-1 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{{ stats.storageUsed }}%</p>
+                    <p class="text-3xl font-black mb-1 text-[#6366f1]">{{ stats.storageUsed }}%</p>
                     <p class="text-xs text-slate-500">{{ stats.images + stats.cards }} files stored</p>
                 </div>
                 <!-- Circular Progress Mockup -->
@@ -57,11 +57,11 @@
                         <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="6" fill="none"
                             class="text-slate-200" />
                         <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="6" fill="none"
-                            class="text-indigo-500" stroke-dasharray="175"
+                            class="text-[#6366f1]" stroke-dasharray="175"
                             [attr.stroke-dashoffset]="175 - (175 * stats.storageUsed / 100)" stroke-linecap="round" />
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-[#6366f1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/>
                         </svg>
@@ -71,7 +71,7 @@
 
             <!-- Progress Bar Bottom -->
             <div class="mt-6 w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500" [style.width.%]="stats.storageUsed">
+                <div class="h-full bg-[#6366f1]" [style.width.%]="stats.storageUsed">
                 </div>
             </div>
 
@@ -83,28 +83,28 @@
     <!-- Stats Grid -->
     <section class="grid grid-cols-2 gap-4 mb-8">
         <!-- Documents -->
-        <a routerLink="/documents" class="bg-white rounded-2xl p-4 hover:shadow-md transition-all shadow-sm border border-slate-100 group">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3 text-blue-600 group-hover:bg-blue-100 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a routerLink="/documents" class="bg-white rounded-3xl p-6 hover:shadow-lg transition-all shadow-lg border border-slate-100 group">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-4 text-[#3b82f6] group-hover:bg-blue-100 transition-colors">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                 </svg>
             </div>
             <h4 class="text-2xl font-bold mb-1 text-slate-900">{{ stats.images }}</h4>
-            <p class="text-xs text-slate-500 font-medium">Documents</p>
+            <p class="text-sm text-slate-500 font-medium">Documents</p>
         </a>
 
         <!-- Cards -->
-        <a routerLink="/cards" class="bg-white rounded-2xl p-4 hover:shadow-md transition-all shadow-sm border border-slate-100 group">
-            <div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center mb-3 text-pink-600 group-hover:bg-pink-100 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button (click)="navigateToCards()" class="bg-white rounded-3xl p-6 hover:shadow-lg transition-all shadow-lg border border-slate-100 group text-left w-full">
+            <div class="w-12 h-12 rounded-2xl bg-pink-50 flex items-center justify-center mb-4 text-[#ec4899] group-hover:bg-pink-100 transition-colors">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
                 </svg>
             </div>
             <h4 class="text-2xl font-bold mb-1 text-slate-900">{{ stats.cards }}</h4>
-            <p class="text-xs text-slate-500 font-medium">Saved Cards</p>
-        </a>
+            <p class="text-sm text-slate-500 font-medium">Saved Cards</p>
+        </button>
 
         <!-- Friends -->
         <a routerLink="/friends" class="bg-white rounded-2xl p-4 hover:shadow-md transition-all shadow-sm border border-slate-100 group">

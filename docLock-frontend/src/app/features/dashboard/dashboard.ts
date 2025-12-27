@@ -44,6 +44,12 @@ export class DashboardComponent {
         });
     }
 
+    navigateToCards() {
+        this.router.navigate(['/documents'], { 
+            queryParams: { view: 'cards' } 
+        });
+    }
+
     get firstName(): string {
         const name = this.authService.user()?.name || 'User';
         return name.split(' ')[0];

@@ -11,7 +11,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
             </div>
-            <h1 class="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-3">My Vault</h1>
+            <h1 class="text-4xl font-bold text-slate-800 mb-3">My Vault</h1>
             <p class="text-slate-500 text-lg font-medium">Your secure digital sanctuary</p>
         </header>
 
@@ -24,14 +24,14 @@
                 <div class="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -translate-y-16 translate-x-16"></div>
                 
                 <div class="relative text-center">
-                    <div class="w-20 h-20 mx-auto mb-6 bg-blue-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-300">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-[#3b82f6] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z"/>
                         </svg>
                     </div>
-                    <h2 class="text-2xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors mb-3">Documents</h2>
+                    <h2 class="text-2xl font-bold text-slate-800 group-hover:text-[#3b82f6] transition-colors mb-3">Documents</h2>
                     <p class="text-slate-500 text-lg font-medium mb-6">{{totalStats.documents}} Files • {{totalStats.size}}</p>
-                    <div class="inline-flex items-center text-blue-500 group-hover:text-blue-600 transition-colors font-medium">
+                    <div class="inline-flex items-center text-[#3b82f6] group-hover:text-blue-600 transition-colors font-medium">
                         <span class="mr-2">Explore</span>
                         <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
@@ -44,35 +44,35 @@
         <!-- Secondary Options -->
         <div class="grid grid-cols-2 gap-4 mb-10">
             <!-- Cards -->
-            <a routerLink="/cards"
-                class="group bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-all duration-300 cursor-pointer active:scale-[0.98] block">
+            <div (click)="setViewMode('cards')"
+                class="group bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-all duration-300 cursor-pointer active:scale-[0.98]">
                 <div class="text-center">
-                    <div class="w-14 h-14 mx-auto mb-4 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-300">
+                    <div class="w-14 h-14 mx-auto mb-4 bg-[#ec4899] rounded-xl flex items-center justify-center text-white shadow-lg shadow-pink-500/25 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors mb-1">Cards</h3>
-                    <p class="text-slate-500 text-sm font-medium">4 Active</p>
+                    <h3 class="text-lg font-bold text-slate-800 group-hover:text-[#ec4899] transition-colors mb-1">Cards</h3>
+                    <p class="text-[#ec4899] text-sm font-medium">4 Active</p>
                 </div>
-            </a>
+            </div>
 
             <!-- My QRs -->
-            <a routerLink="/my-qr"
-                class="group bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-all duration-300 cursor-pointer active:scale-[0.98] block">
+            <div (click)="setViewMode('qrs')"
+                class="group bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-all duration-300 cursor-pointer active:scale-[0.98]">
                 <div class="text-center">
-                    <div class="w-14 h-14 mx-auto mb-4 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-300">
+                    <div class="w-14 h-14 mx-auto mb-4 bg-[#22c55e] rounded-xl flex items-center justify-center text-white shadow-lg shadow-green-500/25 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3.75v3.75H13.5V13.5z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors mb-1">My QRs</h3>
-                    <p class="text-slate-500 text-sm font-medium">3 Saved</p>
+                    <h3 class="text-lg font-bold text-slate-800 group-hover:text-[#22c55e] transition-colors mb-1">My QRs</h3>
+                    <p class="text-[#22c55e] text-sm font-medium">3 Saved</p>
                 </div>
-            </a>
+            </div>
         </div>
 
         <!-- Minimal Storage Overview -->
@@ -85,17 +85,17 @@
                 <div class="flex items-center gap-4">
                     <div class="text-center">
                         <p class="text-xl font-bold text-slate-800">{{totalStats.documents}}</p>
-                        <p class="text-blue-600 text-xs font-medium">Documents</p>
+                        <p class="text-[#3b82f6] text-xs font-medium">Documents</p>
                     </div>
                     <div class="w-px h-8 bg-slate-200"></div>
                     <div class="text-center">
                         <p class="text-xl font-bold text-slate-800">{{totalStats.folders}}</p>
-                        <p class="text-blue-600 text-xs font-medium">Folders</p>
+                        <p class="text-[#3b82f6] text-xs font-medium">Folders</p>
                     </div>
                     <div class="w-px h-8 bg-slate-200"></div>
                     <div class="text-center">
                         <p class="text-xl font-bold text-slate-800">{{totalStats.size}}</p>
-                        <p class="text-blue-600 text-xs font-medium">Used</p>
+                        <p class="text-[#3b82f6] text-xs font-medium">Used</p>
                     </div>
                 </div>
             </div>
@@ -176,7 +176,7 @@
         <div class="grid grid-cols-2 gap-4 mb-6">
             @for (folder of currentFolders; track folder.id) {
             <div (click)="openFolder(folder.id)"
-                class="group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100/50 hover:shadow-xl hover:border-blue-200 transition-all cursor-pointer active:scale-[0.98]">
+                class="group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100/50 hover:shadow-xl hover:border-blue-200 transition-all cursor-pointer active:scale-[0.98] relative">
                 <div class="text-center">
                     <div class="w-16 h-16 mx-auto mb-4 {{folder.color}} rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,6 +186,13 @@
                     <h3 class="text-slate-800 font-bold text-base mb-2 group-hover:text-blue-600 transition-colors">{{folder.name}}</h3>
                     <p class="text-blue-500 text-sm font-medium">{{folder.itemCount}} items</p>
                 </div>
+                <!-- Delete Button -->
+                <button (click)="$event.stopPropagation(); confirmDeleteFolder(folder)"
+                    class="absolute top-3 right-3 p-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244 2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                    </svg>
+                </button>
             </div>
             }
         </div>
@@ -198,7 +205,7 @@
             <div class="group bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-blue-100/50 hover:shadow-xl hover:border-blue-200 transition-all cursor-pointer">
                 <div class="flex items-center gap-4">
                     <!-- Document Icon -->
-                    <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
+                    <div class="w-12 h-12 bg-[#3b82f6] rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                         </svg>
@@ -206,25 +213,25 @@
 
                     <!-- Document Info -->
                     <div class="flex-1">
-                        <h3 class="text-slate-800 font-bold text-base group-hover:text-blue-600 transition-colors">{{doc.name}}</h3>
-                        <p class="text-blue-500 text-sm font-medium">{{doc.type}} • {{doc.size}} • {{doc.date | date:'MMM d, y'}}</p>
+                        <h3 class="text-slate-800 font-bold text-base group-hover:text-[#3b82f6] transition-colors">{{doc.name}}</h3>
+                        <p class="text-[#3b82f6] text-sm font-medium">{{doc.type}} • {{doc.size}} • {{doc.date | date:'MMM d, y'}}</p>
                     </div>
 
                     <!-- Actions -->
                     <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button (click)="downloadDocument(doc)"
-                            class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-colors">
+                            class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#3b82f6] hover:text-blue-700 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
                             </svg>
                         </button>
                         <button (click)="shareDocument(doc)"
-                            class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-colors">
+                            class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#3b82f6] hover:text-blue-700 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
                             </svg>
                         </button>
-                        <button (click)="deleteDocument(doc)"
+                        <button (click)="confirmDeleteDocument(doc)"
                             class="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
@@ -240,7 +247,7 @@
         <!-- Minimal Empty State -->
         <div class="text-center py-16">
             <div class="w-20 h-20 mx-auto mb-6 bg-blue-100 rounded-3xl flex items-center justify-center">
-                <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-10 h-10 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                 </svg>
             </div>
@@ -255,7 +262,7 @@
                     </svg>
                     <span>Folder</span>
                 </button>
-                <button (click)="openUploadModal()" class="flex items-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-2xl shadow-lg shadow-blue-500/25 transition-all hover:scale-105 active:scale-95">
+                <button (click)="openUploadModal()" class="flex items-center gap-2 px-4 py-3 bg-[#3b82f6] hover:bg-blue-600 text-white font-medium rounded-2xl shadow-lg shadow-blue-500/25 transition-all hover:scale-105 active:scale-95">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/>
                     </svg>
@@ -273,7 +280,7 @@
         <div class="relative">
             <!-- Main FAB -->
             <button (click)="toggleFabMenu()" 
-                class="w-14 h-14 bg-blue-500 hover:bg-blue-600 rounded-2xl shadow-2xl shadow-blue-500/30 flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
+                class="w-14 h-14 bg-[#3b82f6] hover:bg-blue-600 rounded-2xl shadow-2xl shadow-blue-500/30 flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
                 [class.rotate-45]="showFabMenu">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -293,7 +300,7 @@
                 </button>
                 <!-- Upload Document -->
                 <button (click)="openUploadModal(); showFabMenu = false" 
-                    class="flex items-center gap-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-2xl shadow-xl shadow-blue-500/25 transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
+                    class="flex items-center gap-3 bg-[#3b82f6] hover:bg-blue-600 text-white px-4 py-3 rounded-2xl shadow-xl shadow-blue-500/25 transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
                     </svg>
@@ -310,7 +317,7 @@
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
         <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border border-blue-100">
             <div class="text-center mb-8">
-                <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <div class="w-20 h-20 mx-auto mb-6 bg-blue-500 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-500/25">
                     <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z"/>
                     </svg>
@@ -327,9 +334,9 @@
                     
                     <!-- Live Preview of Detected Icon -->
                     @if (newFolderName.trim()) {
-                    <div class="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-100">
+                    <div class="mt-4 p-4 bg-blue-50 rounded-2xl border-2 border-blue-100">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-gradient-to-br {{detectedColor}} rounded-xl flex items-center justify-center text-white shadow-lg">
+                            <div class="w-12 h-12 {{detectedColor}} rounded-xl flex items-center justify-center text-white shadow-lg">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" [attr.d]="getIconSvg(detectedIcon)"/>
                                 </svg>
@@ -400,7 +407,7 @@
                         Cancel
                     </button>
                     <button (click)="createFolder()" [disabled]="!newFolderName.trim()"
-                        class="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25">
+                        class="flex-1 px-6 py-4 bg-[#3b82f6] hover:bg-blue-600 text-white font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25">
                         Create Folder
                     </button>
                 </div>
@@ -414,7 +421,7 @@
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
         <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border border-blue-100">
             <div class="text-center mb-8">
-                <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <div class="w-20 h-20 mx-auto mb-6 bg-blue-500 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-500/25">
                     <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                     </svg>
@@ -425,10 +432,10 @@
 
             <div class="space-y-6">
                 <!-- Enhanced File Upload Area -->
-                <div class="border-2 border-dashed border-blue-200 rounded-2xl p-8 text-center bg-gradient-to-br from-blue-50/50 to-indigo-50/50 hover:border-blue-300 transition-colors">
+                <div class="border-2 border-dashed border-blue-200 rounded-2xl p-8 text-center bg-blue-50 hover:border-blue-300 transition-colors">
                     <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
                     <button (click)="fileInput.click()" class="w-full">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-[#3b82f6] rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
                             </svg>
@@ -439,9 +446,9 @@
                 </div>
 
                 @if (selectedFile) {
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border-2 border-blue-100">
+                <div class="bg-blue-50 rounded-2xl p-4 border-2 border-blue-100">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                        <div class="w-10 h-10 bg-[#3b82f6] rounded-xl flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
@@ -466,8 +473,216 @@
                         Cancel
                     </button>
                     <button (click)="uploadDocument()" [disabled]="!selectedFile"
-                        class="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25">
+                        class="flex-1 px-6 py-4 bg-[#3b82f6] hover:bg-blue-600 text-white font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25">
                         Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Cards View -->
+    @if (viewMode === 'cards') {
+    <div class="px-6 py-4">
+        <!-- Header -->
+        <header class="mb-6 pt-4">
+            <div class="flex items-center gap-4 mb-6">
+                <button (click)="setViewMode('home')"
+                    class="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg flex items-center justify-center text-slate-600 hover:text-slate-900 transition-all hover:scale-105 active:scale-95">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+                    </svg>
+                </button>
+                <div class="flex-1">
+                    <h1 class="text-2xl font-bold text-slate-800">My Cards</h1>
+                    <p class="text-slate-500 font-medium">4 active cards</p>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <div class="bg-white rounded-2xl p-2 shadow-lg border border-pink-100">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-[#ec4899]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0110.607 10.607z"/>
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Search cards..."
+                            class="w-full bg-pink-50 border-0 rounded-xl pl-12 pr-4 py-3 text-slate-800 placeholder-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:bg-white transition-all font-medium">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Cards Grid -->
+        <div class="grid grid-cols-1 gap-4 mb-6">
+            @if (cards.length > 0) {
+            @for (card of cards; track card.id) {
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-pink-100/50 hover:shadow-xl hover:border-pink-200 transition-all group">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-[#ec4899] rounded-xl flex items-center justify-center text-white shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-slate-800 font-bold text-base">{{card.name}}</h3>
+                        <p class="text-[#ec4899] text-sm font-medium">**** {{card.number.slice(-4)}} • {{card.type}}</p>
+                    </div>
+                    <!-- Delete Button -->
+                    <button (click)="deleteCard(card.id)"
+                        class="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            }
+            } @else {
+            <!-- Empty State -->
+            <div class="text-center py-16">
+                <div class="w-20 h-20 mx-auto mb-6 bg-pink-100 rounded-3xl flex items-center justify-center">
+                    <svg class="w-10 h-10 text-[#ec4899]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">No Cards Added</h3>
+                <p class="text-slate-500 mb-8 font-medium">Start by adding your first card</p>
+                
+                <button (click)="openAddCardModal()" class="flex items-center gap-2 px-6 py-3 bg-[#ec4899] hover:bg-pink-600 text-white font-medium rounded-2xl shadow-lg shadow-pink-500/25 transition-all hover:scale-105 active:scale-95 mx-auto">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/>
+                    </svg>
+                    <span>Add Card</span>
+                </button>
+            </div>
+            }
+        </div>
+
+        <!-- FAB for Cards -->
+        @if (cards.length > 0) {
+        <div class="fixed bottom-20 right-1/2 transform translate-x-1/2 z-40">
+            <button (click)="openAddCardModal()" 
+                class="w-14 h-14 bg-[#ec4899] hover:bg-pink-600 rounded-2xl shadow-2xl shadow-pink-500/30 flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/>
+                </svg>
+            </button>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- QRs View -->
+    @if (viewMode === 'qrs') {
+    <div class="px-6 py-4">
+        <!-- Header -->
+        <header class="mb-6 pt-4">
+            <div class="flex items-center gap-4 mb-6">
+                <button (click)="setViewMode('home')"
+                    class="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg flex items-center justify-center text-slate-600 hover:text-slate-900 transition-all hover:scale-105 active:scale-95">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+                    </svg>
+                </button>
+                <div class="flex-1">
+                    <h1 class="text-2xl font-bold text-slate-800">My QR Codes</h1>
+                    <p class="text-slate-500 font-medium">3 saved codes</p>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <div class="bg-white rounded-2xl p-2 shadow-lg border border-green-100">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-[#22c55e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0110.607 10.607z"/>
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Search QR codes..."
+                            class="w-full bg-green-50 border-0 rounded-xl pl-12 pr-4 py-3 text-slate-800 placeholder-green-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white transition-all font-medium">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- QR Codes Grid -->
+        <div class="grid grid-cols-1 gap-4 mb-6">
+            <!-- Sample QR Items -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-green-100/50 hover:shadow-xl hover:border-green-200 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-[#22c55e] rounded-xl flex items-center justify-center text-white shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3.75v3.75H13.5V13.5z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-slate-800 font-bold text-base">Profile QR</h3>
+                        <p class="text-[#22c55e] text-sm font-medium">Personal • Created today</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Add Card Modal -->
+    @if (showAddCardModal) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border border-pink-100">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 mx-auto mb-6 bg-[#ec4899] rounded-3xl flex items-center justify-center shadow-lg shadow-pink-500/25">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Add New Card</h2>
+                <p class="text-slate-500 font-medium">Add a new card to your collection</p>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Card Name</label>
+                    <input type="text" [(ngModel)]="newCardName" placeholder="e.g. My Credit Card"
+                        class="w-full bg-pink-50/50 border-2 border-pink-100 rounded-2xl px-4 py-4 text-slate-800 placeholder-pink-300 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Card Number</label>
+                    <input type="text" [(ngModel)]="newCardNumber" placeholder="1234 5678 9012 3456"
+                        class="w-full bg-pink-50/50 border-2 border-pink-100 rounded-2xl px-4 py-4 text-slate-800 placeholder-pink-300 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-mono">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Card Type</label>
+                        <select [(ngModel)]="newCardType"
+                            class="w-full bg-pink-50/50 border-2 border-pink-100 rounded-2xl px-4 py-4 text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-medium">
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="Gift Card">Gift Card</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Expiry</label>
+                        <input type="text" [(ngModel)]="newCardExpiry" placeholder="MM/YY"
+                            class="w-full bg-pink-50/50 border-2 border-pink-100 rounded-2xl px-4 py-4 text-slate-800 placeholder-pink-300 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-mono">
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button (click)="closeAddCardModal()"
+                        class="flex-1 px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-colors">
+                        Cancel
+                    </button>
+                    <button (click)="addCard()" [disabled]="!newCardName.trim() || !newCardNumber.trim()"
+                        class="flex-1 px-6 py-4 bg-[#ec4899] hover:bg-pink-600 text-white font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-pink-500/25">
+                        Add Card
                     </button>
                 </div>
             </div>

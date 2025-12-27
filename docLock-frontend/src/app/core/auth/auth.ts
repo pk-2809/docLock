@@ -233,7 +233,7 @@ export class AuthService {
         return of(null);
       }),
       finalize(() => {
-        this.isLoading.set(false);
+   this.isLoading.set(false);
       })
     );
   }

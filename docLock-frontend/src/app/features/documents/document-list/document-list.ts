@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DocumentService } from '../../../core/services/document';
 import { ToastService } from '../../../core/services/toast.service';
@@ -46,7 +46,7 @@ interface BreadcrumbItem {
 @Component({
     selector: 'app-document-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule],
+    imports: [CommonModule, FormsModule],
     templateUrl: './document-list.html',
     styleUrl: './document-list.css'
 })
@@ -65,6 +65,9 @@ export class DocumentListComponent implements OnInit {
     selectedFile: File | null = null;
     documentName = '';
     showFabMenu = false; // FAB menu state
+
+    // Document Actions Menu State
+    activeDocumentMenu: string | null = null;
 
     // Card related properties
     showAddCardModal = false;
@@ -552,5 +555,20 @@ export class DocumentListComponent implements OnInit {
         if (confirm(`Are you sure you want to delete "${doc.name}"?`)) {
             this.deleteDocument(doc);
         }
+    }
+
+    confirmDeleteCard(card: Card) {
+        if (confirm(`Are you sure you want to delete "${card.name}"?`)) {
+            this.deleteCard(card.id);
+        }
+    }
+
+    // Document Actions Menu Methods
+    toggleDocumentMenu(docId: string) {
+        this.activeDocumentMenu = this.activeDocumentMenu === docId ? null : docId;
+    }
+
+    closeDocumentMenu() {
+        this.activeDocumentMenu = null;
     }
 }

@@ -43,36 +43,87 @@
         @if (!isLoading() && friends().length > 0) {
         <div class="space-y-4 animate-fade-in">
             @for (friend of friends(); track friend.uid; let i = $index) {
-            <div
-                class="bg-white rounded-3xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all border border-slate-100 hover:border-indigo-100">
-                <div class="flex items-center gap-4">
-                    <!-- Icon Profile (Solid Colors) -->
-                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold overflow-hidden shrink-0 text-white shadow-lg"
-                        [ngClass]="i % 2 === 0 ? 'bg-[#6366f1] shadow-indigo-500/20' : 'bg-[#ec4899] shadow-pink-500/20'">
-                        @if (friend.profileImage) {
-                        <img [src]="friend.profileImage" class="w-full h-full object-cover">
-                        }
-                        @if (!friend.profileImage) {
-                        <span>{{ friend.name.charAt(0) }}</span>
-                        }
+            <div class="space-y-3">
+                <!-- Friend Card -->
+                <div (click)="onFriendClick(friend)"
+                    class="bg-white rounded-3xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all border border-slate-100 hover:border-indigo-100 cursor-pointer"
+                    [class.border-indigo-200]="selectedFriendId() === friend.uid"
+                    [class.shadow-md]="selectedFriendId() === friend.uid">
+                    <div class="flex items-center gap-4">
+                        <!-- Icon Profile (Solid Colors) -->
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold overflow-hidden shrink-0 text-white shadow-lg"
+                            [ngClass]="i % 2 === 0 ? 'bg-[#6366f1] shadow-indigo-500/20' : 'bg-[#ec4899] shadow-pink-500/20'">
+                            @if (friend.profileImage) {
+                            <img [src]="friend.profileImage" class="w-full h-full object-cover">
+                            }
+                            @if (!friend.profileImage) {
+                            <span>{{ friend.name.charAt(0) }}</span>
+                            }
+                        </div>
+
+                        <!-- Text Details -->
+                        <div class="flex flex-col">
+                            <h4 class="font-bold text-base text-slate-800">{{ friend.name }}</h4>
+                            <p class="text-xs font-medium text-slate-400 mt-0.5">Added {{ friend.addedAt | date:'mediumDate'
+                                }}</p>
+                        </div>
                     </div>
 
-                    <!-- Text Details -->
-                    <div class="flex flex-col">
-                        <h4 class="font-bold text-base text-slate-800">{{ friend.name }}</h4>
-                        <p class="text-xs font-medium text-slate-400 mt-0.5">Added {{ friend.addedAt | date:'mediumDate'
-                            }}</p>
-                    </div>
+                    <!-- Action Menu (Bin Icon) -->
+                    <button (click)="$event.stopPropagation(); confirmDelete(friend)"
+                        class="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                    </button>
                 </div>
 
-                <!-- Action Menu (Bin Icon) -->
-                <button (click)="confirmDelete(friend)"
-                    class="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                    </svg>
-                </button>
+                <!-- Compact Interaction Card (appears below selected friend) -->
+                @if (selectedFriendId() === friend.uid && showInteractionCard()) {
+                <div class="bg-blue-50 rounded-xl p-4 border border-indigo-200 shadow-sm animate-slide-down">
+                    <div class="text-center mb-3">
+                        <h5 class="text-base font-bold text-slate-800 mb-1">Connect with {{ friend.name }}</h5>
+                        <p class="text-xs text-slate-500">Send a request to share securely</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <!-- Request Card -->
+                        <button (click)="requestCard(friend)"
+                            class="group bg-white hover:bg-indigo-50 rounded-xl p-3 border border-indigo-100 hover:border-indigo-200 transition-all hover:scale-105 active:scale-95 shadow-sm">
+                            <div class="text-center">
+                                <div class="w-8 h-8 mx-auto mb-2 bg-[#ec4899] group-hover:bg-pink-600 rounded-lg flex items-center justify-center text-white shadow-sm transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                                    </svg>
+                                </div>
+                                <h6 class="text-xs font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">Request Card</h6>
+                            </div>
+                        </button>
+
+                        <!-- Request Document -->
+                        <button (click)="requestDocument(friend)"
+                            class="group bg-white hover:bg-indigo-50 rounded-xl p-3 border border-indigo-100 hover:border-indigo-200 transition-all hover:scale-105 active:scale-95 shadow-sm">
+                            <div class="text-center">
+                                <div class="w-8 h-8 mx-auto mb-2 bg-[#3b82f6] group-hover:bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-sm transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                                    </svg>
+                                </div>
+                                <h6 class="text-xs font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">Request Doc</h6>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Close Button -->
+                    <div class="text-center mt-3">
+                        <button (click)="closeInteractionCard()"
+                            class="text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+                }
             </div>
             }
         </div>

@@ -5,14 +5,14 @@
     @if (viewMode === 'home') {
     <div class="px-6 py-8">
         <!-- Header -->
-        <header class="text-center mb-12 pt-6">
-            <div class="w-24 h-24 mx-auto mb-6 bg-blue-500 rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/30">
-                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <header class="text-center mb-8 pt-6">
+            <div class="w-16 h-16 mx-auto mb-4 bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
             </div>
-            <h1 class="text-4xl font-bold text-slate-800 mb-3">My Vault</h1>
-            <p class="text-slate-500 text-lg font-medium">Your secure digital sanctuary</p>
+            <h1 class="text-2xl font-bold text-slate-800 mb-2">My Vault</h1>
+            <p class="text-slate-500 text-base font-medium">Your secure digital sanctuary</p>
         </header>
 
         <!-- Main Documents Card -->
@@ -75,32 +75,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Minimal Storage Overview -->
-        <div class="bg-white rounded-2xl p-4 shadow-lg border border-slate-100">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-lg font-bold text-slate-800">Storage Overview</h3>
-                <div class="text-xs text-slate-500 font-medium">Your vault statistics</div>
-            </div>
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="text-center">
-                        <p class="text-xl font-bold text-slate-800">{{totalStats.documents}}</p>
-                        <p class="text-[#3b82f6] text-xs font-medium">Documents</p>
-                    </div>
-                    <div class="w-px h-8 bg-slate-200"></div>
-                    <div class="text-center">
-                        <p class="text-xl font-bold text-slate-800">{{totalStats.folders}}</p>
-                        <p class="text-[#3b82f6] text-xs font-medium">Folders</p>
-                    </div>
-                    <div class="w-px h-8 bg-slate-200"></div>
-                    <div class="text-center">
-                        <p class="text-xl font-bold text-slate-800">{{totalStats.size}}</p>
-                        <p class="text-[#3b82f6] text-xs font-medium">Used</p>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     }
 
@@ -140,31 +114,63 @@
                 </div>
             </div>
 
-            <!-- Enhanced Breadcrumbs Path (Second) -->
-            <div class="mb-2">
-                <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-3 shadow-lg border border-blue-100/50">
-                    <div class="flex items-center gap-2 text-sm overflow-x-auto">
-                        @for (item of breadcrumbs; track item.id; let isLast = $last; let isFirst = $first) {
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                            @if (isFirst) {
-                            <div class="w-5 h-5 bg-blue-500 rounded-lg flex items-center justify-center">
-                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>
+            <!-- Fixed No-Scroll Breadcrumbs -->
+            <div class="mb-4 w-full overflow-hidden">
+                <div class="flex justify-center">
+                    <div class="bg-white rounded-xl p-3 shadow-sm border border-blue-100 max-w-[85%] min-w-0">
+                        <div class="flex items-center justify-center gap-1 text-xs overflow-hidden">
+                            @if (breadcrumbs.length <= 3) {
+                            <!-- Show all items if 3 or fewer -->
+                            @for (item of breadcrumbs; track item.id; let isLast = $last; let isFirst = $first) {
+                            <div class="flex items-center gap-1 min-w-0">
+                                @if (isFirst) {
+                                <div class="w-3 h-3 bg-[#3b82f6] rounded flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>
+                                    </svg>
+                                </div>
+                                }
+                                <button (click)="navigateToBreadcrumb(item)" 
+                                    class="px-2 py-1 rounded-md font-medium transition-all hover:bg-blue-50 text-xs truncate max-w-[60px] flex-shrink-0"
+                                    [class]="isLast ? 'text-[#3b82f6] bg-blue-50 font-semibold' : 'text-slate-600 hover:text-[#3b82f6]'"
+                                    [title]="item.name">
+                                    {{item.name}}
+                                </button>
+                                @if (!isLast) {
+                                <svg class="w-2 h-2 text-slate-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
                                 </svg>
+                                }
                             </div>
                             }
-                            <button (click)="navigateToBreadcrumb(item)" 
-                                class="px-2 py-1 rounded-lg font-medium transition-all hover:scale-105 text-sm"
-                                [class]="isLast ? 'text-blue-600 bg-blue-50 border border-blue-200' : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50'">
-                                {{item.name}}
-                            </button>
-                            @if (!isLast) {
-                            <svg class="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-                            </svg>
+                            } @else {
+                            <!-- Show first, ..., and last if more than 3 -->
+                            <div class="flex items-center gap-1 min-w-0">
+                                <div class="w-3 h-3 bg-[#3b82f6] rounded flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>
+                                    </svg>
+                                </div>
+                                <button (click)="navigateToBreadcrumb(breadcrumbs[0])" 
+                                    class="px-2 py-1 rounded-md font-medium transition-all hover:bg-blue-50 text-xs text-slate-600 hover:text-[#3b82f6] truncate max-w-[50px] flex-shrink-0"
+                                    [title]="breadcrumbs[0].name">
+                                    {{breadcrumbs[0].name}}
+                                </button>
+                                <svg class="w-2 h-2 text-slate-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                                </svg>
+                                <span class="text-slate-400 text-xs flex-shrink-0">...</span>
+                                <svg class="w-2 h-2 text-slate-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                                </svg>
+                                <button (click)="navigateToBreadcrumb(breadcrumbs[breadcrumbs.length - 1])" 
+                                    class="px-2 py-1 rounded-md font-medium transition-all hover:bg-blue-50 text-xs text-[#3b82f6] bg-blue-50 font-semibold truncate max-w-[50px] flex-shrink-0"
+                                    [title]="breadcrumbs[breadcrumbs.length - 1].name">
+                                    {{breadcrumbs[breadcrumbs.length - 1].name}}
+                                </button>
+                            </div>
                             }
                         </div>
-                        }
                     </div>
                 </div>
             </div>
@@ -189,9 +195,9 @@
                 </div>
                 <!-- Delete Button -->
                 <button (click)="$event.stopPropagation(); confirmDeleteFolder(folder)"
-                    class="absolute top-3 right-3 p-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100">
+                    class="absolute top-2 right-2 p-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-all opacity-70 hover:opacity-100 group-hover:opacity-100 shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244 2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
                     </svg>
                 </button>
             </div>
@@ -203,41 +209,57 @@
         @if (currentDocuments.length > 0) {
         <div class="space-y-3">
             @for (doc of currentDocuments; track doc.id) {
-            <div class="group bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-blue-100/50 hover:shadow-xl hover:border-blue-200 transition-all cursor-pointer">
+            <div class="group bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-blue-100/50 hover:shadow-xl hover:border-blue-200 transition-all cursor-pointer relative">
                 <div class="flex items-center gap-4">
-                    <!-- Document Icon -->
-                    <div class="w-12 h-12 bg-[#3b82f6] rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Enhanced Document Icon -->
+                    <div class="w-14 h-14 bg-[#3b82f6] rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                         </svg>
                     </div>
 
                     <!-- Document Info -->
-                    <div class="flex-1">
-                        <h3 class="text-slate-800 font-bold text-base group-hover:text-[#3b82f6] transition-colors">{{doc.name}}</h3>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-slate-800 font-bold text-base group-hover:text-[#3b82f6] transition-colors truncate">{{doc.name}}</h3>
                         <p class="text-[#3b82f6] text-sm font-medium">{{doc.type}} • {{doc.size}} • {{doc.date | date:'MMM d, y'}}</p>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button (click)="downloadDocument(doc)"
-                            class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#3b82f6] hover:text-blue-700 transition-colors">
+                    <!-- Three Dot Menu -->
+                    <div class="relative">
+                        <button (click)="$event.stopPropagation(); toggleDocumentMenu(doc.id)"
+                            class="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                             </svg>
                         </button>
-                        <button (click)="shareDocument(doc)"
-                            class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#3b82f6] hover:text-blue-700 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
-                            </svg>
-                        </button>
-                        <button (click)="confirmDeleteDocument(doc)"
-                            class="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
-                            </svg>
-                        </button>
+
+                        <!-- Dropdown Menu -->
+                        @if (activeDocumentMenu === doc.id) {
+                        <div class="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 min-w-[140px]">
+                            <button (click)="downloadDocument(doc); closeDocumentMenu()"
+                                class="w-full px-4 py-2 text-left hover:bg-slate-50 transition-colors flex items-center gap-3 text-sm text-slate-700">
+                                <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                                </svg>
+                                Download
+                            </button>
+                            <button (click)="shareDocument(doc); closeDocumentMenu()"
+                                class="w-full px-4 py-2 text-left hover:bg-slate-50 transition-colors flex items-center gap-3 text-sm text-slate-700">
+                                <svg class="w-4 h-4 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
+                                </svg>
+                                Share
+                            </button>
+                            <div class="border-t border-slate-100 my-1"></div>
+                            <button (click)="confirmDeleteDocument(doc); closeDocumentMenu()"
+                                class="w-full px-4 py-2 text-left hover:bg-red-50 transition-colors flex items-center gap-3 text-sm text-red-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -277,7 +299,7 @@
 
     <!-- Floating Action Button (when content exists) -->
     @if (viewMode === 'folders' && (currentFolders.length > 0 || currentDocuments.length > 0)) {
-    <div class="fixed bottom-20 right-1/2 transform translate-x-1/2 z-40">
+    <div class="fixed bottom-32 right-1/2 transform translate-x-1/2 z-40">
         <div class="relative">
             <!-- Main FAB -->
             <button (click)="toggleFabMenu()" 
@@ -313,103 +335,96 @@
     </div>
     }
 
-    <!-- Enhanced Create Folder Modal -->
+    <!-- Minimal Create Folder Modal -->
     @if (showCreateFolderModal) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border border-blue-100">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 mx-auto mb-6 bg-blue-500 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z"/>
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <!-- Compact Header -->
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 mx-auto mb-3 bg-[#3b82f6] rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z"/>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-2">New Folder</h2>
-                <p class="text-slate-500 font-medium">Create a new folder to organize your files</p>
+                <h2 class="text-lg font-bold text-slate-800">New Folder</h2>
             </div>
 
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Folder Name</label>
-                    <input type="text" [(ngModel)]="newFolderName" (input)="onFolderNameChange()" placeholder="e.g. Personal Documents"
-                        class="w-full bg-blue-50/50 border-2 border-blue-100 rounded-2xl px-4 py-4 text-slate-800 placeholder-blue-300 focus:outline-none focus:border-blue-400 focus:bg-white transition-all font-medium">
+            <!-- Compact Form -->
+            <div class="space-y-4">
+                <input type="text" [(ngModel)]="newFolderName" (input)="onFolderNameChange()" 
+                    placeholder="Folder name"
+                    class="w-full bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all">
+                
+                <!-- Compact Location Selector -->
+                <div class="relative">
+                    <button (click)="toggleLocationDropdown()" 
+                        class="w-full bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-left text-slate-800 focus:outline-none focus:border-blue-400 focus:bg-white transition-all flex items-center justify-between text-sm">
+                        <span class="truncate">{{getSelectedLocationPath()}}</span>
+                        <svg class="w-4 h-4 text-blue-400 transition-transform flex-shrink-0 ml-2" [class.rotate-180]="showLocationDropdown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                        </svg>
+                    </button>
                     
-                    <!-- Live Preview of Detected Icon -->
-                    @if (newFolderName.trim()) {
-                    <div class="mt-4 p-4 bg-blue-50 rounded-2xl border-2 border-blue-100">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 {{detectedColor}} rounded-xl flex items-center justify-center text-white shadow-lg">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" [attr.d]="getIconSvg(detectedIcon)"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-bold text-slate-700">Auto-detected icon</p>
-                                <p class="text-xs text-blue-600 font-medium">Based on folder name</p>
-                            </div>
-                        </div>
+                    @if (showLocationDropdown) {
+                    <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-blue-200 rounded-xl shadow-lg z-10 max-h-40 overflow-y-auto">
+                        <!-- Root option -->
+                        <button (click)="selectLocation(null)" 
+                            class="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors flex items-center gap-3 text-sm"
+                            [class.bg-blue-100]="selectedLocationId === null"
+                            [class.text-blue-700]="selectedLocationId === null">
+                            <svg class="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z"/>
+                            </svg>
+                            <span class="truncate">My Documents (Root)</span>
+                            @if (selectedLocationId === null) {
+                            <svg class="w-3 h-3 text-blue-600 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            }
+                        </button>
+                        
+                        <!-- Existing folders -->
+                        @for (folder of availableLocations; track folder.id) {
+                        <button (click)="selectLocation(folder.id)" 
+                            class="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors flex items-center gap-3 text-sm"
+                            [class.bg-blue-100]="selectedLocationId === folder.id"
+                            [class.text-blue-700]="selectedLocationId === folder.id">
+                            <svg class="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getIconSvg(folder.icon)"/>
+                            </svg>
+                            <span class="truncate">{{folder.name}}</span>
+                            @if (selectedLocationId === folder.id) {
+                            <svg class="w-3 h-3 text-blue-600 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            }
+                        </button>
+                        }
                     </div>
                     }
                 </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Location</label>
-                    <div class="relative">
-                        <button (click)="toggleLocationDropdown()" 
-                            class="w-full bg-blue-50/50 border-2 border-blue-100 rounded-2xl px-4 py-4 text-left text-slate-800 focus:outline-none focus:border-blue-400 focus:bg-white transition-all flex items-center justify-between font-medium">
-                            <span>{{getSelectedLocationPath()}}</span>
-                            <svg class="w-5 h-5 text-blue-400 transition-transform" [class.rotate-180]="showLocationDropdown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                            </svg>
-                        </button>
-                        
-                        @if (showLocationDropdown) {
-                        <div class="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-100 rounded-2xl shadow-xl z-10 max-h-48 overflow-y-auto">
-                            <!-- Root option -->
-                            <button (click)="selectLocation(null)" 
-                                class="w-full px-4 py-4 text-left hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium"
-                                [class.bg-blue-100]="selectedLocationId === null"
-                                [class.text-blue-700]="selectedLocationId === null">
-                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z"/>
-                                </svg>
-                                <span>My Documents (Root)</span>
-                                @if (selectedLocationId === null) {
-                                <svg class="w-4 h-4 text-blue-600 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                }
-                            </button>
-                            
-                            <!-- Existing folders -->
-                            @for (folder of availableLocations; track folder.id) {
-                            <button (click)="selectLocation(folder.id)" 
-                                class="w-full px-4 py-4 text-left hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium"
-                                [class.bg-blue-100]="selectedLocationId === folder.id"
-                                [class.text-blue-700]="selectedLocationId === folder.id">
-                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" [attr.d]="getIconSvg(folder.icon)"/>
-                                </svg>
-                                <span>{{folder.name}}</span>
-                                @if (selectedLocationId === folder.id) {
-                                <svg class="w-4 h-4 text-blue-600 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                }
-                            </button>
-                            }
-                        </div>
-                        }
+                
+                <!-- Compact Icon Preview -->
+                @if (newFolderName.trim()) {
+                <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                    <div class="w-8 h-8 {{detectedColor}} rounded-lg flex items-center justify-center text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getIconSvg(detectedIcon)"/>
+                        </svg>
                     </div>
+                    <span class="text-sm text-slate-600 font-medium">Auto-detected</span>
                 </div>
+                }
 
-                <div class="flex gap-4 pt-4">
+                <!-- Compact Buttons -->
+                <div class="flex gap-3 pt-2">
                     <button (click)="closeCreateFolderModal()"
-                        class="flex-1 px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-colors">
+                        class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors text-sm">
                         Cancel
                     </button>
                     <button (click)="createFolder()" [disabled]="!newFolderName.trim()"
-                        class="flex-1 px-6 py-4 bg-[#3b82f6] hover:bg-blue-600 text-white font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25">
-                        Create Folder
+                        class="flex-1 px-4 py-2.5 bg-[#3b82f6] hover:bg-blue-600 text-white font-medium rounded-xl transition-all disabled:opacity-50 text-sm">
+                        Create
                     </button>
                 </div>
             </div>
@@ -417,64 +432,60 @@
     </div>
     }
 
-    <!-- Enhanced Upload Document Modal -->
+    <!-- Minimal Upload Document Modal -->
     @if (showUploadModal) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border border-blue-100">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 mx-auto mb-6 bg-blue-500 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <!-- Compact Header -->
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 mx-auto mb-3 bg-[#3b82f6] rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-2">Add Document</h2>
-                <p class="text-slate-500 font-medium">Upload or scan a new document</p>
+                <h2 class="text-lg font-bold text-slate-800">Upload File</h2>
             </div>
 
-            <div class="space-y-6">
-                <!-- Enhanced File Upload Area -->
-                <div class="border-2 border-dashed border-blue-200 rounded-2xl p-8 text-center bg-blue-50 hover:border-blue-300 transition-colors">
+            <!-- Compact Upload Area -->
+            <div class="space-y-4">
+                <div class="border-2 border-dashed border-blue-200 rounded-xl p-6 text-center bg-blue-50">
                     <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
                     <button (click)="fileInput.click()" class="w-full">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-[#3b82f6] rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
-                            </svg>
-                        </div>
-                        <p class="text-slate-700 font-bold text-lg mb-2">Tap to upload</p>
-                        <p class="text-blue-500 font-medium">PDF, JPG, PNG (Max 10MB)</p>
+                        <svg class="w-8 h-8 mx-auto mb-2 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                        </svg>
+                        <p class="text-slate-700 font-medium text-sm">Tap to upload</p>
+                        <p class="text-blue-500 text-xs">PDF, JPG, PNG</p>
                     </button>
                 </div>
 
                 @if (selectedFile) {
-                <div class="bg-blue-50 rounded-2xl p-4 border-2 border-blue-100">
+                <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-[#3b82f6] rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-8 h-8 bg-[#3b82f6] rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
-                        <div class="flex-1">
-                            <p class="text-slate-800 font-bold text-sm">{{selectedFile.name}}</p>
-                            <p class="text-blue-600 text-xs font-medium">{{(selectedFile.size / (1024 * 1024)).toFixed(1)}} MB</p>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-slate-800 font-medium text-sm truncate">{{selectedFile.name}}</p>
+                            <p class="text-blue-600 text-xs">{{(selectedFile.size / (1024 * 1024)).toFixed(1)}} MB</p>
                         </div>
                     </div>
                 </div>
                 }
 
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Document Name (Optional)</label>
-                    <input type="text" [(ngModel)]="documentName" placeholder="Auto-generated if empty"
-                        class="w-full bg-blue-50/50 border-2 border-blue-100 rounded-2xl px-4 py-4 text-slate-800 placeholder-blue-300 focus:outline-none focus:border-blue-400 focus:bg-white transition-all font-medium">
-                </div>
+                <input type="text" [(ngModel)]="documentName" placeholder="Document name (optional)"
+                    class="w-full bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all text-sm">
 
-                <div class="flex gap-4 pt-4">
+                <!-- Compact Buttons -->
+                <div class="flex gap-3 pt-2">
                     <button (click)="closeUploadModal()"
-                        class="flex-1 px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-colors">
+                        class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors text-sm">
                         Cancel
                     </button>
                     <button (click)="uploadDocument()" [disabled]="!selectedFile"
-                        class="flex-1 px-6 py-4 bg-[#3b82f6] hover:bg-blue-600 text-white font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25">
+                        class="flex-1 px-4 py-2.5 bg-[#3b82f6] hover:bg-blue-600 text-white font-medium rounded-xl transition-all disabled:opacity-50 text-sm">
                         Upload
                     </button>
                 </div>
@@ -533,8 +544,8 @@
                         <p class="text-[#ec4899] text-sm font-medium">**** {{card.number.slice(-4)}} • {{card.type}}</p>
                     </div>
                     <!-- Delete Button -->
-                    <button (click)="deleteCard(card.id)"
-                        class="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100">
+                    <button (click)="confirmDeleteCard(card)"
+                        class="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-all opacity-70 hover:opacity-100 group-hover:opacity-100 shadow-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
                         </svg>
@@ -565,7 +576,7 @@
 
         <!-- FAB for Cards -->
         @if (cards.length > 0) {
-        <div class="fixed bottom-20 right-1/2 transform translate-x-1/2 z-40">
+        <div class="fixed bottom-32 right-1/2 transform translate-x-1/2 z-40">
             <button (click)="openAddCardModal()" 
                 class="w-14 h-14 bg-[#ec4899] hover:bg-pink-600 rounded-2xl shadow-2xl shadow-pink-500/30 flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -632,57 +643,64 @@
     </div>
     }
 
-    <!-- Add Card Modal -->
+    <!-- Minimal Add Card Modal -->
     @if (showAddCardModal) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border border-pink-100">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 mx-auto mb-6 bg-[#ec4899] rounded-3xl flex items-center justify-center shadow-lg shadow-pink-500/25">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <!-- Compact Header -->
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 mx-auto mb-3 bg-[#ec4899] rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-2">Add New Card</h2>
-                <p class="text-slate-500 font-medium">Add a new card to your collection</p>
+                <h2 class="text-lg font-bold text-slate-800">Add Card</h2>
             </div>
 
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Card Name</label>
-                    <input type="text" [(ngModel)]="newCardName" placeholder="e.g. My Credit Card"
-                        class="w-full bg-pink-50/50 border-2 border-pink-100 rounded-2xl px-4 py-4 text-slate-800 placeholder-pink-300 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-medium">
-                </div>
+            <!-- Compact Form -->
+            <div class="space-y-4">
+                <input type="text" [(ngModel)]="newCardName" placeholder="Card name"
+                    class="w-full bg-pink-50 border border-pink-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pink-400 focus:bg-white transition-all text-sm">
 
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Card Number</label>
-                    <input type="text" [(ngModel)]="newCardNumber" placeholder="1234 5678 9012 3456"
-                        class="w-full bg-pink-50/50 border-2 border-pink-100 rounded-2xl px-4 py-4 text-slate-800 placeholder-pink-300 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-mono">
-                </div>
+                <input type="text" [(ngModel)]="newCardNumber" placeholder="Card number"
+                    class="w-full bg-pink-50 border border-pink-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-mono text-sm">
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Card Type</label>
-                        <select [(ngModel)]="newCardType"
-                            class="w-full bg-pink-50/50 border-2 border-pink-100 rounded-2xl px-4 py-4 text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-medium">
-                            <option value="Credit Card">Credit Card</option>
-                            <option value="Debit Card">Debit Card</option>
-                            <option value="Gift Card">Gift Card</option>
-                        </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Card Type Selection -->
+                    <div class="col-span-2">
+                        <label class="block text-xs font-medium text-slate-600 mb-2">Card Type</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" (click)="newCardType = 'Credit Card'"
+                                class="px-3 py-2 rounded-lg text-xs font-medium transition-all border"
+                                [class]="newCardType === 'Credit Card' ? 'bg-[#ec4899] text-white border-[#ec4899]' : 'bg-pink-50 text-slate-600 border-pink-200 hover:bg-pink-100'">
+                                Credit
+                            </button>
+                            <button type="button" (click)="newCardType = 'Debit Card'"
+                                class="px-3 py-2 rounded-lg text-xs font-medium transition-all border"
+                                [class]="newCardType === 'Debit Card' ? 'bg-[#ec4899] text-white border-[#ec4899]' : 'bg-pink-50 text-slate-600 border-pink-200 hover:bg-pink-100'">
+                                Debit
+                            </button>
+                            <button type="button" (click)="newCardType = 'Gift Card'"
+                                class="px-3 py-2 rounded-lg text-xs font-medium transition-all border"
+                                [class]="newCardType === 'Gift Card' ? 'bg-[#ec4899] text-white border-[#ec4899]' : 'bg-pink-50 text-slate-600 border-pink-200 hover:bg-pink-100'">
+                                Gift
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Expiry</label>
-                        <input type="text" [(ngModel)]="newCardExpiry" placeholder="MM/YY"
-                            class="w-full bg-pink-50/50 border-2 border-pink-100 rounded-2xl px-4 py-4 text-slate-800 placeholder-pink-300 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-mono">
-                    </div>
+                    
+                    <!-- Expiry Date -->
+                    <input type="text" [(ngModel)]="newCardExpiry" placeholder="MM/YY" maxlength="5"
+                        class="bg-pink-50 border border-pink-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pink-400 focus:bg-white transition-all font-mono text-sm">
                 </div>
 
-                <div class="flex gap-4 pt-4">
+                <!-- Compact Buttons -->
+                <div class="flex gap-3 pt-2">
                     <button (click)="closeAddCardModal()"
-                        class="flex-1 px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-colors">
+                        class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors text-sm">
                         Cancel
                     </button>
                     <button (click)="addCard()" [disabled]="!newCardName.trim() || !newCardNumber.trim()"
-                        class="flex-1 px-6 py-4 bg-[#ec4899] hover:bg-pink-600 text-white font-bold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-pink-500/25">
+                        class="flex-1 px-4 py-2.5 bg-[#ec4899] hover:bg-pink-600 text-white font-medium rounded-xl transition-all disabled:opacity-50 text-sm">
                         Add Card
                     </button>
                 </div>

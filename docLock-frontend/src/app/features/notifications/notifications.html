@@ -1,28 +1,31 @@
-<div class="min-h-screen bg-slate-900 pb-6 text-white flex flex-col">
-    <!-- Header (Fixed) -->
-    <header class="flex-none p-4 pt-6 mb-2 flex items-center justify-between z-10 bg-slate-900 sticky top-0">
-        <div class="flex items-center gap-3">
+<div class="min-h-screen bg-gray-50 text-slate-900 pb-6 flex flex-col">
+    <!-- Header (Sticky & Blurry) -->
+    <header
+        class="flex-none p-6 pt-6 mb-2 flex items-center justify-between z-20 sticky top-0 bg-gray-50/95 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+            <!-- Back Button -->
             <a routerLink="/dashboard"
-                class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                class="w-12 h-12 rounded-[1.2rem] bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all hover:scale-105 active:scale-95 active:shadow-inner">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </a>
-            <h1 class="text-xl font-bold tracking-tight">Notifications</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-800">Notifications</h1>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex gap-3">
             <!-- Mark Read -->
             @if (notificationService.unreadCount() > 0) {
             <button (click)="markAllRead()" [disabled]="isMarkingRead"
-                class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-green-500 hover:bg-slate-800/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                class="w-12 h-12 rounded-[1.2rem] bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-400 hover:text-emerald-500 hover:border-emerald-100 transition-all active:scale-95 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed group">
                 @if (!isMarkingRead) {
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
                 }
                 @if (isMarkingRead) {
-                <svg class="animate-spin w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                <svg class="animate-spin w-5 h-5 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor"
@@ -36,9 +39,10 @@
             <!-- Clear All -->
             @if (notifications().length > 0) {
             <button (click)="confirmClearAll()" [disabled]="isClearing"
-                class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-slate-800/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                class="w-12 h-12 rounded-[1.2rem] bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-100 transition-all active:scale-95 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed group">
                 @if (!isClearing) {
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                     </path>
@@ -59,55 +63,99 @@
     </header>
 
     <!-- Content -->
-    <div class="flex-1 px-4 pb-4">
+    <div class="flex-1 px-6 pb-6">
         <!-- Empty State -->
         @if (notifications().length === 0) {
         <div class="flex flex-col items-center justify-center py-32 text-center animate-fade-in">
-            <div class="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-slate-600 mb-4">
+            <div
+                class="w-24 h-24 rounded-[2rem] bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-300 mb-6">
                 <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
                     </path>
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-slate-300">No notifications</h3>
-            <p class="text-slate-500 text-sm mt-1">You're all caught up!</p>
+            <h3 class="text-xl font-bold text-slate-800 tracking-tight">All Caught Up!</h3>
+            <p class="text-slate-500 text-sm mt-2 max-w-[200px] leading-relaxed">You have no new notifications at the
+                moment.</p>
         </div>
         }
 
         <!-- Notification List -->
         @if (notifications().length > 0) {
-        <div class="space-y-3 animate-fade-in">
+        <div class="space-y-4 animate-fade-in">
             @for (notification of notifications(); track notification.id) {
-            <div class="glass-card p-4 flex gap-4 items-start relative overflow-hidden group">
-                <!-- Icon -->
+            <div
+                class="bg-white p-5 rounded-[1.5rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-200 flex gap-4 items-start relative overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
+
+                <!-- Unread Dot (Absolute) -->
+                @if (!notification.read) {
                 <div
-                    class="flex-shrink-0 w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-indigo-400 mt-1">
+                    class="absolute top-5 right-5 w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)] animate-pulse">
+                </div>
+                }
+
+                <!-- Icon Container -->
+                <div class="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center mt-0.5 transition-colors"
+                    [ngClass]="{
+                        'bg-rose-50 text-rose-500': notification.icon === 'lock' || notification.icon === 'trash',
+                        'bg-indigo-50 text-indigo-500': notification.icon === 'user',
+                        'bg-emerald-50 text-emerald-500': notification.icon === 'check' || notification.icon === 'check-circle',
+                        'bg-slate-50 text-slate-500': !['lock', 'trash', 'user', 'check', 'check-circle'].includes(notification.icon || '')
+                    }">
+
+                    <!-- Lock (Security) -->
                     @if (notification.icon === 'lock') {
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
                         </path>
                     </svg>
                     }
-                    @if (notification.icon !== 'lock') {
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                    <!-- User (Add Friend) -->
+                    @if (notification.icon === 'user') {
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
+                        </path>
+                    </svg>
+                    }
+
+                    <!-- Trash (Delete Friend) -->
+                    @if (notification.icon === 'trash') {
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                    </svg>
+                    }
+
+                    <!-- Check (Success) -->
+                    @if (notification.icon === 'check' || notification.icon === 'check-circle') {
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    }
+
+                    <!-- Default (Bell) -->
+                    @if (!['lock', 'trash', 'user', 'check', 'check-circle'].includes(notification.icon || '')) {
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                        </path>
                     </svg>
                     }
                 </div>
 
                 <!-- Text -->
-                <div class="flex-1">
-                    <h4 class="font-bold text-base text-white mb-1 flex items-center gap-2">
+                <div class="flex-1 pr-4">
+                    <h4 class="font-bold text-[0.95rem] text-slate-800 mb-1.5 leading-snug">
                         {{ notification.title }}
-                        @if (!notification.read) {
-                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                        }
                     </h4>
-                    <p class="text-sm text-slate-400 leading-relaxed">{{ notification.message }}</p>
-                    <p class="text-xs text-slate-500 mt-2">{{ notification.time | date:'unknown' }}</p>
+                    <p class="text-[0.85rem] text-slate-500 leading-relaxed font-medium">{{ notification.message }}</p>
+                    <p class="text-xs text-slate-400 mt-3 font-medium">{{ notification.createdAt | timeAgo }}</p>
                 </div>
             </div>
             }

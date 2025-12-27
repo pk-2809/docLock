@@ -1,68 +1,94 @@
-<div class="h-[calc(100dvh-6rem)] bg-slate-900 flex flex-col overflow-hidden">
+<div class="h-[calc(100dvh-6rem)] bg-gradient-to-br from-indigo-50 via-white to-rose-50 flex flex-col overflow-hidden">
     <!-- Header (Fixed) -->
-    <header class="flex-none p-4 pt-6 mb-2 flex items-center justify-between z-10 bg-slate-900">
-        <h1 class="text-xl font-bold tracking-tight">My Friends</h1>
+    <header class="flex-none p-6 pt-8 mb-2 flex items-center justify-between z-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">My Friends</h1>
+            <p class="text-sm text-slate-500 font-medium">Connect & Share</p>
+        </div>
+
+        <!-- Add Button (Send Style) -->
         <a routerLink="/add-friend"
-            class="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 hover:from-violet-500 hover:to-indigo-500 transition-all transform hover:scale-105">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
+            class="h-12 bg-rose-500 rounded-2xl p-1.5 flex items-center gap-3 pr-4 shadow-lg shadow-rose-500/20 hover:scale-105 transition-transform active:scale-95">
+            <div class="h-full aspect-square bg-white rounded-xl flex items-center justify-center text-rose-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+                </svg>
+            </div>
+            <span class="text-white font-bold text-sm tracking-wide">Add Friend</span>
         </a>
     </header>
 
     <!-- Scrollable Content Area -->
-    <div class="flex-1 overflow-y-auto px-4 pb-4">
+    <div class="flex-1 overflow-y-auto px-6 pb-28">
         <!-- Loading State -->
-        <div *ngIf="isLoading()" class="flex justify-center py-12">
-            <div class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin">
+        @if (isLoading()) {
+        <div class="flex justify-center py-12">
+            <div class="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin">
             </div>
         </div>
+        }
 
         <!-- Empty State -->
-        <div *ngIf="!isLoading() && friends().length === 0"
-            class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-            <div class="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-slate-600 mb-4">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        @if (!isLoading() && friends().length === 0) {
+        <div class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+            <div class="w-24 h-24 rounded-full bg-white shadow-sm flex items-center justify-center text-rose-200 mb-4">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
                     </path>
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-slate-300">No friends yet</h3>
-            <p class="text-slate-500 text-sm mt-1">Add friends to share documents securely.</p>
+            <h3 class="text-lg font-bold text-slate-800">No friends yet</h3>
+            <p class="text-slate-400 text-sm mt-1 max-w-[200px]">Add friends to start sharing documents securely.</p>
         </div>
+        }
 
         <!-- Friends List -->
-        <div *ngIf="!isLoading() && friends().length > 0" class="space-y-3 animate-fade-in">
-            <div *ngFor="let friend of friends()" class="glass-card p-4 flex items-center justify-between group">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 overflow-hidden">
-                        <img *ngIf="friend.profileImage" [src]="friend.profileImage" class="w-full h-full object-cover">
-                        <span *ngIf="!friend.profileImage" class="text-lg font-bold">{{ friend.name.charAt(0) }}</span>
+        @if (!isLoading() && friends().length > 0) {
+        <div class="space-y-4 animate-fade-in">
+            @for (friend of friends(); track friend.uid; let i = $index) {
+            <div
+                class="bg-white rounded-[2rem] p-4 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.04)] transition-all border border-slate-100 hover:border-rose-100">
+                <div class="flex items-center gap-4">
+                    <!-- Icon Profile (Pink Gradient Square) -->
+                    <div class="w-14 h-14 rounded-[1.2rem] flex items-center justify-center text-xl font-bold overflow-hidden shrink-0 text-white shadow-lg shadow-rose-500/20"
+                        [ngClass]="i % 2 === 0 ? 'bg-gradient-to-br from-rose-400 to-pink-500' : 'bg-gradient-to-br from-indigo-400 to-violet-500'">
+                        @if (friend.profileImage) {
+                        <img [src]="friend.profileImage" class="w-full h-full object-cover">
+                        }
+                        @if (!friend.profileImage) {
+                        <span>{{ friend.name.charAt(0) }}</span>
+                        }
                     </div>
-                    <div>
-                        <h4 class="font-bold text-base text-white">{{ friend.name }}</h4>
-                        <p class="text-xs text-slate-500">Added {{ friend.addedAt | date }}</p>
+
+                    <!-- Text Details -->
+                    <div class="flex flex-col">
+                        <h4 class="font-bold text-base text-slate-800">{{ friend.name }}</h4>
+                        <p class="text-xs font-medium text-slate-400 mt-0.5">Added {{ friend.addedAt | date:'mediumDate'
+                            }}</p>
                     </div>
                 </div>
 
+                <!-- Action Menu (Bin Icon) -->
                 <button (click)="confirmDelete(friend.uid)"
-                    class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-red-500 hover:bg-slate-800 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                        </path>
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                 </button>
             </div>
+            }
         </div>
+        }
     </div>
 
     <!-- Confirmation Sheet -->
-    <app-confirmation-sheet *ngIf="showConfirmation()" title="Remove Friend"
+    @if (showConfirmation()) {
+    <app-confirmation-sheet title="Remove Friend"
         message="Are you sure you want to remove this friend? They will be removed from your secure circle."
-        confirmText="Yes, Remove" cancelText="Cancel" type="danger" (confirm)="onDeleteConfirmed()"
-        (cancel)="closeConfirmation()">
+        confirmText="Yes, Remove" cancelText="Cancel" type="danger" [isLoading]="isDeleting()"
+        (confirm)="onDeleteConfirmed()" (cancel)="closeConfirmation()">
     </app-confirmation-sheet>
+    }
 </div>

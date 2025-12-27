@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmationSheetComponent } from '../../shared/components/confirmation-sheet/confirmation-sheet';
+import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
 
 @Component({
     selector: 'app-notifications',
     standalone: true,
-    imports: [CommonModule, RouterLink, ConfirmationSheetComponent],
+    imports: [CommonModule, RouterLink, ConfirmationSheetComponent, TimeAgoPipe],
     templateUrl: './notifications.html',
     styles: []
 })

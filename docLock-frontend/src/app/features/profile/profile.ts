@@ -73,12 +73,11 @@ export class ProfileComponent {
         const userId = this.user()?.uid;
         if (!userId) return;
 
-        const url = `${window.location.origin}/profile/${userId}`;
-        navigator.clipboard.writeText(url).then(() => {
-            this.toastService.showSuccess('Profile URL copied to clipboard!'); // Success Toast
+        navigator.clipboard.writeText(userId).then(() => {
+            this.toastService.showSuccess('Profile ID copied to clipboard!'); // Success Toast
         }).catch(err => {
             console.error('Failed to copy: ', err);
-            this.toastService.showError('Failed to copy URL'); // Error Toast
+            this.toastService.showError('Failed to copy ID'); // Error Toast
         });
     }
 

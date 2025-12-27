@@ -21,7 +21,7 @@ interface Document {
     styleUrl: './document-list.css'
 })
 export class DocumentListComponent implements OnInit {
-    viewMode: 'grid' | 'list' = 'grid';
+    viewMode: 'home' | 'grid' | 'list' = 'home';
     searchQuery = '';
     selectedCategory = 'all';
 
@@ -116,7 +116,12 @@ export class DocumentListComponent implements OnInit {
         return filtered;
     }
 
+    setViewMode(mode: 'home' | 'grid' | 'list') {
+        this.viewMode = mode;
+    }
+
     toggleViewMode() {
+        if (this.viewMode === 'home') return;
         this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
     }
 

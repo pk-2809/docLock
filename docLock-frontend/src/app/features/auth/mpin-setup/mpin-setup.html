@@ -40,38 +40,47 @@
 
         <!-- Error Message -->
         <div class="h-6 mb-4 sm:mb-8">
-            <p *ngIf="error()" class="text-red-400 text-xs sm:text-sm font-bold animate-bounce text-center">{{ error()
-                }}
-            </p>
+            @if (error()) {
+            <p class="text-red-400 text-xs sm:text-sm font-bold animate-bounce text-center">{{ error() }}</p>
+            }
         </div>
 
         <!-- Keypad -->
         <div class="grid grid-cols-3 gap-4 sm:gap-6 w-full max-w-70 sm:max-w-xs mb-4">
-            <button *ngFor="let key of keys" (click)="onKeyPress(key)" [disabled]="key === -1" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold transition-all mx-auto
+            @for (key of keys; track key) {
+            <button (click)="onKeyPress(key)" [disabled]="key === -1" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold transition-all mx-auto
                            focus:outline-none active:scale-95 select-none" [ngClass]="{
                         'bg-slate-800 hover:bg-slate-700 text-white shadow-lg': key !== -1 && key !== -2,
                         'text-indigo-400 hover:bg-indigo-500/10': key === -2,
                         'opacity-0 pointer-events-none': key === -1
                     }">
-                <span *ngIf="key !== -2">{{ key }}</span>
-                <svg *ngIf="key === -2" class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
+                @if (key !== -2) {
+                <span>{{ key }}</span>
+                }
+                @if (key === -2) {
+                <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a1 1 0 001.414 0L19 12l-8.172-8.172a1 1 0 00-1.414 0L3 12z">
                     </path>
                 </svg>
+                }
             </button>
+            }
         </div>
 
         <!-- Cancel / Loader -->
         <div class="mt-4 mb-8">
-            <button *ngIf="!isLoading()" (click)="reset()"
+            @if (!isLoading()) {
+            <button (click)="reset()"
                 class="text-slate-500 text-xs sm:text-sm font-bold uppercase tracking-wider hover:text-white transition-colors">
                 Reset
             </button>
-            <div *ngIf="isLoading()"
+            }
+            @if (isLoading()) {
+            <div
                 class="w-6 h-6 sm:w-8 sm:h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin">
             </div>
+            }
         </div>
     </div>
 </div>

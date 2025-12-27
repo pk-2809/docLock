@@ -10,7 +10,4 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 })
 export class App {
   title = 'docLock';
-  constructor() {
-    console.log('✨ DocLock Frontend: Toast Update Loaded');
-  }
 }

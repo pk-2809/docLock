@@ -1,63 +1,113 @@
-<div class="min-h-screen bg-slate-900 text-white p-4 relative">
-    <!-- Header -->
-    <header class="flex items-center gap-4 mb-8 pt-2">
+<div class="min-h-screen bg-gray-50 text-slate-900 p-6 relative flex flex-col">
+    <!-- Header (Matching Profile Style) -->
+    <header class="relative flex items-center justify-center mb-8 pt-4 shrink-0">
+        <!-- Back Button -->
         <a routerLink="/friends"
-            class="w-10 h-10 rounded-full glass-card flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="absolute left-0 w-12 h-12 rounded-[1.2rem] bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all hover:scale-105 active:scale-95 active:shadow-inner">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
         </a>
-        <h1 class="text-xl font-bold tracking-tight">Add Friend</h1>
+
+        <!-- Title -->
+        <h1 class="text-2xl font-bold tracking-tight text-slate-800">Add Friend</h1>
     </header>
 
-    <div class="glass-card p-6 animate-slide-in-up">
-        <div class="mb-6 text-center">
+    <!-- Center Card -->
+    <div class="flex-1 flex flex-col justify-start pb-20">
+        <div
+            class="bg-gradient-to-b from-indigo-500 to-violet-600 rounded-[2.5rem] p-8 py-10 shadow-[0_30px_60px_rgba(79,70,229,0.4)] animate-slide-in-up w-full max-w-sm mx-auto relative overflow-hidden">
+
+            <!-- Background Decoration -->
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-3xl"></div>
+            </div>
+
+            <div class="mb-10 text-center relative z-10">
+                <!-- Icon -->
+                <div
+                    class="w-24 h-24 rounded-[2rem] bg-white flex items-center justify-center text-indigo-600 mx-auto mb-6 shadow-lg shadow-black/10">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
+                        </path>
+                    </svg>
+                </div>
+
+                <!-- Headings -->
+                <h2 class="text-2xl font-bold text-white mb-3 tracking-tight">Connect with People</h2>
+                <p class="text-sm text-indigo-100 px-4 leading-relaxed font-medium">Paste a User ID or profile link
+                    below to
+                    add them to your secure
+                    circle.</p>
+            </div>
+
+            <!-- Input -->
+            <div class="mb-6 relative z-10">
+                <label class="block text-[10px] font-bold text-indigo-200 uppercase tracking-widest mb-3 ml-1">Profile
+                    Link or ID</label>
+                <input type="text" [(ngModel)]="profileUrl" name="profileUrl" autocomplete="off" autocorrect="off"
+                    autocapitalize="off" spellcheck="false" inputmode="text" (contextmenu)="$event.preventDefault()"
+                    class="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 text-white placeholder-indigo-200/50 focus:outline-none focus:border-white/50 focus:bg-white/20 transition-all font-mono text-sm shadow-inner backdrop-blur-sm"
+                    placeholder="e.g. gV5I3sJf...">
+                @if (profileUrl && !isValidInput()) {
+                <p
+                    class="text-white/90 bg-red-500/80 rounded-lg px-2 py-1 inline-flex text-xs mt-2 font-medium items-center gap-1 shadow-sm backdrop-blur-md">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Invalid format
+                </p>
+                }
+            </div>
+
+            <!-- Feedback -->
+            @if (error()) {
             <div
-                class="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 mx-auto mb-4">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                </svg>
+                class="mb-6 p-4 rounded-2xl bg-red-500/20 border border-red-200/20 text-white text-sm flex items-center gap-3 animate-fade-in font-medium backdrop-blur-md relative z-10">
+                <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                {{ error() }}
             </div>
-            <h2 class="text-lg font-bold text-white mb-2">Connect with People</h2>
-            <p class="text-sm text-slate-400">Paste a user's profile link below to add them to your secure circle.</p>
-        </div>
+            }
 
-        <!-- Input -->
-        <div class="mb-6">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Profile URL</label>
-            <input type="text" [(ngModel)]="profileUrl"
-                class="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
-                placeholder="https://doclock.app/profile/user123">
-            <p *ngIf="profileUrl && !isValidUrl()" class="text-red-400 text-xs mt-2 animate-fade-in">
-                Invalid Profile URL format.
-            </p>
-        </div>
-
-        <!-- Feedback -->
-        <div *ngIf="error()"
-            class="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3 animate-fade-in">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            {{ error() }}
-        </div>
-
-        <div *ngIf="success()"
-            class="mb-6 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center gap-3 animate-fade-in">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            {{ success() }}
-        </div>
-
-        <!-- Action -->
-        <button (click)="addFriend()" [disabled]="isLoading() || !isValidUrl()"
-            class="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-600 font-bold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-            <span *ngIf="!isLoading()">Add Friend</span>
-            <div *ngIf="isLoading()" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin">
+            @if (success()) {
+            <div
+                class="mb-6 p-4 rounded-2xl bg-emerald-500/20 border border-emerald-200/20 text-white text-sm flex items-center gap-3 animate-fade-in font-medium backdrop-blur-md relative z-10">
+                <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                {{ success() }}
             </div>
-        </button>
+            }
+
+            <!-- Action -->
+            <button (click)="initiateAddFriend()" [disabled]="isLoading() || !isValidInput()"
+                class="w-full h-14 rounded-2xl bg-white font-bold text-lg text-indigo-600 shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center relative overflow-hidden group z-10">
+                @if (!isLoading()) {
+                <span class="relative">Add Friend</span>
+                }
+                @if (isLoading()) {
+                <div class="w-6 h-6 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                }
+            </button>
+        </div>
     </div>
+
+    <!-- Confirmation Sheet -->
+    @if (showConfirmation()) {
+    <app-confirmation-sheet title="Found Them! ✨"
+        [message]="'You\'re about to add <span class=\'text-indigo-600 font-bold\'>' + (friendToConfirm()?.name || 'this user') + '</span> to your secure circle. Ready to start sharing?'"
+        confirmText="Let's Connect" cancelText="Not yet" type="profile"
+        [image]="friendToConfirm()?.profileImage || null" (confirm)="confirmAdd()" (cancel)="closeConfirmation()">
+    </app-confirmation-sheet>
+    }
 </div>

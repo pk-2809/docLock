@@ -1,4 +1,4 @@
-import './debug-token'; // MUST be the first import
+
 import { bootstrapApplication } from '@angular/platform-browser';
 import { environment } from './environments/environment';
 import { appConfig } from './app/app.config';

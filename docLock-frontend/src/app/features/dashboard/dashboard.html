@@ -24,9 +24,10 @@
                 </path>
             </svg>
             <!-- Badge -->
-            <span *ngIf="notificationService.unreadCount() > 0"
-                class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-900">
+            @if (notificationService.unreadCount() > 0) {
+            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-900">
             </span>
+            }
             }
 
             <!-- Spinner (Shown when loading) -->

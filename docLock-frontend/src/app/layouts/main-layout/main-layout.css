@@ -1,45 +1,11 @@
-/* Glass Navigation */
-.glass-nav {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-}
-
 /* Nav Item Styling */
 .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #94a3b8;
-    /* slate-400 */
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
     padding: 0.5rem;
-    border-radius: 0.75rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-item:active {
     transform: scale(0.95);
-}
-
-.nav-item.active {
-    color: #818cf8;
-    /* indigo-400 */
-    transform: translateY(-2px);
-}
-
-.nav-item.active .icon-container {
-    background: rgba(129, 140, 248, 0.1);
-    box-shadow: 0 0 20px rgba(129, 140, 248, 0.2);
-}
-
-.icon-container {
-    padding: 0.5rem;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
 }
 
 /* FAB Menu Styling */

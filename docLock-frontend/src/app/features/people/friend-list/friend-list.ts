@@ -21,9 +21,14 @@ export class FriendListComponent implements OnInit {
     // Confirmation Sheet State
     showConfirmation = signal(false);
     friendToDelete = signal<string | null>(null);
+    isDeleting = signal(false);
 
     ngOnInit() {
-        this.loadFriends();
+        if (!this.peopleService.loaded()) {
+            this.loadFriends();
+        } else {
+            this.isLoading.set(false);
+        }
     }
 
     loadFriends() {
@@ -43,13 +48,16 @@ export class FriendListComponent implements OnInit {
         const friendId = this.friendToDelete();
         if (!friendId) return;
 
+        this.isDeleting.set(true);
         this.peopleService.deleteFriend(friendId).subscribe({
             next: () => {
                 this.toastService.showSuccess('Friend removed successfully');
+                this.isDeleting.set(false);
                 this.closeConfirmation();
             },
             error: (err) => {
                 this.toastService.showError('Failed to remove friend');
+                this.isDeleting.set(false);
                 this.closeConfirmation();
             }
         });

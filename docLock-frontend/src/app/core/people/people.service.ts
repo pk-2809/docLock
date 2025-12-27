@@ -19,12 +19,14 @@ export class PeopleService {
 
     friends = signal<Friend[]>([]);
     isLoading = signal<boolean>(false);
+    loaded = signal<boolean>(false);
 
     getFriends(): Observable<{ friends: Friend[] }> {
         return this.http.get<{ friends: Friend[] }>(`${this.apiUrl}/api/people`, { withCredentials: true })
             .pipe(
                 tap(response => {
                     this.friends.set(response.friends || []);
+                    this.loaded.set(true);
                 })
             );
     }
@@ -37,6 +39,10 @@ export class PeopleService {
                     this.getFriends().subscribe();
                 })
             );
+    }
+
+    getPublicProfile(userId: string): Observable<Partial<Friend>> {
+        return this.http.get<Partial<Friend>>(`${this.apiUrl}/api/people/user/${userId}`, { withCredentials: true });
     }
 
     deleteFriend(friendId: string): Observable<any> {

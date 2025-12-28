@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,9 +11,10 @@ import { AppConfigService } from '../../../core/services/app-config.service';
 interface Card {
     id: string;
     name: string;
-    type: string;
+    type: 'debit' | 'credit';
     number: string;
     expiryDate: string;
+    cvv?: string;
     createdAt: Date;
 }
 
@@ -30,14 +31,16 @@ interface BreadcrumbItem {
     templateUrl: './document-list.html',
     styleUrl: './document-list.css'
 })
-export class DocumentListComponent implements OnInit, OnDestroy {
+export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
+    @ViewChild('breadcrumbContainer') breadcrumbContainer!: ElementRef;
     private route = inject(ActivatedRoute);
     private documentService = inject(DocumentService);
     private toastService = inject(ToastService);
     private cdr = inject(ChangeDetectorRef);
     private configService = inject(AppConfigService);
-    viewMode: 'home' | 'folders' | 'cards' | 'qrs' = 'home';
+    viewMode: 'home' | 'folders' | 'cards' | 'card-folder' | 'qrs' = 'home';
     currentFolderId: string | null = null;
+    currentCardFolder: 'debit' | 'credit' | null = null;
     searchQuery = '';
 
     // UI States
@@ -63,10 +66,12 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     editFolderName = '';
 
     // Card related properties
-    showAddCardModal = false;
+    showAddCardBottomSheet = false;
+    editingCard: Card | null = null;
     newCardName = '';
     newCardNumber = '';
     newCardExpiry = '';
+    newCardCvv = '';
     newCardType = 'Credit Card';
 
     // Auto-detected folder properties
@@ -96,6 +101,19 @@ export class DocumentListComponent implements OnInit, OnDestroy {
 
         // Global Guard removed to prevent blocking valid interactions.
         // We will handle specific input behavior in the template handlers.
+    }
+
+    ngAfterViewInit() {
+        // Auto-scroll breadcrumb to the end when it has many items
+        setTimeout(() => {
+            if (this.breadcrumbContainer && this.breadcrumbs.length > 3) {
+                const container = this.breadcrumbContainer.nativeElement;
+                const breadcrumbPath = container.querySelector('.overflow-x-auto');
+                if (breadcrumbPath) {
+                    breadcrumbPath.scrollLeft = breadcrumbPath.scrollWidth;
+                }
+            }
+        }, 100);
     }
 
     ngOnDestroy() {
@@ -254,6 +272,17 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     openFolder(folderId: string) {
         this.currentFolderId = folderId;
         this.viewMode = 'folders'; // Stay in folders view, just change current folder
+        
+        // Auto-scroll breadcrumb after folder change
+        setTimeout(() => {
+            if (this.breadcrumbContainer && this.breadcrumbs.length > 3) {
+                const container = this.breadcrumbContainer.nativeElement;
+                const breadcrumbPath = container.querySelector('.overflow-x-auto');
+                if (breadcrumbPath) {
+                    breadcrumbPath.scrollLeft = breadcrumbPath.scrollWidth;
+                }
+            }
+        }, 100);
     }
 
     navigateToBreadcrumb(item: BreadcrumbItem) {
@@ -694,46 +723,163 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     }
 
     // Card Management Methods
-    openAddCardModal() {
-        this.showAddCardModal = true;
+    openCardFolder(type: 'debit' | 'credit') {
+        this.currentCardFolder = type;
+        this.viewMode = 'card-folder';
+    }
+
+    getCurrentFolderCards(): Card[] {
+        if (!this.currentCardFolder) return [];
+        return this.cards.filter(card => card.type === this.currentCardFolder);
+    }
+
+    getTotalCardsCount(): number {
+        return this.cards.length;
+    }
+
+    getDebitCardsCount(): number {
+        return this.cards.filter(card => card.type === 'debit').length;
+    }
+
+    getCreditCardsCount(): number {
+        return this.cards.filter(card => card.type === 'credit').length;
+    }
+
+    // Enhanced card display methods
+    showCardCVV = new Set<string>();
+
+    getCardGradient(type: string): string {
+        return type === 'credit' 
+            ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800'
+            : 'bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800';
+    }
+
+    formatCardNumber(number: string): string {
+        return number.replace(/(.{4})/g, '$1 ').trim();
+    }
+
+    toggleCardCVV(cardId: string): void {
+        if (this.showCardCVV.has(cardId)) {
+            this.showCardCVV.delete(cardId);
+        } else {
+            this.showCardCVV.add(cardId);
+        }
+    }
+
+    copyCardDetails(card: Card): void {
+        const details = `Card: ${card.name}\nNumber: ${this.formatCardNumber(card.number)}\nExpiry: ${card.expiryDate}\nCVV: ${card.cvv || 'N/A'}`;
+        navigator.clipboard.writeText(details).then(() => {
+            this.toastService.showSuccess('Card details copied to clipboard');
+        }).catch(() => {
+            this.toastService.showError('Failed to copy card details');
+        });
+    }
+
+    editCard(card: Card): void {
+        this.editingCard = card;
+        this.newCardName = card.name;
+        this.newCardNumber = this.formatCardNumber(card.number);
+        this.newCardExpiry = card.expiryDate;
+        this.newCardCvv = card.cvv || '';
+        this.newCardType = card.type === 'credit' ? 'Credit Card' : 'Debit Card';
+        this.showAddCardBottomSheet = true;
+    }
+
+    openAddCardBottomSheet() {
+        this.editingCard = null; // Reset editing state
+        this.showAddCardBottomSheet = true;
         this.newCardName = '';
         this.newCardNumber = '';
         this.newCardExpiry = '';
-        this.newCardType = 'Credit Card';
+        this.newCardCvv = '';
         this.showFabMenu = false;
     }
 
-    closeAddCardModal() {
-        this.showAddCardModal = false;
+    closeAddCardBottomSheet() {
+        this.showAddCardBottomSheet = false;
+        this.editingCard = null;
         this.newCardName = '';
         this.newCardNumber = '';
         this.newCardExpiry = '';
-        this.newCardType = 'Credit Card';
+        this.newCardCvv = '';
+    }
+
+    formatCardNumberInput(event: any) {
+        let value = event.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+        const matches = value.match(/\d{4,16}/g);
+        const match = matches && matches[0] || '';
+        const parts = [];
+        for (let i = 0, len = match.length; i < len; i += 4) {
+            parts.push(match.substring(i, i + 4));
+        }
+        if (parts.length) {
+            event.target.value = parts.join(' ');
+            this.newCardNumber = parts.join(' ');
+        } else {
+            event.target.value = value;
+            this.newCardNumber = value;
+        }
+    }
+
+    formatExpiryDate(event: any) {
+        let value = event.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        event.target.value = value;
+        this.newCardExpiry = value;
+    }
+
+    openAddCardModal() {
+        this.openAddCardBottomSheet();
+    }
+
+    closeAddCardModal() {
+        this.closeAddCardBottomSheet();
     }
 
     addCard() {
         if (!this.newCardName.trim() || !this.newCardNumber.trim()) return;
 
         const config = this.configService.config();
-        const currentTypeCount = this.cards.filter(c => c.type === this.newCardType).length;
-        const limit = this.newCardType === 'Credit Card' ? config.maxCreditCardsLimit : config.maxDebitCardsLimit;
+        const currentTypeCount = this.cards.filter(c => c.type === this.currentCardFolder).length;
+        const limit = this.currentCardFolder === 'credit' ? config.maxCreditCardsLimit : config.maxDebitCardsLimit;
 
-        if (currentTypeCount >= limit) {
-            this.toastService.showError(`${this.newCardType} limit reached. Max ${limit} allowed.`);
+        // Only check limit when adding new card (not editing)
+        if (!this.editingCard && currentTypeCount >= limit) {
+            this.toastService.showError(`${this.currentCardFolder} card limit reached. Max ${limit} allowed.`);
             return;
         }
 
-        const newCard: Card = {
-            id: Date.now().toString(),
-            name: this.newCardName.trim(),
-            type: this.newCardType,
-            number: this.newCardNumber.trim(),
-            expiryDate: this.newCardExpiry,
-            createdAt: new Date()
-        };
+        if (this.editingCard) {
+            // Update existing card
+            const cardIndex = this.cards.findIndex(c => c.id === this.editingCard!.id);
+            if (cardIndex > -1) {
+                this.cards[cardIndex] = {
+                    ...this.editingCard,
+                    name: this.newCardName.trim(),
+                    number: this.newCardNumber.trim().replace(/\s/g, ''),
+                    expiryDate: this.newCardExpiry,
+                    cvv: this.newCardCvv || undefined
+                };
+                this.toastService.showSuccess('Card updated successfully');
+            }
+        } else {
+            // Add new card
+            const newCard: Card = {
+                id: Date.now().toString(),
+                name: this.newCardName.trim(),
+                type: this.currentCardFolder || 'debit',
+                number: this.newCardNumber.trim().replace(/\s/g, ''),
+                expiryDate: this.newCardExpiry,
+                cvv: this.newCardCvv || undefined,
+                createdAt: new Date()
+            };
+            this.cards.push(newCard);
+            this.toastService.showSuccess('Card added successfully');
+        }
 
-        this.cards.push(newCard);
-        this.closeAddCardModal();
+        this.closeAddCardBottomSheet();
     }
 
     deleteCard(cardId: string) {

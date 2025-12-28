@@ -17,6 +17,8 @@ module.exports = {
         'glow': 'glow 2s ease-in-out infinite',
         'spin-slow': 'spin 3s linear infinite',
         'wiggle': 'wiggle 1s ease-in-out infinite',
+        'scale-in': 'scaleIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.3s ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -76,6 +78,16 @@ module.exports = {
           },
           '100%': {
             transform: 'translateY(0px)'
+          }
+        },
+        slideUp: {
+          'from': {
+            opacity: '0',
+            transform: 'translateY(100%)'
+          },
+          'to': {
+            opacity: '1',
+            transform: 'translateY(0)'
           }
         },
         glow: {

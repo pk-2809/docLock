@@ -41,6 +41,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/profile/profile').then(m => m.ProfileComponent)
             },
             {
+                path: 'about-us',
+                loadComponent: () => import('./features/profile/about-us/about-us').then(m => m.AboutUsComponent)
+            },
+            {
                 path: 'scan',
                 loadComponent: () => import('./features/qr/qr-scan/qr-scan').then(m => m.QrScanComponent)
             },

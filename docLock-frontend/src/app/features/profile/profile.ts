@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth';
 import { ToastService } from '../../core/services/toast.service';
+import { AppConfigService } from '../../core/services/app-config.service';
 
 import { ConfirmationSheetComponent } from '../../shared/components/confirmation-sheet/confirmation-sheet';
 import { MpinSetupComponent } from '../auth/mpin-setup/mpin-setup';
@@ -23,15 +24,25 @@ export class ProfileComponent {
     user = this.authService.user;
     isUploading = signal(false);
 
+    private configService = inject(AppConfigService);
+
     // Computed stats for template
     get stats() {
         const u = this.user();
+        const usedBytes = u?.storageUsed || 0;
+        const maxBytes = this.configService.config().maxStorageLimit;
+
+        let percentage = 0;
+        if (maxBytes > 0) {
+            percentage = (usedBytes / maxBytes) * 100;
+        }
+
         return {
             documents: u?.documentsCount || 0,
-            storageUsed: u?.storageUsed || 0
+            storageUsed: usedBytes,
+            storagePercentage: Math.min(Math.round(percentage * 10) / 10, 100) // 1 decimal place, max 100
         };
     }
-    // Mock stats removed - using user signal directly
 
 
 

@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DocumentService, Document, Folder } from '../../../core/services/document';
-import { ToastService } from '../../../core/services/toast.service';
+import { ToastService } from '../../../core/services/toast.service'; // Import ToastService
 import { forkJoin, finalize, timeout } from 'rxjs'; // Import forkJoin, finalize, timeout
 import { ChangeDetectorRef } from '@angular/core';
+import { AppConfigService } from '../../../core/services/app-config.service';
 
 interface Card {
     id: string;
@@ -34,6 +35,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     private documentService = inject(DocumentService);
     private toastService = inject(ToastService);
     private cdr = inject(ChangeDetectorRef);
+    private configService = inject(AppConfigService);
     viewMode: 'home' | 'folders' | 'cards' | 'qrs' = 'home';
     currentFolderId: string | null = null;
     searchQuery = '';
@@ -427,6 +429,21 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     createFolder() {
         if (!this.newFolderName.trim()) return;
 
+        const config = this.configService.config();
+        // Check nesting limit. Breadcrumbs usually include Root + ancestors + current. 
+        // If we are IN a folder, breadcrumbs has that folder. 
+        // If we create a SUB-folder, the depth increases.
+        // Approx depth = breadcrumbs.length (Root is 1, subfolder is 2...).
+        // User config: maxFolderNestingAllowed (e.g. 5).
+
+        // This is a rough check. If breadcrumbs has 'Root', 'A', 'B' (length 3), creating 'C' makes depth 4.
+        const currentDepth = this.breadcrumbs.length;
+
+        if (currentDepth >= config.maxFolderNestingAllowed) {
+            this.toastService.showError(`Max folder nesting (${config.maxFolderNestingAllowed}) reached.`);
+            return;
+        }
+
         // OPTIMISTIC UPDATE
         // 1. Create a temporary folder object
         const tempId = 'temp-' + Date.now();
@@ -696,6 +713,15 @@ export class DocumentListComponent implements OnInit, OnDestroy {
 
     addCard() {
         if (!this.newCardName.trim() || !this.newCardNumber.trim()) return;
+
+        const config = this.configService.config();
+        const currentTypeCount = this.cards.filter(c => c.type === this.newCardType).length;
+        const limit = this.newCardType === 'Credit Card' ? config.maxCreditCardsLimit : config.maxDebitCardsLimit;
+
+        if (currentTypeCount >= limit) {
+            this.toastService.showError(`${this.newCardType} limit reached. Max ${limit} allowed.`);
+            return;
+        }
 
         const newCard: Card = {
             id: Date.now().toString(),

@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../auth/auth';
+import { AppConfigService } from '../services/app-config.service';
 
 export interface Document {
     id: string;
@@ -39,6 +41,8 @@ export interface Folder {
 })
 export class DocumentService {
     private http = inject(HttpClient);
+    private authService = inject(AuthService);
+    private configService = inject(AppConfigService);
     private apiUrl = `${environment.apiUrl}/api/documents`;
 
     getDocuments(): Observable<{ status: string; documents: Document[] }> {
@@ -54,6 +58,43 @@ export class DocumentService {
         }
         if (name) {
             formData.append('name', name);
+        }
+
+        // Check Storage Limit
+        const user = this.authService.user();
+        const config = this.configService.config();
+
+        if (user && config) {
+            const currentUsed = user.storageUsed || 0;
+            const newSize = file.size;
+            if (currentUsed + newSize > config.maxStorageLimit) {
+                return new Observable(observer => {
+                    observer.error(new Error(`Storage limit exceeded. Max ${config.maxStorageLimit / (1024 * 1024)}MB allowed.`));
+                });
+            }
+
+            // Check File Type and Size
+            const extension = '.' + file.name.split('.').pop()?.toLowerCase();
+            const isImage = config.imgFormatsAllowed.includes(extension);
+            const isDoc = config.otherFormatsAllowed.includes(extension);
+
+            if (!isImage && !isDoc) {
+                return new Observable(observer => {
+                    observer.error(new Error(`Invalid file format. Allowed: ${config.imgFormatsAllowed.join(', ')}, ${config.otherFormatsAllowed.join(', ')}`));
+                });
+            }
+
+            if (isImage && file.size > config.maxImgSizeAllowed) {
+                return new Observable(observer => {
+                    observer.error(new Error(`Image size exceeded. Max ${config.maxImgSizeAllowed / (1024 * 1024)}MB allowed.`));
+                });
+            }
+
+            if (isDoc && file.size > config.maxPdfSizeAllowed) {
+                return new Observable(observer => {
+                    observer.error(new Error(`Document size exceeded. Max ${config.maxPdfSizeAllowed / (1024 * 1024)}MB allowed.`));
+                });
+            }
         }
 
         return this.http.post(`${this.apiUrl}/upload`, formData, { withCredentials: true });

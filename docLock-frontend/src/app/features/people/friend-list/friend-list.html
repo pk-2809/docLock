@@ -83,14 +83,12 @@
 
                 <!-- Compact Interaction Card (appears below selected friend) -->
                 @if (selectedFriendId() === friend.uid && showInteractionCard()) {
-                <div [@expandCollapse] class="bg-blue-50 rounded-xl p-4 border border-indigo-200 shadow-sm">
+                <div [@expandCollapse] class="bg-blue-50 rounded-3xl p-4 border border-indigo-200 shadow-sm">
                     <div class="text-center mb-3">
-                        <h5 class="text-base font-bold text-slate-800 mb-1">Connect with {{ friend.name }}</h5>
                         <p class="text-xs text-slate-500">Send a request to share securely</p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-
 
                         <!-- Request Card -->
                         <button (click)="requestCard(friend)"
@@ -120,14 +118,6 @@
                                 </div>
                                 <h6 class="text-[10px] font-bold text-slate-600">Request Doc</h6>
                             </div>
-                        </button>
-                    </div>
-
-                    <!-- Close Button -->
-                    <div class="text-center mt-3">
-                        <button (click)="closeInteractionCard()"
-                            class="text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors">
-                            Close
                         </button>
                     </div>
                 </div>

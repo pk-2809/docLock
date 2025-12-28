@@ -7,46 +7,60 @@ import { DropdownComponent, DropdownOption } from '../../../shared/components/dr
 import { DocumentService, Document as SvcDocument, Folder as SvcFolder } from '../../../core/services/document';
 import { ToastService } from '../../../core/services/toast.service';
 import { AppConfigService } from '../../../core/services/app-config.service';
+import { forkJoin, timeout, finalize } from 'rxjs';
 
 // define local type that acts as union or extension for View
 export interface Document {
     id: string;
     name: string;
     type?: string;
-    size?: string;
-    date: Date;
-    icon: string;
-    color: string;
+    size?: number | string;
+    formattedSize?: string;
+    date?: Date;
+    createdAt?: Date;
+    icon?: string;
+    color?: string;
     category?: string;
     isFolder?: boolean;
     parentId?: string | null;
-    folderId?: string; // Service compatibility
+    folderId?: string;
+    mimeType?: string;
+    webViewLink?: string;
+    driveFileId?: string;
 }
 
 export interface Folder {
     id: string;
     name: string;
+    path: string;
     parentId?: string | null;
     icon?: string;
     color?: string;
+    itemCount?: number;
+    createdAt?: Date;
 }
 
-interface Card {
+export interface BreadcrumbItem {
+    id: string | null | 'root';
+    name: string;
+    path?: string;
+}
+
+export interface Card {
     id: string;
     name: string;
-    type: string; // 'debit' | 'credit'
+    type: string;
     number: string;
     expiryDate: string;
     cvv?: string;
     createdAt?: Date;
-    // Keep optional visual props if needed or remove
     color?: string;
 }
 
 @Component({
     selector: 'app-document-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule, BottomSheetComponent, DropdownComponent],
+    imports: [CommonModule, FormsModule, BottomSheetComponent, DropdownComponent],
     templateUrl: './document-list.html',
     styleUrl: './document-list.css'
 })
@@ -57,112 +71,81 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     private toastService = inject(ToastService);
     private cdr = inject(ChangeDetectorRef);
     private configService = inject(AppConfigService);
-    viewMode: 'home' | 'folders' | 'cards' | 'card-folder' | 'qrs' = 'home';
+    viewMode: 'home' | 'folders' | 'cards' | 'card-folder' | 'qrs' | 'list' | 'grid' = 'home';
     currentFolderId: string | null = null;
     currentCardFolder: 'debit' | 'credit' | null = null;
     searchQuery = '';
+    breadcrumbs: BreadcrumbItem[] = [{ id: 'root', name: 'My Documents', path: 'root' }];
 
-    // File Manager State
-    // currentFolderId: string | null = null; // Removed duplicate
-    breadcrumbs: { id: string | null; name: string }[] = [{ id: null, name: 'My Documents' }];
-    selectedCategory: string = 'all';
-    cards: Card[] = []; // Initialize cards array
+    // UI States
+    // UI States
+    isLoading = true;
+    isUploading = false;
 
-    // UI State
-    showFabMenu = false;
-    editingCard: Card | null = null;
-    newCardName = '';
-    newCardNumber = '';
-    newCardExpiry = '';
-    newCardCvv = '';
-    newCardType: 'debit' | 'credit' | 'Credit Card' | 'Debit Card' = 'debit';
-    showAddCardBottomSheet = false;
+    showCreateFolderModal = false;
+    showUploadModal = false;
+    showLocationDropdown = false;
+    newFolderName = '';
+    selectedLocationId: string | null = null;
+    selectedFile: File | null = null;
+    documentName = '';
+    showFabMenu = false; // FAB menu state
 
-    // Menu States
+    // Document Actions Menu State
     activeDocumentMenu: string | null = null;
     activeFolderMenu: string | null = null;
 
-    // Folder Edit State
+    // Folder Editing State
     editFolderId: string | null = null;
-    editFolderName: string = '';
+    editFolderName = '';
 
-    // Folders Local State (mock or real)
+    // Card related properties
+    showAddCardModal = false;
+    newCardName = '';
+    newCardNumber = '';
+    newCardExpiry = '';
+    newCardType = 'Credit Card';
+    newCardCvv = '';
+    editingCard: Card | null = null;
+    showAddCardBottomSheet = false;
+
+    // Auto-detected folder properties
+    public detectedIcon = 'folder';
+    public detectedColor = 'bg-slate-500';
+
+    // Start with empty folders - user creates everything
     folders: Folder[] = [];
 
-    categories = [
-        { id: 'all', name: 'All Documents', icon: '📁', count: 12 },
-        { id: 'passport', name: 'Passport', icon: '🛂', count: 2 },
-        { id: 'license', name: 'License', icon: '🪪', count: 3 },
-        { id: 'insurance', name: 'Insurance', icon: '🏥', count: 4 },
-        { id: 'other', name: 'Other', icon: '📄', count: 3 }
-    ];
-
+    // Missing stats object
     usageStats = {
-        qrUsed: 3,
-        qrLimit: 5,
-        cardsUsed: 4,
-        cardsLimit: 5,
-        storageUsed: 150, // MB
-        storageLimit: 200 // MB
+        storageUsed: 0,
+        storageLimit: 100,
+        qrUsed: 0,
+        qrLimit: 10,
+        cardsUsed: 0,
+        cardsLimit: 5
     };
 
-    get storagePercentage(): number {
-        return (this.usageStats.storageUsed / this.usageStats.storageLimit) * 100;
-    }
+    // Bottom Sheet Props
+    showFolderSheet = false;
+    showDocumentSheet = false;
+    newDocName = '';
+    selectedParentId: string | null = null;
+    folderOptions: DropdownOption[] = [];
+    previewIcon = '📁';
 
-    documents: Document[] = [
-        {
-            id: 'f1',
-            name: 'Work Projects',
-            date: new Date('2024-12-20'),
-            icon: '📁',
-            color: 'bg-indigo-100 text-indigo-600',
-            isFolder: true,
-            parentId: null
-        },
-        {
-            id: 'f2',
-            name: 'Personal Stuff',
-            date: new Date('2024-12-21'),
-            icon: '📁',
-            color: 'bg-rose-100 text-rose-600',
-            isFolder: true,
-            parentId: null
-        },
-        {
-            id: '1',
-            name: 'Passport.pdf',
-            type: 'PDF',
-            size: '2.4 MB',
-            date: new Date('2024-12-15'),
-            icon: '🛂',
-            color: 'from-blue-500 to-cyan-500',
-            category: 'passport',
-            parentId: null
-        },
-        {
-            id: '2',
-            name: 'Driver License.jpg',
-            type: 'JPG',
-            size: '1.8 MB',
-            date: new Date('2024-12-14'),
-            icon: '🪪',
-            color: 'from-green-500 to-teal-500',
-            category: 'license',
-            parentId: null
-        },
-        {
-            id: '101',
-            name: 'Project Specs.docx',
-            type: 'DOCX',
-            size: '1.2 MB',
-            date: new Date('2024-12-22'),
-            icon: '📄',
-            color: 'from-blue-500 to-cyan-500',
-            category: 'work',
-            parentId: 'f1'
-        }
-    ];
+    // Mock methods for bottom sheet actions
+    closeFolderSheet() { this.showFolderSheet = false; }
+    closeDocumentSheet() { this.showDocumentSheet = false; }
+    saveFolder() { this.createFolder(); } // Mapping old logic
+    saveDocument() { this.uploadDocument(); } // Mapping old logic
+    onFolderInput(e: any) { this.newFolderName = e.target.value; }
+
+    // Start with empty documents - user uploads everything
+    documents: Document[] = [];
+
+    // Start with empty cards - user adds everything
+    cards: Card[] = [];
 
     ngOnInit() {
         this.loadData();
@@ -177,107 +160,96 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
-    loadData() {
-        // Load folders and documents from service
-        // For now, we mix them into this.documents to support the existing view logic
-        // In a real app, strict separation is better, but this fixes the compilation.
-
-        this.documentService.getFolders().subscribe({
-            next: (res) => {
-                const mappedFolders = res.folders.map(f => ({
-                    ...f,
-                    type: 'folder',
-                    isFolder: true,
-                    date: new Date(f.createdAt),
-                    size: f.itemCount + ' items',
-                    parentId: f.parentId || null
-                })) as any as Document[];
-
-                this.documentService.getDocuments().subscribe({
-                    next: (resDocs) => {
-                        const mappedDocs = resDocs.documents.map(d => ({
-                            ...d,
-                            isFolder: false,
-                            date: d.createdAt ? new Date(d.createdAt) : new Date(),
-                            parentId: d.folderId || null,
-                            type: d.mimeType // or map mime to simple type
-                        })) as any as Document[];
-
-                        // Merge with existing mock data if you want, or replace. 
-                        // Replacing is safer for real app, but for "not compiling" fix we assume we want real data?
-                        // The existing mock data is hardcoded in `documents` property.
-                        // Let's APPEND to it or REPLACE it?
-                        // If we replace, we lose the nice mock examples.
-                        // Let's append for now to not break demo vibes if backend is empty.
-                        // this.documents = [...this.documents, ...mappedFolders, ...mappedDocs];
-
-                        // Actually, let's just log for now to avoid duplicates if ngOnInit calls this.
-                        // Optimally: this.documents = [...mappedFolders, ...mappedDocs];
-                    },
-                    error: (err: any) => console.error('Error loading docs', err)
-                });
-            },
-            error: (err: any) => console.error('Error loading folders', err)
-        });
-    }
-
-    updateFolderCountsRecursively(folderId: string | null, change: number) {
-        if (!folderId) return;
-        const folder = this.documents.find(d => d.id === folderId && d.isFolder);
-        if (folder) {
-            // folder.itemCount? 
-            // The local Document interface doesn't have itemCount. 
-            // We might store it in size string? "X items"
-            // Start simpler: just ignore or update if property exists.
-        }
-    }
-
-    detectFolderProperties(name: string): { icon: string, color: string } {
-        const lowerName = name.toLowerCase();
-        const match = this.ICON_CONFIG.find(c => c.keywords.some(k => lowerName.includes(k)));
-        return match ? { icon: match.icon, color: 'bg-indigo-100 text-indigo-600' } : { icon: '📁', color: 'bg-slate-100 text-slate-600' };
-    }
-    ngAfterViewInit() {
-        // Implementation for AfterViewInit
-    }
-
     ngOnDestroy() {
-        // Implementation for OnDestroy
+        // Cleanup if any
     }
 
-    get filteredDocuments(): Document[] {
-        // 1. Filter by Current Folder (Parent ID)
-        let filtered = this.documents.filter(doc => {
-            // Treat undefined parentId as null (root) for backward compatibility if needed, 
-            // but we explicitly set it now.
-            return doc.parentId === this.currentFolderId;
+    loadData() {
+        console.log('Starting loadData...');
+        this.isLoading = true;
+
+        forkJoin({
+            folders: this.documentService.getFolders(),
+            documents: this.documentService.getDocuments()
+        }).pipe(
+            timeout(10000), // Force timeout after 10 seconds
+            finalize(() => {
+                console.log('Finalize block executing. Setting isLoading = false');
+                this.isLoading = false;
+                this.cdr.detectChanges(); // Force UI update
+            })
+        ).subscribe({
+            next: (res) => {
+                console.log('Data received:', res);
+                try {
+                    // Process Folders
+                    if (res.folders && res.folders.folders) {
+                        this.folders = res.folders.folders.map((f: any) => ({
+                            ...f,
+                            createdAt: new Date(f.createdAt)
+                        }));
+                    } else {
+                        this.folders = [];
+                    }
+
+                    // Process Documents
+                    if (res.documents && res.documents.documents) {
+                        this.documents = res.documents.documents.map((d: any) => ({
+                            ...d,
+                            type: d.mimeType ? d.mimeType.split('/').pop()?.toUpperCase() : 'DOC',
+                            size: d.size || 0,
+                            formattedSize: d.size ? `${(d.size / (1024 * 1024)).toFixed(2)} MB` : '0 MB',
+                            date: d.createdAt ? new Date(d.createdAt) : new Date(),
+                            createdAt: d.createdAt ? new Date(d.createdAt) : new Date(),
+                            icon: 'document',
+                            color: 'bg-blue-500',
+                            folderId: d.folderId || undefined,
+                            parentId: d.folderId || null, // Map folderId to parentId for local logic
+                            isFolder: false
+                        }));
+                    } else {
+                        this.documents = [];
+                    }
+                } catch (e) {
+                    console.error('Error processing data:', e);
+                    this.toastService.showError('Error displaying data');
+                }
+            },
+            error: (err) => {
+                console.error('Error loading data', err);
+                this.toastService.showError('Failed to load data (Timeout or Error)');
+            }
         });
+    }
 
-        // 2. Filter by Category (if selected and not 'all')
-        if (this.selectedCategory !== 'all') {
-            filtered = filtered.filter(doc => doc.category === this.selectedCategory);
-        }
+    ngAfterViewInit() {
+        // Lifecycle hook
+    }
 
-        // 3. Filter by Search Query
+    get currentFolder(): Folder | null {
+        if (!this.currentFolderId) return null;
+        return this.folders.find(f => f.id === this.currentFolderId) || null;
+    }
+
+    // Previous breadcrumbs getter removed in favor of property
+
+    // Removed duplicate currentFolders getter here
+
+    get currentFolders(): Folder[] {
+        // Return folders in current view that match parentId
+        return this.documents.filter(d => d.isFolder && d.parentId === this.currentFolderId) as unknown as Folder[];
+    }
+
+    get currentDocuments(): Document[] {
+        // Filter documents by folderId/parentId
+        let filtered = this.documents.filter(doc => !doc.isFolder && (doc.parentId === this.currentFolderId || doc.folderId === this.currentFolderId));
+
         if (this.searchQuery) {
             filtered = filtered.filter(doc =>
                 doc.name.toLowerCase().includes(this.searchQuery.toLowerCase())
             );
         }
-
         return filtered;
-    }
-
-    get currentFolders(): Folder[] {
-        // Return folders in current view
-        // Adapt based on how you store folders. If strict separation:
-        // return this.folders.filter(f => f.parentId === this.currentFolderId);
-        // If mixed in 'documents' array with isFolder=true:
-        return this.documents.filter(d => d.isFolder && d.parentId === this.currentFolderId) as unknown as Folder[];
-    }
-
-    get currentDocuments(): Document[] {
-        return this.filteredDocuments.filter(d => !d.isFolder);
     }
 
     getTotalItemsCount(): number {
@@ -288,11 +260,15 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.showFabMenu = !this.showFabMenu;
     }
 
-    setViewMode(mode: 'home' | 'folders' | 'cards' | 'qrs' | 'grid' | 'list') {
-        this.viewMode = (mode === 'grid' || mode === 'list') ? 'folders' : mode;
-        // If grid/list used for layout toggle, handle it separately if needed.
-        // For now, mapping 'grid'/'list' to 'folders' to avoid error, 
-        // assuming the template handles layout via other means or this variable is just for view switching.
+    setViewMode(mode: 'home' | 'folders' | 'cards' | 'qrs' | 'list' | 'grid') {
+        this.viewMode = mode;
+        if (mode === 'home') {
+            this.currentFolderId = null;
+        } else if (mode === 'folders') {
+            this.currentFolderId = null;
+        }
+        // Handle cards and qrs views - for now they work like folders
+        // You can implement specific logic for cards and QRs later
     }
 
     openFolder(folderOrId: string | Document) {
@@ -312,7 +288,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         }, 100);
     }
 
-    navigateToBreadcrumb(item: { id: string | null, name: string } | number) {
+    navigateToBreadcrumb(item: BreadcrumbItem | number) {
         if (typeof item === 'number') {
             this.breadcrumbs = this.breadcrumbs.slice(0, item + 1);
             this.currentFolderId = this.breadcrumbs[item].id;
@@ -355,164 +331,371 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.searchQuery = event.target.value;
     }
 
-    // --- File Manager Navigation ---
+    // Intelligent folder icon and color detection
+    detectFolderProperties(folderName: string) {
+        const name = folderName.toLowerCase().trim();
 
-    // Removed duplicate openFolder and navigateToBreadcrumb methods
+        // Define keyword mappings for icons and colors
+        const folderMappings = [
+            // Identity Documents
+            {
+                keywords: ['id', 'ids', 'identity', 'passport', 'license', 'driving', 'voter', 'aadhaar', 'aadhar', 'pan', 'identification'],
+                icon: 'identification',
+                color: 'bg-blue-500'
+            },
+            // Education
+            {
+                keywords: ['education', 'school', 'college', 'university', 'marksheet', 'certificate', 'degree', 'diploma', 'academic', 'transcript', 'result'],
+                icon: 'academic-cap',
+                color: 'bg-emerald-500'
+            },
+            // Medical/Health
+            {
+                keywords: ['medical', 'health', 'hospital', 'doctor', 'prescription', 'report', 'test', 'medicine', 'healthcare', 'clinic'],
+                icon: 'heart',
+                color: 'bg-red-500'
+            },
+            // Banking/Finance
+            {
+                keywords: ['bank', 'banking', 'finance', 'financial', 'statement', 'loan', 'credit', 'debit', 'account', 'money', 'payment'],
+                icon: 'building-library',
+                color: 'bg-violet-500'
+            },
+            // Insurance
+            {
+                keywords: ['insurance', 'policy', 'claim', 'coverage', 'premium', 'life insurance', 'health insurance', 'car insurance'],
+                icon: 'shield-check',
+                color: 'bg-amber-500'
+            },
+            // Legal
+            {
+                keywords: ['legal', 'law', 'court', 'agreement', 'contract', 'will', 'property', 'deed', 'lawyer', 'attorney'],
+                icon: 'scale',
+                color: 'bg-slate-500'
+            },
+            // Work/Professional
+            {
+                keywords: ['work', 'job', 'office', 'professional', 'career', 'employment', 'company', 'business', 'corporate'],
+                icon: 'briefcase',
+                color: 'bg-indigo-500'
+            },
+            // Personal
+            {
+                keywords: ['personal', 'private', 'family', 'home', 'household', 'personal documents'],
+                icon: 'user',
+                color: 'bg-pink-500'
+            },
+            // Travel
+            {
+                keywords: ['travel', 'trip', 'vacation', 'flight', 'hotel', 'booking', 'ticket', 'visa', 'tourism'],
+                icon: 'airplane',
+                color: 'bg-sky-500'
+            },
+            // Tax
+            {
+                keywords: ['tax', 'taxes', 'income tax', 'return', 'filing', 'itr', 'tds', 'gst'],
+                icon: 'calculator',
+                color: 'bg-orange-500'
+            },
+            // Property/Real Estate
+            {
+                keywords: ['property', 'real estate', 'house', 'home', 'apartment', 'rent', 'lease', 'mortgage'],
+                icon: 'home',
+                color: 'bg-green-500'
+            },
+            // Vehicle
+            {
+                keywords: ['vehicle', 'car', 'bike', 'motorcycle', 'auto', 'registration', 'rc', 'vehicle documents'],
+                icon: 'truck',
+                color: 'bg-gray-500'
+            }
+        ];
 
-    navigateUp() {
-        if (this.breadcrumbs.length > 1) {
-            this.breadcrumbs.pop();
-            this.currentFolderId = this.breadcrumbs[this.breadcrumbs.length - 1].id;
+        // Find matching category
+        for (const mapping of folderMappings) {
+            if (mapping.keywords.some(keyword => name.includes(keyword))) {
+                this.detectedIcon = mapping.icon;
+                this.detectedColor = mapping.color;
+                return;
+            }
+        }
+
+        // Default fallback
+        this.detectedIcon = 'folder';
+        this.detectedColor = 'bg-slate-500';
+    }
+
+    // Called when user types in folder name input
+    onFolderNameChange(): void {
+        if (this.newFolderName.trim()) {
+            this.detectFolderProperties(this.newFolderName);
         } else {
-            // If at root, go back to Home Dashboard
-            this.setViewMode('home');
+            this.detectedIcon = 'folder';
+            this.detectedColor = 'bg-slate-500';
         }
     }
 
-    // --- Actions ---
-
-    // --- Smart Icon Configuration ---
-    readonly ICON_CONFIG = [
-        { icon: '💰', keywords: ['finance', 'money', 'tax', 'bank', 'bill'] },
-        { icon: '🏠', keywords: ['home', 'house', 'family', 'rent', 'lease'] },
-        { icon: '💼', keywords: ['work', 'job', 'office', 'project', 'client'] },
-        { icon: '📸', keywords: ['photo', 'pic', 'image', 'picture', 'shot'] },
-        { icon: '📄', keywords: ['doc', 'file', 'note', 'contract', 'agreement'] },
-        { icon: '✈️', keywords: ['travel', 'trip', 'flight', 'ticket', 'visa'] },
-        { icon: '🚗', keywords: ['car', 'vehicle', 'insurance', 'license'] },
-        { icon: '🏥', keywords: ['health', 'med', 'doctor', 'prescription'] },
-        { icon: '🎓', keywords: ['school', 'edu', 'course', 'study'] }
-    ];
-
-    // --- State ---
-    showFolderSheet = false;
-    showDocumentSheet = false;
-
-    newFolderName = '';
-    previewIcon = '📁';
-
-    newDocName = '';
-    selectedParentId: string | null = null;
-    selectedFile: File | null = null;
-
-    // --- Getters ---
-    get allFolders(): { id: string | null, name: string }[] {
-        const folders = this.documents
-            .filter(d => d.isFolder)
-            .map(f => ({ id: f.id, name: f.name }));
-        return [{ id: null, name: 'My Documents (Root)' }, ...folders];
-    }
-
-    get folderOptions(): DropdownOption[] {
-        return this.allFolders.map(f => ({ label: f.name, value: f.id }));
-    }
-
-    // --- Folder Sheet Methods ---
-    createFolder() {
-        this.openFolderSheet();
-    }
-
-    openFolderSheet() {
-        this.showFolderSheet = true;
+    // Modal functions
+    openCreateFolderModal() {
+        this.showCreateFolderModal = true;
         this.newFolderName = '';
-        this.previewIcon = '📁';
-        this.selectedParentId = this.currentFolderId;
+        this.selectedLocationId = this.currentFolderId; // Default to current location
+        this.showLocationDropdown = false;
+        this.showFabMenu = false; // Close FAB menu
+        // Reset detected properties
+        this.detectedIcon = 'folder';
+        this.detectedColor = 'bg-slate-500';
     }
 
-    closeFolderSheet() {
-        this.showFolderSheet = false;
+    closeCreateFolderModal() {
+        this.showCreateFolderModal = false;
+        this.newFolderName = '';
+        this.selectedLocationId = null;
+        this.showLocationDropdown = false;
+        // Reset detected properties
+        this.detectedIcon = 'folder';
+        this.detectedColor = 'bg-slate-500';
     }
 
-    onFolderInput(event: any) {
-        this.newFolderName = event.target.value;
-        this.updatePreviewIcon();
+    toggleLocationDropdown() {
+        this.showLocationDropdown = !this.showLocationDropdown;
     }
 
-    updatePreviewIcon() {
-        const name = this.newFolderName.toLowerCase();
-        const match = this.ICON_CONFIG.find(config =>
-            config.keywords.some(k => name.includes(k))
-        );
-        this.previewIcon = match ? match.icon : '📁';
+    selectLocation(locationId: string | null) {
+        this.selectedLocationId = locationId;
+        this.showLocationDropdown = false;
     }
 
-    saveFolder() {
-        if (!this.newFolderName) return;
+    getSelectedLocationPath(): string {
+        if (this.selectedLocationId === null) {
+            return 'My Documents (Root)';
+        }
 
-        const newFolder: Document = {
-            id: Date.now().toString(),
-            name: this.newFolderName,
-            date: new Date(),
-            icon: this.previewIcon,
-            color: 'bg-amber-100 text-amber-600',
-            isFolder: true,
-            parentId: this.selectedParentId
+        const folder = this.folders.find(f => f.id === this.selectedLocationId);
+        return folder ? folder.name : 'My Documents (Root)';
+    }
+
+    // OPTIMISTIC UPDATE
+    // But we need to update folderOptions as well when folder changes
+    updateFolderOptions() {
+        this.folderOptions = [
+            { label: 'My Documents (Root)', value: null },
+            ...this.folders.map(f => ({ label: f.name, value: f.id }))
+        ];
+    }
+
+    createFolder() {
+        if (!this.newFolderName.trim()) return;
+
+        const config = this.configService.config();
+        // Check nesting limit. Breadcrumbs usually include Root + ancestors + current. 
+        // If we are IN a folder, breadcrumbs has that folder. 
+        // If we create a SUB-folder, the depth increases.
+        // Approx depth = breadcrumbs.length (Root is 1, subfolder is 2...).
+        // User config: maxFolderNestingAllowed (e.g. 5).
+
+        // This is a rough check. If breadcrumbs has 'Root', 'A', 'B' (length 3), creating 'C' makes depth 4.
+        const currentDepth = this.breadcrumbs.length;
+
+        if (currentDepth >= config.maxFolderNestingAllowed) {
+            this.toastService.showError(`Max folder nesting (${config.maxFolderNestingAllowed}) reached.`);
+            return;
+        }
+
+        // OPTIMISTIC UPDATE
+        // 1. Create a temporary folder object
+        const tempId = 'temp-' + Date.now();
+        const tempFolder: any = {
+            id: tempId,
+            name: this.newFolderName.trim(),
+            icon: this.detectedIcon,
+            color: this.detectedColor,
+            parentId: this.selectedLocationId || this.currentFolderId,
+            itemCount: 0,
+            createdAt: new Date(),
+            isOptimistic: true
         };
-        this.documents.push(newFolder);
-        this.closeFolderSheet();
+
+        // 2. Add to array immediately
+        this.folders.push(tempFolder);
+
+        // Update parent folder count recursively
+        if (tempFolder.parentId) {
+            this.updateFolderCountsRecursively(tempFolder.parentId, 1);
+        }
+
+        this.closeCreateFolderModal();
+        this.toastService.showSuccess('Folder created!');
+
+        // 3. Perform actual API call
+        this.documentService.createFolder(
+            tempFolder.name,
+            tempFolder.parentId,
+            tempFolder.icon,
+            tempFolder.color
+        ).subscribe({
+            next: (res) => {
+                // 4. On success, update the temporary object with real ID and data
+                Object.assign(tempFolder, {
+                    ...res.folder,
+                    createdAt: new Date(res.folder.createdAt),
+                    isOptimistic: false
+                });
+            },
+            error: (err) => {
+                console.error('Create folder failed', err);
+                this.toastService.showError('Failed to create folder');
+                // 5. On error, remove the optimistic folder
+                this.folders = this.folders.filter(f => f.id !== tempId);
+                // Revert count
+                if (tempFolder.parentId) {
+                    this.updateFolderCountsRecursively(tempFolder.parentId, -1);
+                }
+            }
+        });
     }
 
-    // --- Document Sheet Methods ---
-    addDocument() {
-        this.openDocumentSheet();
-    }
-
-    openDocumentSheet() {
-        this.newDocName = '';
-        this.selectedParentId = this.currentFolderId || (this.allFolders.length === 1 ? 'root' : this.allFolders[0].id);
-        this.selectedFile = null; // Reset file
-        this.showDocumentSheet = true;
-    }
-
-    closeDocumentSheet() {
-        this.showDocumentSheet = false;
+    openUploadModal() {
+        this.showUploadModal = true;
         this.selectedFile = null;
+        this.documentName = '';
+        this.showFabMenu = false; // Close FAB menu
+    }
+
+    closeUploadModal() {
+        this.showUploadModal = false;
+        this.selectedFile = null;
+        this.documentName = '';
     }
 
     onFileSelected(event: any) {
         const file = event.target.files[0];
         if (file) {
             this.selectedFile = file;
-            // Always auto-fill name from file
-            const nameWithoutExt = file.name.split('.').slice(0, -1).join('.');
-            this.newDocName = nameWithoutExt;
+            this.documentName = file.name;
         }
     }
 
-    saveDocument() {
-        if (!this.selectedFile) {
-            // In a real app we might require a file, or allow scanning.
-            // For now, let's require it if we are "uploading".
-            // But if the user just wants to create a placeholder, maybe allow it?
-            // Let's assume for this "Upload" UI that a file is preferred but we fallback to mock.
+    uploadDocument() {
+        if (!this.selectedFile) return;
+
+        this.isUploading = true;
+        this.toastService.showSuccess(`Uploading ${this.selectedFile.name}...`);
+
+        // Pass currentFolderId (or null) as the target folder
+        const targetFolderId = this.currentFolderId;
+
+        this.documentService.uploadDocument(this.selectedFile, 'Personal', targetFolderId, this.documentName)
+            .pipe(
+                finalize(() => {
+                    this.isUploading = false;
+                    this.cdr.detectChanges();
+                })
+            )
+            .subscribe({
+                next: (res) => {
+                    this.toastService.showSuccess('Upload complete');
+                    // Add new doc to list
+                    const d = res.document;
+                    const newDoc = {
+                        ...d,
+                        type: d.mimeType ? d.mimeType.split('/').pop()?.toUpperCase() : 'DOC',
+                        size: d.size || 0,
+                        formattedSize: d.size ? `${(d.size / (1024 * 1024)).toFixed(2)} MB` : '0 MB',
+                        date: d.createdAt ? new Date(d.createdAt) : new Date(),
+                        icon: 'document',
+                        color: 'bg-blue-500',
+                        folderId: targetFolderId || undefined
+                    };
+
+                    this.documents.push(newDoc);
+
+                    // Update folder count recursively
+                    if (targetFolderId) {
+                        this.updateFolderCountsRecursively(targetFolderId, 1);
+                    }
+
+                    this.closeUploadModal();
+                },
+                error: (err) => {
+                    console.error('Upload failed', err);
+                    this.toastService.showError('Failed to upload document');
+                }
+            });
+    }
+
+    // Recursively update folder counts in the local state
+    updateFolderCountsRecursively(folderId: string, change: number) {
+        const folder = this.folders.find(f => f.id === folderId);
+        if (folder) {
+            folder.itemCount = (folder.itemCount || 0) + change;
+
+            // Recursively update parent
+            if (folder.parentId) {
+                this.updateFolderCountsRecursively(folder.parentId, change);
+            }
         }
-
-        const newDoc: Document = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: this.newDocName || (this.selectedFile ? this.selectedFile.name : 'New Document'),
-            type: this.selectedFile ? this.selectedFile.type : 'application/pdf',
-            size: this.selectedFile ? (this.selectedFile.size / 1024 / 1024).toFixed(2) + ' MB' : '0 MB',
-            date: new Date(),
-            icon: '📄', // Simple icon for now
-            color: 'bg-slate-100',
-            parentId: this.selectedParentId === 'root' ? null : this.selectedParentId
-        };
-
-        this.documents.push(newDoc);
-        this.closeDocumentSheet();
     }
 
     downloadDocument(doc: Document) {
-        console.log('Downloading:', doc.name);
+        this.toastService.showSuccess(`Downloading ${doc.name}...`);
+        this.documentService.downloadDocument(doc.id, doc.name).subscribe({
+            next: (blob: Blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = doc.name;
+                link.click();
+                window.URL.revokeObjectURL(url);
+                this.toastService.showSuccess('Download complete');
+            },
+            error: (err: any) => {
+                console.error('Download failed', err);
+                this.toastService.showError('Failed to download document');
+            }
+        });
     }
 
     shareDocument(doc: Document) {
-        console.log('Sharing:', doc.name);
+        if (doc.webViewLink) {
+            navigator.clipboard.writeText(doc.webViewLink);
+            this.toastService.showSuccess('Link copied to clipboard');
+        }
     }
 
     deleteDocument(doc: Document) {
-        console.log('Deleting:', doc.name);
-        this.documents = this.documents.filter(d => d.id !== doc.id);
+        const d = doc as any;
+        if (!d.driveFileId) {
+            this.toastService.showError('Cannot delete: Missing Drive ID');
+            return;
+        }
+
+        // OPTIMISTIC DELETE
+        const docToDelete = doc;
+        const index = this.documents.findIndex(i => i.id === doc.id);
+
+        // Remove immediately
+        if (index > -1) {
+            this.documents.splice(index, 1);
+            if (doc.folderId) {
+                this.updateFolderCountsRecursively(doc.folderId, -1);
+            }
+        }
+        this.toastService.showSuccess('Document deleted');
+
+        this.documentService.deleteDocument(d.id, d.driveFileId, 0).subscribe({
+            next: () => {
+                // Success
+            },
+            error: (err) => {
+                this.toastService.showError('Failed to delete document');
+                // Revert
+                this.documents.splice(index, 0, docToDelete);
+                if (doc.folderId) {
+                    this.updateFolderCountsRecursively(doc.folderId, 1);
+                }
+            }
+        });
     }
 
     deleteFolder(folder: Folder) {

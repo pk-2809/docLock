@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, QueryList, ViewChildren, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, QueryList, ViewChildren, ElementRef, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -32,7 +32,7 @@ export class OtpComponent implements OnChanges {
     otp: string[] = ['', '', '', '', '', ''];
 
     // Resend Logic
-    resendTimer = 30; // seconds
+    resendTimer = signal(30);
     canResend = false;
     resendAttempts = 0;
     maxResendAttempts = 3;
@@ -60,13 +60,14 @@ export class OtpComponent implements OnChanges {
     }
 
     startTimer() {
-        this.resendTimer = 30;
+        this.resendTimer.set(30);
         this.canResend = false;
         this.stopTimer(); // clear existing
 
         this.intervalId = setInterval(() => {
-            if (this.resendTimer > 0) {
-                this.resendTimer--;
+            const current = this.resendTimer();
+            if (current > 0) {
+                this.resendTimer.set(current - 1);
             } else {
                 this.canResend = true;
                 this.stopTimer();

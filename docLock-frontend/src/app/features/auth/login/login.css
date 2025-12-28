@@ -336,3 +336,88 @@ svg {
         height: 3px;
     }
 }
+/* Floating blob animations */
+.blob-float-1 {
+    animation: floatBlob1 6s ease-in-out infinite;
+}
+
+.blob-float-2 {
+    animation: floatBlob2 8s ease-in-out infinite;
+}
+
+.blob-float-3 {
+    animation: floatBlob3 7s ease-in-out infinite;
+}
+
+.blob-float-4 {
+    animation: floatBlob4 9s ease-in-out infinite;
+}
+
+.blob-float-5 {
+    animation: floatBlob5 5s ease-in-out infinite;
+}
+
+@keyframes floatBlob1 {
+    0%, 100% {
+        transform: translateY(0px) translateX(16px) rotate(0deg);
+    }
+    33% {
+        transform: translateY(-10px) translateX(20px) rotate(120deg);
+    }
+    66% {
+        transform: translateY(5px) translateX(12px) rotate(240deg);
+    }
+}
+
+@keyframes floatBlob2 {
+    0%, 100% {
+        transform: translateY(0px) translateX(-12px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-15px) translateX(-8px) rotate(180deg);
+    }
+}
+
+@keyframes floatBlob3 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-8px) rotate(90deg);
+    }
+    75% {
+        transform: translateY(8px) rotate(270deg);
+    }
+}
+
+@keyframes floatBlob4 {
+    0%, 100% {
+        transform: translateY(-20px) translateX(-20px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-25px) translateX(-15px) rotate(180deg);
+    }
+}
+
+@keyframes floatBlob5 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    40% {
+        transform: translateY(-12px) rotate(144deg);
+    }
+    80% {
+        transform: translateY(6px) rotate(288deg);
+    }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .blob-float-1,
+    .blob-float-2,
+    .blob-float-3,
+    .blob-float-4,
+    .blob-float-5 {
+        animation: none;
+    }
+}

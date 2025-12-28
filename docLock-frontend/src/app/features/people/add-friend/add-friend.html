@@ -1,11 +1,11 @@
-<div class="min-h-screen bg-gray-50 text-slate-900 p-6 relative flex flex-col">
-    <!-- Header (Matching Profile Style) -->
-    <header class="relative flex items-center justify-center mb-8 pt-4 shrink-0">
+<div class="min-h-screen bg-slate-50 text-slate-900 p-6 relative flex flex-col">
+    <!-- Header -->
+    <header class="relative flex items-center justify-center mb-12 pt-4 shrink-0">
         <!-- Back Button -->
         <a routerLink="/friends"
-            class="absolute left-0 w-12 h-12 rounded-[1.2rem] bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all hover:scale-105 active:scale-95 active:shadow-inner">
+            class="absolute left-0 w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all hover:scale-105 active:scale-95">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
             </svg>
         </a>
 
@@ -13,64 +13,47 @@
         <h1 class="text-2xl font-bold tracking-tight text-slate-800">Add Friend</h1>
     </header>
 
-    <!-- Center Card -->
-    <div class="flex-1 flex flex-col justify-start pb-20">
-        <div
-            class="bg-gradient-to-b from-indigo-500 to-violet-600 rounded-[2.5rem] p-8 py-10 shadow-[0_30px_60px_rgba(79,70,229,0.4)] animate-slide-in-up w-full max-w-sm mx-auto relative overflow-hidden">
-
-            <!-- Background Decoration -->
-            <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div class="absolute -top-24 -right-24 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-3xl"></div>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col justify-center pb-20 max-w-sm mx-auto w-full">
+        <!-- Icon -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 mx-auto mb-6 bg-[#ec4899] rounded-3xl flex items-center justify-center shadow-lg shadow-pink-500/25">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/>
+                </svg>
             </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Connect with People</h2>
+            <p class="text-slate-500 leading-relaxed">Paste a User ID or profile link below to add them to your secure circle.</p>
+        </div>
 
-            <div class="mb-10 text-center relative z-10">
-                <!-- Icon -->
-                <div
-                    class="w-24 h-24 rounded-[2rem] bg-white flex items-center justify-center text-indigo-600 mx-auto mb-6 shadow-lg shadow-black/10">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
-                        </path>
-                    </svg>
-                </div>
-
-                <!-- Headings -->
-                <h2 class="text-2xl font-bold text-white mb-3 tracking-tight">Connect with People</h2>
-                <p class="text-sm text-indigo-100 px-4 leading-relaxed font-medium">Paste a User ID or profile link
-                    below to
-                    add them to your secure
-                    circle.</p>
-            </div>
-
+        <!-- Form -->
+        <div class="space-y-6">
             <!-- Input -->
-            <div class="mb-6 relative z-10">
-                <label class="block text-[10px] font-bold text-indigo-200 uppercase tracking-widest mb-3 ml-1">Profile
-                    Link or ID</label>
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-3">Profile Link or ID</label>
                 <input type="text" [(ngModel)]="profileUrl" name="profileUrl" autocomplete="off" autocorrect="off"
                     autocapitalize="off" spellcheck="false" inputmode="text" (contextmenu)="$event.preventDefault()"
-                    class="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 text-white placeholder-indigo-200/50 focus:outline-none focus:border-white/50 focus:bg-white/20 transition-all font-mono text-sm shadow-inner backdrop-blur-sm"
+                    class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#ec4899] focus:ring-4 focus:ring-pink-500/10 transition-all font-mono text-sm"
                     placeholder="e.g. gV5I3sJf...">
                 @if (profileUrl && !isValidInput()) {
-                <p
-                    class="text-white/90 bg-red-500/80 rounded-lg px-2 py-1 inline-flex text-xs mt-2 font-medium items-center gap-1 shadow-sm backdrop-blur-md">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <p class="text-red-500 bg-red-50 rounded-lg px-3 py-2 inline-flex text-sm mt-3 font-medium items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            d="M12 9v3m0 3h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
                     </svg>
                     Invalid format
                 </p>
                 }
             </div>
 
-            <!-- Feedback -->
+            <!-- Feedback Messages -->
             @if (error()) {
-            <div
-                class="mb-6 p-4 rounded-2xl bg-red-500/20 border border-red-200/20 text-white text-sm flex items-center gap-3 animate-fade-in font-medium backdrop-blur-md relative z-10">
-                <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+            <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-3 animate-fade-in">
+                <div class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            d="M12 9v3m0 3h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
                     </svg>
                 </div>
                 {{ error() }}
@@ -78,25 +61,24 @@
             }
 
             @if (success()) {
-            <div
-                class="mb-6 p-4 rounded-2xl bg-emerald-500/20 border border-emerald-200/20 text-white text-sm flex items-center gap-3 animate-fade-in font-medium backdrop-blur-md relative z-10">
-                <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+            <div class="p-4 rounded-2xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-center gap-3 animate-fade-in">
+                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
                     </svg>
                 </div>
                 {{ success() }}
             </div>
             }
 
-            <!-- Action -->
+            <!-- Action Button -->
             <button (click)="initiateAddFriend()" [disabled]="isLoading() || !isValidInput()"
-                class="w-full h-14 rounded-2xl bg-white font-bold text-lg text-indigo-600 shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center relative overflow-hidden group z-10">
+                class="w-full h-14 rounded-2xl bg-[#ec4899] hover:bg-pink-600 text-white font-bold text-lg shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center relative overflow-hidden group">
                 @if (!isLoading()) {
                 <span class="relative">Add Friend</span>
                 }
                 @if (isLoading()) {
-                <div class="w-6 h-6 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                <div class="w-6 h-6 border-2 border-pink-200 border-t-white rounded-full animate-spin"></div>
                 }
             </button>
         </div>
@@ -105,7 +87,7 @@
     <!-- Confirmation Sheet -->
     @if (showConfirmation()) {
     <app-confirmation-sheet title="Found Them! ✨"
-        [message]="'You\'re about to add <span class=\'text-indigo-600 font-bold\'>' + (friendToConfirm()?.name || 'this user') + '</span> to your secure circle. Ready to start sharing?'"
+        [message]="'You\'re about to add <span class=\'text-[#ec4899] font-bold\'>' + (friendToConfirm()?.name || 'this user') + '</span> to your secure circle. Ready to start sharing?'"
         confirmText="Let's Connect" cancelText="Not yet" type="profile"
         [image]="friendToConfirm()?.profileImage || null" (confirm)="confirmAdd()" (cancel)="closeConfirmation()">
     </app-confirmation-sheet>

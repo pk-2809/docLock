@@ -4,6 +4,7 @@ import { Observable, tap, catchError, of, finalize, map, switchMap, throwError }
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, Auth } from 'firebase/auth';
 import { firebaseAuth } from './firebase';
 import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../services/app-config.service';
 
 export interface User {
   uid: string;
@@ -12,6 +13,8 @@ export interface User {
   role?: string;
   profileImage?: string;
   createdAt?: string;
+  storageUsed?: number;
+  documentsCount?: number;
 }
 
 @Injectable({
@@ -19,6 +22,7 @@ export interface User {
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private appConfigService = inject(AppConfigService);
 
   private auth = firebaseAuth;
   private confirmationResult: ConfirmationResult | undefined;
@@ -190,7 +194,10 @@ export class AuthService {
         this.isLoading.set(false);
         return throwError(() => err);
       }),
-      map(user => user!)
+      switchMap(user => {
+        // Load config after login
+        return this.appConfigService.loadConfig().then(() => user!);
+      })
     );
   }
 
@@ -209,7 +216,10 @@ export class AuthService {
         this.isLoading.set(false);
         return throwError(() => err);
       }),
-      map(user => user!)
+      switchMap(user => {
+        // Load config after signup
+        return this.appConfigService.loadConfig().then(() => user!);
+      })
     );
   }
 
@@ -221,6 +231,8 @@ export class AuthService {
       tap(response => {
         if (response.isLoggedIn && response.user) {
           this.user.set(response.user);
+          // Load config if session is active
+          this.appConfigService.loadConfig();
         } else {
           this.user.set(null);
         }
@@ -248,8 +260,12 @@ export class AuthService {
     );
   }
 
-  updateProfile(data: { mpin?: string; profileImage?: string; name?: string }): Observable<any> {
+  updateProfile(data: FormData | { mpin?: string; profileImage?: string; name?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/update-profile`, data, { withCredentials: true });
+  }
+
+  deleteAccount(): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete-account`, { withCredentials: true });
   }
 
   // Legacy/Deprecated methods - kept for backward compatibility

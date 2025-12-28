@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.routes';
 import peopleRoutes from './routes/people.routes';
 import notificationRoutes from './routes/notification.routes';
 import documentRoutes from './routes/document.routes';
+import configRoutes from './routes/config.routes';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -49,6 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/people', peopleRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/config', configRoutes);
 
 // Health Check
 app.get('/health', (_req: Request, res: Response) => {

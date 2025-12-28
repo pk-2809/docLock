@@ -1,1 +1,8 @@
 /* Clean slate for new list design - no custom masks needed */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

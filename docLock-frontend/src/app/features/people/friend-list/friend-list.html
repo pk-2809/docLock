@@ -10,7 +10,7 @@
         <a routerLink="/add-friend"
             class="group flex items-center justify-center w-10 h-10 bg-[#ec4899] hover:bg-pink-600 text-white rounded-2xl shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 transition-all hover:scale-105 active:scale-95">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
         </a>
     </header>
@@ -28,7 +28,8 @@
         <!-- Empty State -->
         @if (!isLoading() && friends().length === 0) {
         <div class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-            <div class="w-24 h-24 rounded-3xl bg-pink-100 shadow-sm flex items-center justify-center text-[#ec4899] mb-4">
+            <div
+                class="w-24 h-24 rounded-3xl bg-pink-100 shadow-sm flex items-center justify-center text-[#ec4899] mb-4">
                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
@@ -64,7 +65,8 @@
                         <!-- Text Details -->
                         <div class="flex flex-col">
                             <h4 class="font-bold text-base text-slate-800">{{ friend.name }}</h4>
-                            <p class="text-xs font-medium text-slate-400 mt-0.5">Added {{ friend.addedAt | date:'mediumDate'
+                            <p class="text-xs font-medium text-slate-400 mt-0.5">Added {{ friend.addedAt |
+                                date:'mediumDate'
                                 }}</p>
                         </div>
                     </div>
@@ -81,36 +83,42 @@
 
                 <!-- Compact Interaction Card (appears below selected friend) -->
                 @if (selectedFriendId() === friend.uid && showInteractionCard()) {
-                <div class="bg-blue-50 rounded-xl p-4 border border-indigo-200 shadow-sm animate-slide-down">
+                <div [@expandCollapse] class="bg-blue-50 rounded-xl p-4 border border-indigo-200 shadow-sm">
                     <div class="text-center mb-3">
                         <h5 class="text-base font-bold text-slate-800 mb-1">Connect with {{ friend.name }}</h5>
                         <p class="text-xs text-slate-500">Send a request to share securely</p>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-2">
+
+
                         <!-- Request Card -->
                         <button (click)="requestCard(friend)"
-                            class="group bg-white hover:bg-indigo-50 rounded-xl p-3 border border-indigo-100 hover:border-indigo-200 transition-all hover:scale-105 active:scale-95 shadow-sm">
+                            class="group bg-white hover:bg-slate-50 rounded-xl p-3 border border-slate-100 transition-all hover:scale-105 active:scale-95 shadow-sm">
                             <div class="text-center">
-                                <div class="w-8 h-8 mx-auto mb-2 bg-[#ec4899] group-hover:bg-pink-600 rounded-lg flex items-center justify-center text-white shadow-sm transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                                <div
+                                    class="w-6 h-6 mx-auto mb-2 text-[#ec4899] bg-pink-50 rounded-lg flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                                     </svg>
                                 </div>
-                                <h6 class="text-xs font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">Request Card</h6>
+                                <h6 class="text-[10px] font-bold text-slate-600">Request Card</h6>
                             </div>
                         </button>
 
                         <!-- Request Document -->
                         <button (click)="requestDocument(friend)"
-                            class="group bg-white hover:bg-indigo-50 rounded-xl p-3 border border-indigo-100 hover:border-indigo-200 transition-all hover:scale-105 active:scale-95 shadow-sm">
+                            class="group bg-white hover:bg-slate-50 rounded-xl p-3 border border-slate-100 transition-all hover:scale-105 active:scale-95 shadow-sm">
                             <div class="text-center">
-                                <div class="w-8 h-8 mx-auto mb-2 bg-[#3b82f6] group-hover:bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-sm transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                                <div
+                                    class="w-6 h-6 mx-auto mb-2 text-[#3b82f6] bg-blue-50 rounded-lg flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                     </svg>
                                 </div>
-                                <h6 class="text-xs font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">Request Doc</h6>
+                                <h6 class="text-[10px] font-bold text-slate-600">Request Doc</h6>
                             </div>
                         </button>
                     </div>
@@ -137,5 +145,50 @@
         confirmText="Yes, Remove" cancelText="Cancel" type="danger" [isLoading]="isDeleting()"
         (confirm)="onDeleteConfirmed()" (cancel)="closeConfirmation()">
     </app-confirmation-sheet>
+    }
+
+    <!-- Request Input Sheet -->
+    @if (showRequestSheet()) {
+    <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" (click)="closeRequestSheet()">
+        </div>
+
+        <!-- Sheet -->
+        <div
+            class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden relative animate-slide-up flex flex-col">
+
+            <!-- Header -->
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-slate-800">Request {{ requestType() | titlecase }}</h3>
+                <button (click)="closeRequestSheet()" class="p-2 rounded-full hover:bg-slate-100 text-slate-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">What are you looking for?</label>
+                    <input type="text" [(ngModel)]="requestQuery"
+                        [placeholder]="'e.g. ' + (requestType() === 'document' ? 'Passport, Insurance Policy' : 'Credit Card, ID Card')"
+                        class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 font-bold placeholder:font-normal focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none">
+                    <p class="text-xs text-slate-400 mt-2 px-1">Your friend will receive a notification to share this
+                        item.</p>
+                </div>
+
+                <button (click)="sendRequestItem()" [disabled]="!requestQuery().trim() || isRequesting()"
+                    class="w-full py-4 rounded-2xl bg-[#ec4899] disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold shadow-lg shadow-pink-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-2">
+                    @if (isRequesting()) {
+                    <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    }
+                    Send Request
+                </button>
+            </div>
+        </div>
+    </div>
     }
 </div>

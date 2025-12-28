@@ -3,14 +3,29 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PeopleService } from '../../../core/people/people.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { FormsModule } from '@angular/forms';
 import { ConfirmationSheetComponent } from '../../../shared/components/confirmation-sheet/confirmation-sheet';
+import { trigger, state, style, transition, animate } from '@angular/animations';
+// Removed DocumentService/CardService logic from here as it is moved to Fulfillment Flow (Notifications)
 
 @Component({
     selector: 'app-friend-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ConfirmationSheetComponent],
+    imports: [CommonModule, RouterLink, ConfirmationSheetComponent, FormsModule],
     templateUrl: './friend-list.html',
-    styleUrl: './friend-list.css'
+    styleUrl: './friend-list.css',
+    animations: [
+        trigger('expandCollapse', [
+            transition(':enter', [
+                style({ height: '0px', opacity: 0, overflow: 'hidden' }),
+                animate('300ms ease-out', style({ height: '*', opacity: 1 }))
+            ]),
+            transition(':leave', [
+                style({ height: '*', opacity: 1, overflow: 'hidden' }),
+                animate('300ms ease-in', style({ height: '0px', opacity: 0 }))
+            ])
+        ])
+    ]
 })
 export class FriendListComponent implements OnInit {
     peopleService = inject(PeopleService);
@@ -88,13 +103,11 @@ export class FriendListComponent implements OnInit {
     }
 
     requestCard(friend: any) {
-        this.toastService.showSuccess(`Card request sent to ${friend.name}`);
-        this.closeInteractionCard();
+        this.openRequestSheet(friend, 'card');
     }
 
     requestDocument(friend: any) {
-        this.toastService.showSuccess(`Document request sent to ${friend.name}`);
-        this.closeInteractionCard();
+        this.openRequestSheet(friend, 'document');
     }
 
     closeInteractionCard() {
@@ -106,5 +119,46 @@ export class FriendListComponent implements OnInit {
         const friendId = this.selectedFriendId();
         if (!friendId) return null;
         return this.friends().find(f => f.uid === friendId) || null;
+    }
+
+    // Request Functionality
+    showRequestSheet = signal(false);
+    requestType = signal<'document' | 'card'>('document');
+    requestQuery = signal('');
+    isRequesting = signal(false);
+
+    openRequestSheet(friend: any, type: 'document' | 'card') {
+        this.selectedFriendId.set(friend.uid);
+        this.requestType.set(type);
+        this.showRequestSheet.set(true);
+        this.closeInteractionCard();
+    }
+
+    closeRequestSheet() {
+        this.showRequestSheet.set(false);
+        this.requestQuery.set('');
+        this.isRequesting.set(false);
+    }
+
+    sendRequestItem() {
+        const friendId = this.selectedFriendId();
+        const type = this.requestType();
+        const name = this.requestQuery();
+
+        if (!friendId || !name.trim()) return;
+
+        this.isRequesting.set(true);
+        this.peopleService.requestItem(friendId, type, name).subscribe({
+            next: () => {
+                this.toastService.showSuccess(`Requested ${type} successfully`);
+                this.isRequesting.set(false);
+                this.closeRequestSheet();
+            },
+            error: (err) => {
+                console.error(err);
+                this.toastService.showError('Failed to send request');
+                this.isRequesting.set(false);
+            }
+        });
     }
 }

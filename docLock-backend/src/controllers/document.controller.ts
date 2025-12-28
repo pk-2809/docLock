@@ -96,6 +96,17 @@ export class DocumentController {
         res.json({ status: 'success', documents });
     });
 
+    static getCards = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const sessionCookie = req.cookies.session || '';
+        if (!sessionCookie) throw new CustomError('Unauthorized', 401);
+
+        const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
+        if (!decodedClaims) throw new CustomError('Unauthorized', 401);
+
+        const cards = await FirebaseService.getCards(decodedClaims.uid);
+        res.json({ status: 'success', cards });
+    });
+
     static deleteDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const sessionCookie = req.cookies.session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
@@ -160,6 +171,23 @@ export class DocumentController {
 
         const folders = await FirebaseService.getFolders(decodedClaims.uid);
         res.json({ status: 'success', folders });
+    });
+
+    static updateFolder = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const sessionCookie = req.cookies.session || '';
+        if (!sessionCookie) throw new CustomError('Unauthorized', 401);
+
+        const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
+        if (!decodedClaims) throw new CustomError('Unauthorized', 401);
+
+        const { id } = req.params;
+        const { name } = req.body;
+
+        if (!name) throw new CustomError('Folder name is required', 400);
+
+        await FirebaseService.updateFolder(decodedClaims.uid, id, { name });
+
+        res.json({ status: 'success', message: 'Folder updated' });
     });
 
     static deleteFolder = asyncHandler(async (req: Request, res: Response): Promise<void> => {

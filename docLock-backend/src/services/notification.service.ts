@@ -4,6 +4,7 @@ export interface NotificationPayload {
     title: string;
     message: string;
     icon: 'lock' | 'user' | 'bell' | 'trash'; // restricted icon set for UI mapping
+    metadata?: any; // For actionable notifications (e.g., links, dynamic actions)
 }
 
 export class NotificationService {
@@ -22,7 +23,9 @@ export class NotificationService {
                 title: payload.title,
                 message: payload.message,
                 icon: payload.icon,
+                metadata: payload.metadata || null,
                 read: false,
+
                 createdAt: new Date().toISOString(),
                 // Timestamp for sorting
                 timestamp: Date.now()

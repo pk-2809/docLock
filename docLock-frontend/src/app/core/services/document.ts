@@ -87,4 +87,8 @@ export class DocumentService {
     deleteFolder(id: string): Observable<any> {
         return this.http.delete(`${this.apiUrl}/folder/${id}`, { withCredentials: true });
     }
+
+    updateFolder(id: string, name: string): Observable<any> {
+        return this.http.put(`${this.apiUrl}/folder/${id}`, { name }, { withCredentials: true });
+    }
 }

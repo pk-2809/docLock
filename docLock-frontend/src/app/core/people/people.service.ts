@@ -54,4 +54,12 @@ export class PeopleService {
                 })
             );
     }
+
+    shareItem(recipientUid: string, itemId: string, type: 'document' | 'card'): Observable<any> {
+        return this.http.post(`${this.apiUrl}/api/people/share`, { recipientUid, itemId, type }, { withCredentials: true });
+    }
+
+    requestItem(recipientUid: string, itemType: 'document' | 'card', itemName: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/api/people/request`, { recipientUid, itemType, itemName }, { withCredentials: true });
+    }
 }

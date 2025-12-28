@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -54,6 +54,11 @@ export class DocumentListComponent implements OnInit, OnDestroy {
 
     // Document Actions Menu State
     activeDocumentMenu: string | null = null;
+    activeFolderMenu: string | null = null;
+
+    // Folder Editing State
+    editFolderId: string | null = null;
+    editFolderName = '';
 
     // Card related properties
     showAddCardModal = false;
@@ -760,5 +765,88 @@ export class DocumentListComponent implements OnInit, OnDestroy {
 
     closeDocumentMenu() {
         this.activeDocumentMenu = null;
+    }
+
+    // Folder Actions Menu Methods
+    toggleFolderMenu(folderId: string) {
+        this.activeFolderMenu = this.activeFolderMenu === folderId ? null : folderId;
+        this.activeDocumentMenu = null; // Close other menus
+    }
+
+    closeFolderMenu() {
+        this.activeFolderMenu = null;
+    }
+
+    // Folder Editing Methods
+    startEditFolder(folder: Folder) {
+        this.editFolderId = folder.id;
+        this.editFolderName = folder.name;
+        this.closeFolderMenu();
+        // Focus input logic can be handled in template with autofocus or directive, 
+        // or a simple specific timeout here if needed, but standard input usually suffices.
+    }
+
+    cancelEditFolder() {
+        this.editFolderId = null;
+        this.editFolderName = '';
+    }
+
+    saveEditFolder(folder: Folder) {
+        if (!this.editFolderName.trim() || this.editFolderName.trim() === folder.name) {
+            this.cancelEditFolder();
+            return;
+        }
+
+        const newName = this.editFolderName.trim();
+        const originalName = folder.name;
+
+        // Optimistic Update
+        const targetFolder = this.folders.find(f => f.id === folder.id);
+        if (targetFolder) {
+            targetFolder.name = newName;
+            this.detectFolderProperties(newName); // Update icon/color? Maybe keep original? 
+            // Re-evaluating icon/color on rename is nice:
+            if (targetFolder.icon === 'folder') { // Only update if it was default
+                // Actually let's just update perfectly
+                // We need to run detection logic but it relies on 'this' state.
+                // Let's just update name for now.
+            }
+        }
+        this.editFolderId = null;
+        this.toastService.showSuccess('Folder renamed');
+
+        this.documentService.updateFolder(folder.id, newName).subscribe({
+            next: () => {
+                // Success
+            },
+            error: (err) => {
+                this.toastService.showError('Failed to rename folder');
+                if (targetFolder) targetFolder.name = originalName; // Revert
+            }
+        });
+    }
+
+    // Close menus on click outside
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: MouseEvent) {
+        const target = event.target as HTMLElement;
+
+        // Check if click is inside a menu or a toggle button
+        if (target.closest('button') && (target.closest('button')?.getAttribute('click-stop-propagation'))) {
+            return;
+        }
+
+        // We use stopPropagation in templates for toggles, so if it reaches here, it's outside.
+        // But HostListener catches everything bubbling up.
+        // We rely on the fact that existing toggles use $event.stopPropagation().
+        // So this triggers only if propagation wasn't stopped.
+        // Wait, if I put $event.stopPropagation() on the button, this HostListener (on document) WON'T receive it?
+        // NO, document listener receives it in Capture phase or Bubble phase? 
+        // Angular HostListener defaults to bubbling. If stopped below, it won't reach here?
+        // Correct. So simpler logic: Just close everything here.
+        // If a button was clicked and it stopped propagation, this won't fire.
+
+        this.closeDocumentMenu();
+        this.closeFolderMenu();
     }
 }

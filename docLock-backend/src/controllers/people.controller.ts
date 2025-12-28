@@ -144,3 +144,104 @@ export const deleteFriend = async (req: AuthRequest, res: Response): Promise<voi
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+const shareItemSchema = z.object({
+    recipientUid: z.string().min(1),
+    itemId: z.string().min(1),
+    type: z.enum(['document', 'card'])
+});
+
+import { FirebaseService } from '../services/firebase.service';
+
+export const shareItem = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { recipientUid, itemId, type } = shareItemSchema.parse(req.body);
+        const currentUserId = req.user?.uid;
+
+        if (!currentUserId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+
+        // Verify recipient exists first? (FirebaseService handles some checks, but good to check friendship?)
+        // Assuming you can only share with friends.
+        // Check friendship:
+        const friendCheck = await db.collection('users').doc(currentUserId).collection('friends').doc(recipientUid).get();
+        if (!friendCheck.exists) {
+            res.status(403).json({ error: 'You can only share with friends' });
+            return;
+        }
+
+        await FirebaseService.shareItem(currentUserId, recipientUid, itemId, type);
+
+        // Notify Recipient
+        await NotificationService.createNotification(recipientUid, {
+            title: 'New Shared Item',
+            message: `A friend shared a ${type} with you. Check your Shared folder.`,
+            icon: 'bell' // Generic icon for now to satisfy type
+        });
+
+        res.status(200).json({ message: 'Item shared successfully' });
+
+    } catch (error) {
+        if (error instanceof ZodError) {
+            res.status(400).json({ error: (error as any).errors });
+        } else {
+            console.error('Share Item Error:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+};
+const requestItemSchema = z.object({
+    recipientUid: z.string().min(1),
+    itemType: z.enum(['document', 'card']),
+    itemName: z.string().min(1)
+});
+
+export const requestItem = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { recipientUid, itemType, itemName } = requestItemSchema.parse(req.body);
+        const currentUserId = req.user?.uid;
+
+        if (!currentUserId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+
+        // Check friendship
+        const friendCheck = await db.collection('users').doc(currentUserId).collection('friends').doc(recipientUid).get();
+        if (!friendCheck.exists) {
+            res.status(403).json({ error: 'You can only request items from friends' });
+            return;
+        }
+
+        // Get Requester Name (for notification)
+        const requesterDoc = await db.collection('users').doc(currentUserId).get();
+        const requesterName = requesterDoc.data()?.name || 'A friend';
+
+        // Notify Recipient
+        await NotificationService.createNotification(recipientUid, {
+            title: 'New Request',
+            message: `${requesterName} is requesting "${itemName}" (${itemType}). Tap to respond.`,
+            icon: 'bell',
+            metadata: {
+                type: 'request',
+                requesterId: currentUserId,
+                requesterName: requesterName,
+                itemType: itemType,
+                itemName: itemName,
+                status: 'pending'
+            }
+        });
+
+        res.status(200).json({ message: 'Request sent successfully' });
+
+    } catch (error) {
+        if (error instanceof ZodError) {
+            res.status(400).json({ error: (error as any).errors });
+        } else {
+            console.error('Request Item Error:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+};

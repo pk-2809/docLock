@@ -1,32 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DocumentService } from '../../../core/services/document';
+import { DocumentService, Document, Folder } from '../../../core/services/document';
 import { ToastService } from '../../../core/services/toast.service';
-
-interface Folder {
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-    parentId: string | null;
-    itemCount: number;
-    createdAt: Date;
-}
-
-interface Document {
-    id: string;
-    name: string;
-    type: string;
-    size: string;
-    date: Date;
-    icon: string;
-    color: string;
-    folderId: string | null; // Allow null for root-level documents
-    url?: string;
-    webViewLink?: string; // For sharing
-}
+import { forkJoin, finalize, timeout } from 'rxjs'; // Import forkJoin, finalize, timeout
+import { ChangeDetectorRef } from '@angular/core';
 
 interface Card {
     id: string;
@@ -46,17 +25,24 @@ interface BreadcrumbItem {
 @Component({
     selector: 'app-document-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule],
+    imports: [CommonModule, FormsModule],
     templateUrl: './document-list.html',
     styleUrl: './document-list.css'
 })
-export class DocumentListComponent implements OnInit {
+export class DocumentListComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private documentService = inject(DocumentService);
     private toastService = inject(ToastService);
+    private cdr = inject(ChangeDetectorRef);
     viewMode: 'home' | 'folders' | 'cards' | 'qrs' = 'home';
     currentFolderId: string | null = null;
     searchQuery = '';
+
+    // UI States
+    // UI States
+    isLoading = true;
+    isUploading = false;
+
     showCreateFolderModal = false;
     showUploadModal = false;
     showLocationDropdown = false;
@@ -87,12 +73,76 @@ export class DocumentListComponent implements OnInit {
     cards: Card[] = [];
 
     ngOnInit() {
+        this.loadData();
+
         // Check for query parameters to set initial view mode
         this.route.queryParams.subscribe(params => {
             if (params['view'] === 'cards') {
                 this.viewMode = 'cards';
             } else if (params['view'] === 'qrs') {
                 this.viewMode = 'qrs';
+            }
+        });
+
+        // Global Guard removed to prevent blocking valid interactions.
+        // We will handle specific input behavior in the template handlers.
+    }
+
+    ngOnDestroy() {
+        // Cleanup if any
+    }
+
+    loadData() {
+        console.log('Starting loadData...');
+        this.isLoading = true;
+
+        forkJoin({
+            folders: this.documentService.getFolders(),
+            documents: this.documentService.getDocuments()
+        }).pipe(
+            timeout(10000), // Force timeout after 10 seconds
+            finalize(() => {
+                console.log('Finalize block executing. Setting isLoading = false');
+                this.isLoading = false;
+                this.cdr.detectChanges(); // Force UI update
+            })
+        ).subscribe({
+            next: (res) => {
+                console.log('Data received:', res);
+                try {
+                    // Process Folders
+                    if (res.folders && res.folders.folders) {
+                        this.folders = res.folders.folders.map(f => ({
+                            ...f,
+                            createdAt: new Date(f.createdAt) as any
+                        })) as any;
+                    } else {
+                        this.folders = [];
+                    }
+
+                    // Process Documents
+                    if (res.documents && res.documents.documents) {
+                        this.documents = res.documents.documents.map(d => ({
+                            ...d,
+                            type: d.mimeType ? d.mimeType.split('/').pop()?.toUpperCase() : 'DOC',
+                            size: d.size || 0,
+                            formattedSize: d.size ? `${(d.size / (1024 * 1024)).toFixed(2)} MB` : '0 MB',
+                            date: d.createdAt ? new Date(d.createdAt) : new Date(),
+                            icon: 'document',
+                            color: 'bg-blue-500',
+                            folderId: d.folderId || undefined
+                        }));
+                    } else {
+                        this.documents = [];
+                    }
+                } catch (e) {
+                    console.error('Error processing data:', e);
+                    this.toastService.showError('Error displaying data');
+                }
+            },
+            error: (err) => {
+                console.error('Error loading data', err);
+                this.toastService.showError('Failed to load data (Timeout or Error)');
             }
         });
     }
@@ -142,14 +192,16 @@ export class DocumentListComponent implements OnInit {
     get totalStats() {
         const totalDocs = this.documents.length;
         const totalSize = this.documents.reduce((acc, doc) => {
-            const size = parseFloat(doc.size.replace(/[^\d.]/g, ''));
-            return acc + size;
+            return acc + (doc.size || 0);
         }, 0);
+
+        // Convert to MB
+        const totalSizeMB = totalSize / (1024 * 1024);
 
         return {
             documents: totalDocs,
             folders: this.folders.length,
-            size: `${totalSize.toFixed(1)}MB`
+            size: `${totalSizeMB.toFixed(1)}MB`
         };
     }
 
@@ -367,19 +419,57 @@ export class DocumentListComponent implements OnInit {
     createFolder() {
         if (!this.newFolderName.trim()) return;
 
-        // Use detected icon and color
-        const newFolder: Folder = {
-            id: Date.now().toString(),
+        // OPTIMISTIC UPDATE
+        // 1. Create a temporary folder object
+        const tempId = 'temp-' + Date.now();
+        const tempFolder: any = {
+            id: tempId,
             name: this.newFolderName.trim(),
             icon: this.detectedIcon,
             color: this.detectedColor,
-            parentId: this.selectedLocationId,
+            parentId: this.selectedLocationId || this.currentFolderId,
             itemCount: 0,
-            createdAt: new Date()
+            createdAt: new Date(),
+            isOptimistic: true
         };
 
-        this.folders.push(newFolder);
+        // 2. Add to array immediately
+        this.folders.push(tempFolder);
+
+        // Update parent folder count recursively
+        if (tempFolder.parentId) {
+            this.updateFolderCountsRecursively(tempFolder.parentId, 1);
+        }
+
         this.closeCreateFolderModal();
+        this.toastService.showSuccess('Folder created!');
+
+        // 3. Perform actual API call
+        this.documentService.createFolder(
+            tempFolder.name,
+            tempFolder.parentId,
+            tempFolder.icon,
+            tempFolder.color
+        ).subscribe({
+            next: (res) => {
+                // 4. On success, update the temporary object with real ID and data
+                Object.assign(tempFolder, {
+                    ...res.folder,
+                    createdAt: new Date(res.folder.createdAt),
+                    isOptimistic: false
+                });
+            },
+            error: (err) => {
+                console.error('Create folder failed', err);
+                this.toastService.showError('Failed to create folder');
+                // 5. On error, remove the optimistic folder
+                this.folders = this.folders.filter(f => f.id !== tempId);
+                // Revert count
+                if (tempFolder.parentId) {
+                    this.updateFolderCountsRecursively(tempFolder.parentId, -1);
+                }
+            }
+        });
     }
 
     openUploadModal() {
@@ -406,28 +496,62 @@ export class DocumentListComponent implements OnInit {
     uploadDocument() {
         if (!this.selectedFile) return;
 
-        const newDocument: Document = {
-            id: Date.now().toString(),
-            name: this.documentName || this.selectedFile.name,
-            type: this.selectedFile.type.split('/')[1].toUpperCase(),
-            size: `${(this.selectedFile.size / (1024 * 1024)).toFixed(1)} MB`,
-            date: new Date(),
-            icon: 'document',
-            color: 'bg-blue-500',
-            folderId: this.currentFolderId // Can be null for root level
-        };
+        this.isUploading = true;
+        this.toastService.showSuccess(`Uploading ${this.selectedFile.name}...`);
 
-        this.documents.push(newDocument);
+        // Pass currentFolderId (or null) as the target folder
+        const targetFolderId = this.currentFolderId;
 
-        // Update folder item count if uploading to a folder
-        if (this.currentFolderId) {
-            const folder = this.folders.find(f => f.id === this.currentFolderId);
-            if (folder) {
-                folder.itemCount++;
+        this.documentService.uploadDocument(this.selectedFile, 'Personal', targetFolderId, this.documentName)
+            .pipe(
+                finalize(() => {
+                    this.isUploading = false;
+                    this.cdr.detectChanges();
+                })
+            )
+            .subscribe({
+                next: (res) => {
+                    this.toastService.showSuccess('Upload complete');
+                    // Add new doc to list
+                    const d = res.document;
+                    const newDoc = {
+                        ...d,
+                        type: d.mimeType ? d.mimeType.split('/').pop()?.toUpperCase() : 'DOC',
+                        size: d.size || 0,
+                        formattedSize: d.size ? `${(d.size / (1024 * 1024)).toFixed(2)} MB` : '0 MB',
+                        date: d.createdAt ? new Date(d.createdAt) : new Date(),
+                        icon: 'document',
+                        color: 'bg-blue-500',
+                        folderId: targetFolderId || undefined
+                    };
+
+                    this.documents.push(newDoc);
+
+                    // Update folder count recursively
+                    if (targetFolderId) {
+                        this.updateFolderCountsRecursively(targetFolderId, 1);
+                    }
+
+                    this.closeUploadModal();
+                },
+                error: (err) => {
+                    console.error('Upload failed', err);
+                    this.toastService.showError('Failed to upload document');
+                }
+            });
+    }
+
+    // Recursively update folder counts in the local state
+    updateFolderCountsRecursively(folderId: string, change: number) {
+        const folder = this.folders.find(f => f.id === folderId);
+        if (folder) {
+            folder.itemCount = (folder.itemCount || 0) + change;
+
+            // Recursively update parent
+            if (folder.parentId) {
+                this.updateFolderCountsRecursively(folder.parentId, change);
             }
         }
-
-        this.closeUploadModal();
     }
 
     downloadDocument(doc: Document) {
@@ -457,27 +581,71 @@ export class DocumentListComponent implements OnInit {
     }
 
     deleteDocument(doc: Document) {
-        const index = this.documents.findIndex(d => d.id === doc.id);
+        const d = doc as any;
+        if (!d.driveFileId) {
+            this.toastService.showError('Cannot delete: Missing Drive ID');
+            return;
+        }
+
+        // OPTIMISTIC DELETE
+        const docToDelete = doc;
+        const index = this.documents.findIndex(i => i.id === doc.id);
+
+        // Remove immediately
         if (index > -1) {
             this.documents.splice(index, 1);
-
-            // Update folder item count
-            const folder = this.folders.find(f => f.id === doc.folderId);
-            if (folder && folder.itemCount > 0) {
-                folder.itemCount--;
+            if (doc.folderId) {
+                this.updateFolderCountsRecursively(doc.folderId, -1);
             }
         }
+        this.toastService.showSuccess('Document deleted');
+
+        this.documentService.deleteDocument(d.id, d.driveFileId, 0).subscribe({
+            next: () => {
+                // Success
+            },
+            error: (err) => {
+                this.toastService.showError('Failed to delete document');
+                // Revert
+                this.documents.splice(index, 0, docToDelete);
+                if (doc.folderId) {
+                    this.updateFolderCountsRecursively(doc.folderId, 1);
+                }
+            }
+        });
     }
 
     deleteFolder(folder: Folder) {
-        // Delete all documents in the folder
+        // OPTIMISTIC DELETE
+        const folderToDelete = folder;
+        const relatedDocs = this.documents.filter(doc => doc.folderId === folder.id);
+
+        // Remove immediately from UI
+        this.folders = this.folders.filter(f => f.id !== folder.id);
         this.documents = this.documents.filter(doc => doc.folderId !== folder.id);
 
-        // Delete the folder
-        const index = this.folders.findIndex(f => f.id === folder.id);
-        if (index > -1) {
-            this.folders.splice(index, 1);
+        // Update parent count recursively
+        if (folder.parentId) {
+            this.updateFolderCountsRecursively(folder.parentId, -1);
         }
+
+        this.toastService.showSuccess('Folder deleted');
+
+        this.documentService.deleteFolder(folder.id).subscribe({
+            next: () => {
+                // Success
+            },
+            error: (err) => {
+                this.toastService.showError('Failed to delete folder');
+                // Revert
+                this.folders.push(folderToDelete);
+                this.documents.push(...relatedDocs);
+                // Revert count
+                if (folder.parentId) {
+                    this.updateFolderCountsRecursively(folder.parentId, 1);
+                }
+            }
+        });
     }
 
     getIconSvg(iconName: string): string {
@@ -491,7 +659,7 @@ export class DocumentListComponent implements OnInit {
             'briefcase': 'M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z',
             'user': 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
             'airplane': 'M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25V13.5a2.25 2.25 0 00-2.25-2.25H15a3 3 0 01-3-3V5.25a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v1.5z',
-            'calculator': 'M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008V18H8.25v-.008zM12 13.5h.008v.008H12V13.5zm0 2.25h.008v.008H12v-.008zm0 2.25h.008V18H12v-.008zM15.75 13.5h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zM6 7.5h12A1.5 1.5 0 0119.5 9v10.5a1.5 1.5 0 01-1.5 1.5H6a1.5 1.5 0 01-1.5-1.5V9A1.5 1.5 0 016 7.5zM10.5 4.5a.75.75 0 00-.75.75v.75h4.5v-.75a.75.75 0 00-.75-.75h-3z',
+            'calculator': 'M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zM12 13.5h.008v.008H12V13.5zm0 2.25h.008v.008H12v-.008zm0 2.25h.008V18H12v-.008zM15.75 13.5h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zM6 7.5h12A1.5 1.5 0 0119.5 9v10.5a1.5 1.5 0 01-1.5 1.5H6a1.5 1.5 0 01-1.5-1.5V9A1.5 1.5 0 016 7.5zM10.5 4.5a.75.75 0 00-.75.75v.75h4.5v-.75a.75.75 0 00-.75-.75h-3z',
             'home': 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
             'truck': 'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m15.75 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125A1.125 1.125 0 0021 17.625v-3.375m-9-3.75h5.25m0 0V8.25a2.25 2.25 0 00-2.25-2.25H9a2.25 2.25 0 00-2.25 2.25v1.5m5.25-1.5a1.5 1.5 0 00-1.5-1.5H9.75a1.5 1.5 0 00-1.5 1.5v1.5M12 9.75v1.5m0-1.5h3.75m-3.75 0H8.25',
             'folder': 'M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z',
@@ -551,6 +719,29 @@ export class DocumentListComponent implements OnInit {
     confirmDeleteDocument(doc: Document) {
         if (confirm(`Are you sure you want to delete "${doc.name}"?`)) {
             this.deleteDocument(doc);
+        }
+    }
+
+    // Stop propagation of key events to prevent global shortcuts (like opening menus)
+    // when typing in inputs
+    onInputKeydown(event: KeyboardEvent) {
+        // Check for Ctrl+A or Cmd+A (Select All)
+        const isSelectAll = (event.ctrlKey || event.metaKey) && (event.key === 'a' || event.code === 'KeyA');
+
+        if (isSelectAll) {
+            // Prevent the default browser behavior (which might be opening a menu or bubbling)
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            // Manually perform the "Select All" action
+            const target = event.target as HTMLInputElement;
+            if (target && typeof target.select === 'function') {
+                target.select();
+            }
+        } else {
+            // For other keys, just stop propagation to be safe, but allow default typing
+            event.stopPropagation();
         }
     }
 }

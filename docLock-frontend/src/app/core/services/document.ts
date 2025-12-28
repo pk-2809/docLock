@@ -21,6 +21,17 @@ export interface Document {
     color?: string;
     type?: string;
     date?: Date;
+    formattedSize?: string;
+}
+
+export interface Folder {
+    id: string;
+    name: string;
+    parentId: string | null;
+    icon: string;
+    color: string;
+    itemCount: number;
+    createdAt: string;
 }
 
 @Injectable({
@@ -34,10 +45,16 @@ export class DocumentService {
         return this.http.get<{ status: string; documents: Document[] }>(`${this.apiUrl}/list`, { withCredentials: true });
     }
 
-    uploadDocument(file: File, category: string = 'Personal'): Observable<any> {
+    uploadDocument(file: File, category: string = 'Personal', folderId: string | null = null, name?: string): Observable<any> {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('category', category);
+        if (folderId) {
+            formData.append('folderId', folderId);
+        }
+        if (name) {
+            formData.append('name', name);
+        }
 
         return this.http.post(`${this.apiUrl}/upload`, formData, { withCredentials: true });
     }
@@ -55,5 +72,19 @@ export class DocumentService {
             withCredentials: true,
             body: { driveFileId, size }
         });
+    }
+
+    createFolder(name: string, parentId: string | null, icon: string, color: string): Observable<{ status: string; folder: Folder }> {
+        return this.http.post<{ status: string; folder: Folder }>(`${this.apiUrl}/folder`, {
+            name, parentId, icon, color
+        }, { withCredentials: true });
+    }
+
+    getFolders(): Observable<{ status: string; folders: Folder[] }> {
+        return this.http.get<{ status: string; folders: Folder[] }>(`${this.apiUrl}/folders`, { withCredentials: true });
+    }
+
+    deleteFolder(id: string): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/folder/${id}`, { withCredentials: true });
     }
 }

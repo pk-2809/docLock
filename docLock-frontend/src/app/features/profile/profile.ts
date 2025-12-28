@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -78,9 +78,16 @@ export class ProfileComponent {
     newName = signal('');
     isSavingName = signal(false);
 
+    @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
+
     toggleEditName() {
         this.newName.set(this.user()?.name || '');
         this.isEditingName.set(true);
+        setTimeout(() => {
+            if (this.nameInput) {
+                this.nameInput.nativeElement.focus();
+            }
+        }, 100);
     }
 
     cancelEditName() {
@@ -101,7 +108,10 @@ export class ProfileComponent {
 
         this.isSavingName.set(true);
 
-        this.authService.updateProfile({ name: this.newName() }).subscribe({
+        const formData = new FormData();
+        formData.append('name', this.newName());
+
+        this.authService.updateProfile(formData).subscribe({
             next: () => {
                 this.authService.checkSession().subscribe(() => {
                     this.isSavingName.set(false);
@@ -176,5 +186,28 @@ export class ProfileComponent {
                 this.toastService.showError('Failed to delete account');
             }
         });
+    }
+
+    // Stop propagation of key events to prevent global shortcuts (like opening menus)
+    // when typing in inputs
+    onInputKeydown(event: KeyboardEvent) {
+        // Check for Ctrl+A or Cmd+A (Select All)
+        const isSelectAll = (event.ctrlKey || event.metaKey) && (event.key === 'a' || event.code === 'KeyA');
+
+        if (isSelectAll) {
+            // Prevent the default browser behavior (which might be opening a menu or bubbling)
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            // Manually perform the "Select All" action
+            const target = event.target as HTMLInputElement;
+            if (target && typeof target.select === 'function') {
+                target.select();
+            }
+        } else {
+            // For other keys, just stop propagation to be safe, but allow default typing
+            event.stopPropagation();
+        }
     }
 }

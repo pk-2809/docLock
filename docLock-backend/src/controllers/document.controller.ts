@@ -34,7 +34,7 @@ export class DocumentController {
 
             // 2. Save Metadata to Firestore
             const docData = {
-                name: file.originalname,
+                name: req.body.name || file.originalname,
                 mimeType: file.mimetype,
                 size: file.size,
                 driveFileId: uploadResult.fileId,
@@ -127,5 +127,51 @@ export class DocumentController {
             console.error('Delete Error:', error);
             throw new CustomError('Failed to delete document', 500);
         }
+    });
+    static createFolder = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const sessionCookie = req.cookies.session || '';
+        if (!sessionCookie) throw new CustomError('Unauthorized', 401);
+
+        const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
+        if (!decodedClaims) throw new CustomError('Unauthorized', 401);
+
+        const { name, parentId, icon, color } = req.body;
+
+        if (!name) throw new CustomError('Folder name is required', 400);
+
+        const folderData = {
+            name,
+            parentId: parentId || null,
+            icon: icon || 'folder',
+            color: color || 'bg-slate-500',
+            itemCount: 0
+        };
+
+        const newFolder = await FirebaseService.createFolder(decodedClaims.uid, folderData);
+        res.json({ status: 'success', folder: newFolder });
+    });
+
+    static getFolders = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const sessionCookie = req.cookies.session || '';
+        if (!sessionCookie) throw new CustomError('Unauthorized', 401);
+
+        const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
+        if (!decodedClaims) throw new CustomError('Unauthorized', 401);
+
+        const folders = await FirebaseService.getFolders(decodedClaims.uid);
+        res.json({ status: 'success', folders });
+    });
+
+    static deleteFolder = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const sessionCookie = req.cookies.session || '';
+        if (!sessionCookie) throw new CustomError('Unauthorized', 401);
+
+        const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
+        if (!decodedClaims) throw new CustomError('Unauthorized', 401);
+
+        const { id } = req.params;
+        await FirebaseService.deleteFolder(decodedClaims.uid, id);
+
+        res.json({ status: 'success', message: 'Folder deleted' });
     });
 }

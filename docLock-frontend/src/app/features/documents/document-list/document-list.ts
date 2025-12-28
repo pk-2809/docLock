@@ -52,6 +52,9 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     documentName = '';
     showFabMenu = false; // FAB menu state
 
+    // Document Actions Menu State
+    activeDocumentMenu: string | null = null;
+
     // Card related properties
     showAddCardModal = false;
     newCardName = '';
@@ -743,5 +746,19 @@ export class DocumentListComponent implements OnInit, OnDestroy {
             // For other keys, just stop propagation to be safe, but allow default typing
             event.stopPropagation();
         }
+    }
+    confirmDeleteCard(card: Card) {
+        if (confirm(`Are you sure you want to delete "${card.name}"?`)) {
+            this.deleteCard(card.id);
+        }
+    }
+
+    // Document Actions Menu Methods
+    toggleDocumentMenu(docId: string) {
+        this.activeDocumentMenu = this.activeDocumentMenu === docId ? null : docId;
+    }
+
+    closeDocumentMenu() {
+        this.activeDocumentMenu = null;
     }
 }

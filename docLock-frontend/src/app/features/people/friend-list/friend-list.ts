@@ -23,6 +23,10 @@ export class FriendListComponent implements OnInit {
     friendToDelete = signal<string | null>(null);
     isDeleting = signal(false);
 
+    // Friend Interaction State
+    selectedFriendId = signal<string | null>(null);
+    showInteractionCard = signal(false);
+
     ngOnInit() {
         if (!this.peopleService.loaded()) {
             this.loadFriends();
@@ -69,5 +73,38 @@ export class FriendListComponent implements OnInit {
     closeConfirmation() {
         this.showConfirmation.set(false);
         this.friendToDelete.set(null);
+    }
+
+    // Friend Interaction Methods
+    onFriendClick(friend: any) {
+        if (this.selectedFriendId() === friend.uid) {
+            // If same friend clicked, toggle interaction card
+            this.showInteractionCard.set(!this.showInteractionCard());
+        } else {
+            // If different friend clicked, select new friend and show interaction card
+            this.selectedFriendId.set(friend.uid);
+            this.showInteractionCard.set(true);
+        }
+    }
+
+    requestCard(friend: any) {
+        this.toastService.showSuccess(`Card request sent to ${friend.name}`);
+        this.closeInteractionCard();
+    }
+
+    requestDocument(friend: any) {
+        this.toastService.showSuccess(`Document request sent to ${friend.name}`);
+        this.closeInteractionCard();
+    }
+
+    closeInteractionCard() {
+        this.selectedFriendId.set(null);
+        this.showInteractionCard.set(false);
+    }
+
+    getSelectedFriend() {
+        const friendId = this.selectedFriendId();
+        if (!friendId) return null;
+        return this.friends().find(f => f.uid === friendId) || null;
     }
 }

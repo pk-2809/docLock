@@ -43,7 +43,7 @@
             <div class="flex items-center gap-4 mb-6">
                 @if (!currentFolderId) {
                 <button (click)="goBack()"
-                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-lg flex items-center justify-center text-slate-600 active:text-blue-600 transition-all active:scale-95 touch-manipulation">
+                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white shadow-lg flex items-center justify-center text-slate-600 active:text-blue-600 transition-all active:scale-95 touch-manipulation">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -63,7 +63,7 @@
 
             <!-- Enhanced Search Bar -->
             <div class="mb-4">
-                <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                <div class="bg-white rounded-2xl p-2 shadow-lg border border-blue-100">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@
                             </svg>
                         </div>
                         <input type="text" placeholder="Search documents..." (input)="onSearch($event)"
-                            class="w-full bg-blue-50/50 border-0 rounded-xl pl-12 pr-4 py-3 text-slate-800 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/80 transition-all font-medium backdrop-blur-sm">
+                            class="w-full bg-blue-50 border-0 rounded-xl pl-12 pr-4 py-3 text-slate-800 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all font-medium">
                     </div>
                 </div>
             </div>
@@ -82,7 +82,7 @@
             <div class="mb-4 w-full px-1">
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar" #breadcrumbContainer>
                     <!-- Breadcrumb Path -->
-                    <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur-xl px-3 py-2 rounded-xl shadow-sm border border-white/60 overflow-x-auto flex-1 no-scrollbar">
+                    <div class="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl shadow-sm border border-blue-100 overflow-x-auto flex-1 no-scrollbar">
                         <button (click)="navigateToBreadcrumb({id: 'root', name: 'Home', path: 'root'})"
                             class="flex items-center gap-1.5 px-2 py-1 rounded-lg active:bg-blue-50 text-slate-500 active:text-blue-600 transition-colors flex-shrink-0 touch-manipulation">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +118,7 @@
             <div class="space-y-3 mb-6">
                 <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider px-2 mb-2">Folders</h3>
                 @for (folder of currentFolders; track folder.id) {
-                <div class="group bg-white/90 backdrop-blur-xl rounded-2xl p-3 shadow-lg border border-white/60 active:shadow-xl active:border-blue-100 transition-all cursor-pointer relative touch-manipulation"
+                <div class="group bg-white rounded-2xl p-3 shadow-lg border border-blue-100 active:shadow-xl active:border-blue-200 transition-all cursor-pointer relative touch-manipulation"
                     (click)="openFolder(folder.id)">
 
                     <div class="flex items-center gap-4">
@@ -171,7 +171,7 @@
                             </button>
 
                             @if (activeFolderMenu === folder.id) {
-                            <div class="absolute right-0 top-full mt-1 bg-white/95 backdrop-blur-xl rounded-xl shadow-xl border border-white/60 py-1.5 z-50 min-w-[140px] animate-fade-in"
+                            <div class="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-blue-100 py-1.5 z-50 min-w-[140px] animate-fade-in"
                                 (click)="$event.stopPropagation()">
 
                                 <button (click)="startEditFolder(folder); $event.stopPropagation()"
@@ -207,7 +207,7 @@
             @if (currentDocuments.length > 0) {
             <div class="space-y-3">
                 @for (doc of currentDocuments; track doc.id) {
-                <div class="group bg-white/90 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60 active:shadow-xl active:border-blue-200 transition-all cursor-pointer relative touch-manipulation">
+                <div class="group bg-white rounded-2xl p-4 shadow-lg border border-blue-100 active:shadow-xl active:border-blue-200 transition-all cursor-pointer relative touch-manipulation">
                     <div class="flex items-center gap-4">
                         <!-- Enhanced Document Icon with light background -->
                         <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center shadow-lg group-active:scale-105 transition-transform">
@@ -237,7 +237,7 @@
                             <!-- Dropdown Menu -->
                             @if (activeDocumentMenu === doc.id) {
                             <div (click)="$event.stopPropagation()"
-                                class="absolute right-0 top-full mt-1 bg-white/95 backdrop-blur-xl rounded-xl shadow-xl border border-white/60 py-2 z-50 min-w-[140px]">
+                                class="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-blue-100 py-2 z-50 min-w-[140px]">
                                 <button (click)="downloadDocument(doc); closeDocumentMenu()"
                                     class="w-full px-4 py-2 text-left active:bg-slate-50 transition-colors flex items-center gap-3 text-sm text-slate-700 touch-manipulation">
                                     <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -350,7 +350,7 @@
     <!-- Enhanced Create Folder Modal -->
     @if (showCreateFolderModal) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div class="bg-white/95 backdrop-blur-xl rounded-2xl p-6 w-full max-w-sm shadow-xl border border-white/60">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl border border-blue-100">
             <!-- Compact Header -->
             <div class="text-center mb-6">
                 <div class="w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -449,7 +449,7 @@
     <!-- Enhanced Upload Document Modal -->
     @if (showUploadModal) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div class="bg-white/95 backdrop-blur-xl rounded-2xl p-6 w-full max-w-sm shadow-xl border border-white/60">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl border border-blue-100">
             <!-- Compact Header -->
             <div class="text-center mb-6">
                 <div class="w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-xl flex items-center justify-center">

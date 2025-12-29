@@ -1,5 +1,5 @@
 <!-- Cards Page -->
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 pb-24">
+<div class="min-h-screen bg-linear-to-br from-slate-50 to-blue-50/30 overflow-hidden">
     <!-- Enhanced Header -->
     <header class="relative px-6 pt-8 pb-6">
         <!-- Background Decoration -->
@@ -12,7 +12,7 @@
                 <p class="text-slate-500 text-sm font-medium">Secure digital wallet</p>
             </div>
             <button (click)="editingCard = null; showAddCardModal = true" 
-                class="relative w-14 h-14 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 group overflow-hidden">
+                class="relative w-14 h-14 rounded-2xl bg-linear-to-r from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 group overflow-hidden">
                 <!-- Button glow effect -->
                 <div class="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <svg class="w-7 h-7 relative z-10 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +29,7 @@
         <div class="text-center py-20">
             <div class="relative w-24 h-24 mx-auto mb-8">
                 <!-- Animated background -->
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-pink-500/20 rounded-3xl animate-pulse"></div>
+                <div class="absolute inset-0 bg-linear-to-r from-blue-500/20 to-pink-500/20 rounded-3xl animate-pulse"></div>
                 <div class="relative w-full h-full bg-white rounded-3xl shadow-xl flex items-center justify-center">
                     <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
@@ -40,7 +40,7 @@
             <h3 class="text-2xl font-bold text-slate-800 mb-3">No Cards Yet</h3>
             <p class="text-slate-500 mb-8 max-w-sm mx-auto leading-relaxed">Add your first card to start building your secure digital wallet</p>
             <button (click)="editingCard = null; showAddCardModal = true" 
-                class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
+                class="bg-linear-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
                 Add Your First Card
             </button>
         </div>

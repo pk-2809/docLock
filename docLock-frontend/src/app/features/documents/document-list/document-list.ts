@@ -470,7 +470,8 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
             } else {
                 this.currentFolderId = null;
             }
-        } else if (this.viewMode === 'folders') {
+        } else {
+            // If we're at root level, navigate back to dashboard
             this.router.navigate(['/dashboard']);
         }
     }

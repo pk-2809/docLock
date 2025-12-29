@@ -47,7 +47,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     // State
     isFetchingNotifications = false;
     private cdr = inject(ChangeDetectorRef);
-    viewMode: 'home' | 'folders' | 'cards' | 'card-folder' | 'qrs' = 'home';
+    viewMode: 'folders' | 'cards' | 'card-folder' | 'qrs' = 'folders';
     currentFolderId: string | null = null;
     currentCardFolder: 'debit' | 'credit' | null = null;
     searchQuery = '';
@@ -135,11 +135,81 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         };
     }
 
+    // Interactive chart state
+    selectedChartStat: 'storage' | 'cards' | 'qrs' = 'storage';
+
     // Helper to calculate SVG dash properties for circular progress
     getCircleDashArray(percentage: number, radius: number): string {
         const circumference = 2 * Math.PI * radius;
         const dash = (percentage / 100) * circumference;
         return `${dash} ${circumference}`;
+    }
+
+    // Get current chart display value based on selected stat
+    getCurrentChartValue(): number {
+        switch (this.selectedChartStat) {
+            case 'storage':
+                return this.dashboardStats.storage.percentage;
+            case 'cards':
+                return this.dashboardStats.cards.percentage;
+            case 'qrs':
+                return this.dashboardStats.qrs.percentage;
+            default:
+                return this.dashboardStats.storage.percentage;
+        }
+    }
+
+    // Get current chart label
+    getCurrentChartLabel(): string {
+        switch (this.selectedChartStat) {
+            case 'storage':
+                return 'Storage';
+            case 'cards':
+                return 'Cards';
+            case 'qrs':
+                return 'QRs';
+            default:
+                return 'Storage';
+        }
+    }
+
+    // Select chart stat for display
+    selectChartStat(stat: 'storage' | 'cards' | 'qrs') {
+        this.selectedChartStat = stat;
+    }
+
+    // Get details for selected chart stat
+    getSelectedStatDetails() {
+        switch (this.selectedChartStat) {
+            case 'storage':
+                return {
+                    used: this.dashboardStats.storage.used,
+                    total: this.dashboardStats.storage.total,
+                    unit: 'GB',
+                    label: 'Storage'
+                };
+            case 'cards':
+                return {
+                    used: this.dashboardStats.cards.used,
+                    total: this.dashboardStats.cards.total,
+                    unit: '',
+                    label: 'Cards'
+                };
+            case 'qrs':
+                return {
+                    used: this.dashboardStats.qrs.used,
+                    total: this.dashboardStats.qrs.total,
+                    unit: '',
+                    label: 'QRs'
+                };
+            default:
+                return {
+                    used: this.dashboardStats.storage.used,
+                    total: this.dashboardStats.storage.total,
+                    unit: 'GB',
+                    label: 'Storage'
+                };
+        }
     }
 
     recentActivities = [
@@ -356,15 +426,15 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.showFabMenu = !this.showFabMenu;
     }
 
-    setViewMode(mode: 'home' | 'folders' | 'cards' | 'qrs') {
+    setViewMode(mode: 'folders' | 'cards' | 'qrs') {
         this.viewMode = mode;
-        if (mode === 'home') {
+        if (mode === 'folders') {
             this.currentFolderId = null;
-        } else if (mode === 'folders') {
-            this.currentFolderId = null;
+        } else if (mode === 'cards') {
+            this.currentCardFolder = null;
+        } else if (mode === 'qrs') {
+            // QR view logic
         }
-        // Handle cards and qrs views - for now they work like folders
-        // You can implement specific logic for cards and QRs later
     }
 
     openFolder(folderId: string) {
@@ -401,7 +471,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.currentFolderId = null;
             }
         } else if (this.viewMode === 'folders') {
-            this.setViewMode('home');
+            this.router.navigate(['/dashboard']);
         }
     }
 

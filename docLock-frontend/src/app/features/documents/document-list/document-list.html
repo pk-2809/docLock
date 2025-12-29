@@ -221,7 +221,15 @@
                         <div class="flex-1 min-w-0">
                             <h3 class="text-slate-800 font-bold text-base group-active:text-blue-600 transition-colors truncate">
                                 {{doc.name}}</h3>
-                            <p class="text-blue-600 text-sm font-medium">{{doc.type}} • {{doc.size}} • {{doc.date | date:'MMM d, y'}}</p>
+                            <p class="text-blue-600 text-sm font-medium">{{doc.type}} • {{formatFileSize(doc.size || 0)}} • {{doc.date | date:'MMM d, y'}}</p>
+                            @if (isSharedFolder) {
+                            <div class="flex items-center gap-2 mt-2">
+                                <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                                    <span class="text-[10px] font-bold text-blue-600">{{getDocumentSharer(doc).initial}}</span>
+                                </div>
+                                <p class="text-blue-600 text-xs font-medium">Shared by {{getDocumentSharer(doc).name}}</p>
+                            </div>
+                            }
                         </div>
 
                         <!-- Three Dot Menu -->

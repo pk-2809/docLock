@@ -385,6 +385,43 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.folders.filter(f => f.parentId === this.currentFolderId);
     }
 
+    // Check if current folder is "Shared"
+    get isSharedFolder(): boolean {
+        if (!this.currentFolderId) return false;
+        const currentFolder = this.folders.find(f => f.id === this.currentFolderId);
+        return currentFolder?.name?.toLowerCase() === 'shared';
+    }
+
+    // Get sharer name for a document (placeholder - connect to backend later)
+    getDocumentSharer(doc: Document): { name: string; initial: string } {
+        // TODO: Replace with actual sharedBy data from backend
+        // For now, using placeholder data
+        const sharers: { [key: string]: { name: string; initial: string } } = {
+            'doc1': { name: 'John Doe', initial: 'JD' },
+            'doc2': { name: 'Jane Smith', initial: 'JS' },
+        };
+        return sharers[doc.id] || { name: 'Unknown', initial: 'U' };
+    }
+
+    // Format file size properly (KB, MB, GB)
+    formatFileSize(bytes: number): string {
+        if (!bytes || bytes === 0) return '0 B';
+        
+        const kb = 1024;
+        const mb = kb * 1024;
+        const gb = mb * 1024;
+        
+        if (bytes < kb) {
+            return `${bytes} B`;
+        } else if (bytes < mb) {
+            return `${(bytes / kb).toFixed(1)} KB`;
+        } else if (bytes < gb) {
+            return `${(bytes / mb).toFixed(1)} MB`;
+        } else {
+            return `${(bytes / gb).toFixed(2)} GB`;
+        }
+    }
+
     get totalStats() {
         const totalDocs = this.documents.length;
         const totalSize = this.documents.reduce((acc, doc) => {

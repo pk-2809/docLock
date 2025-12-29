@@ -1,0 +1,208 @@
+<!-- QR Create Page -->
+<div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col overflow-hidden relative">
+    <!-- Green top border line -->
+    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-green-500 z-50"></div>
+    
+    <!-- Sophisticated Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full animate-float-slow"></div>
+        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-teal-400/8 to-green-500/8 rounded-full animate-float-reverse"></div>
+        <div class="absolute top-1/4 right-1/3 w-32 h-32 bg-gradient-to-br from-emerald-300/6 to-green-400/6 rounded-full animate-pulse-slow"></div>
+        <div class="absolute bottom-1/3 left-1/4 w-20 h-20 bg-gradient-to-br from-slate-300/8 to-green-300/8 rounded-full animate-float"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="px-4 sm:px-6 py-4 flex flex-col overflow-hidden relative z-10" style="height: calc(100vh - 7rem); max-height: calc(100vh - 7rem);">
+        <!-- Header -->
+        <header class="mb-4 sm:mb-6 flex-shrink-0 pt-8 sm:pt-12">
+            <!-- Top Navigation -->
+            <div class="flex items-center gap-4 mb-6">
+                <button (click)="goBack()"
+                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-lg flex items-center justify-center text-slate-600 active:text-green-600 transition-all active:scale-95 touch-manipulation">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                </button>
+                <div class="flex-1">
+                    <h2 class="text-slate-500 text-xs sm:text-sm uppercase tracking-wider font-bold mb-2">
+                        QR Generator
+                    </h2>
+                    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 name-heartbeat">
+                        Create QR Code
+                    </h1>
+                    <p class="text-slate-500 font-medium text-sm capitalize">{{selectedType}} QR Code</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Form Content -->
+        <div class="flex-1 overflow-y-auto">
+            <!-- QR Type Selection -->
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-4">Select QR Type</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button *ngFor="let type of ['profile', 'contact', 'wifi', 'url', 'text', 'email']"
+                            (click)="onTypeChange(type)"
+                            [class]="selectedType === type ? 'bg-green-500 text-white shadow-lg' : 'bg-white/90 text-slate-600 hover:bg-green-50'"
+                            class="flex items-center gap-3 p-4 rounded-2xl border border-white/60 backdrop-blur-xl transition-all active:scale-95 touch-manipulation">
+                        <div [class]="selectedType === type ? 'bg-white/20 text-white' : getTypeColor(type)"
+                             class="w-10 h-10 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getTypeIcon(type)" />
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold capitalize">{{type}}</div>
+                            <div class="text-xs opacity-75">
+                                {{type === 'profile' ? 'Personal info' : 
+                                  type === 'contact' ? 'Business card' :
+                                  type === 'wifi' ? 'Network access' :
+                                  type === 'url' ? 'Website link' :
+                                  type === 'text' ? 'Plain text' :
+                                  type === 'email' ? 'Email address' : 'QR Code'}}
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- QR Name Input -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-700 mb-2">QR Code Name</label>
+                <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                    <input type="text" 
+                           [(ngModel)]="qrName"
+                           placeholder="Enter a name for your QR code..."
+                           class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                </div>
+            </div>
+
+            <!-- Dynamic Form Fields -->
+            <div class="mb-6">
+                <h3 class="text-sm font-bold text-slate-700 mb-4 capitalize">{{selectedType}} Information</h3>
+                
+                <!-- Profile Form -->
+                <div *ngIf="selectedType === 'profile'" class="space-y-4">
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="text" 
+                               [(ngModel)]="profileData.name"
+                               placeholder="Full Name"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="email" 
+                               [(ngModel)]="profileData.email"
+                               placeholder="Email Address"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="tel" 
+                               [(ngModel)]="profileData.phone"
+                               placeholder="Phone Number"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="url" 
+                               [(ngModel)]="profileData.website"
+                               placeholder="Website (optional)"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div *ngIf="selectedType === 'contact'" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                            <input type="text" 
+                                   [(ngModel)]="contactData.firstName"
+                                   placeholder="First Name"
+                                   class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                        </div>
+                        <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                            <input type="text" 
+                                   [(ngModel)]="contactData.lastName"
+                                   placeholder="Last Name"
+                                   class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                        </div>
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="text" 
+                               [(ngModel)]="contactData.organization"
+                               placeholder="Organization"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="email" 
+                               [(ngModel)]="contactData.email"
+                               placeholder="Email Address"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="tel" 
+                               [(ngModel)]="contactData.phone"
+                               placeholder="Phone Number"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="url" 
+                               [(ngModel)]="contactData.website"
+                               placeholder="Website (optional)"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                </div>
+
+                <!-- WiFi Form -->
+                <div *ngIf="selectedType === 'wifi'" class="space-y-4">
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="text" 
+                               [(ngModel)]="wifiData.ssid"
+                               placeholder="Network Name (SSID)"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <input type="password" 
+                               [(ngModel)]="wifiData.password"
+                               placeholder="Password"
+                               class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <select [(ngModel)]="wifiData.security"
+                                class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">No Password</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Simple Text Input for other types -->
+                <div *ngIf="['url', 'text', 'email', 'phone'].includes(selectedType)">
+                    <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-white/60">
+                        <textarea [(ngModel)]="qrData"
+                                  [placeholder]="selectedType === 'url' ? 'https://example.com' :
+                                               selectedType === 'email' ? 'email@example.com' :
+                                               selectedType === 'phone' ? '+1234567890' :
+                                               'Enter your text here...'"
+                                  rows="4"
+                                  class="w-full bg-transparent border-0 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-400 font-medium resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Button -->
+            <div class="pb-6">
+                <button (click)="createQR()"
+                        class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-green-600 active:bg-green-700 text-white font-bold rounded-2xl shadow-lg shadow-green-500/25 transition-all active:scale-95 touch-manipulation">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3.75v3.75H13.5V13.5z" />
+                    </svg>
+                    <span>Create QR Code</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

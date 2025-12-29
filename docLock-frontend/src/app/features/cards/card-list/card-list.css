@@ -1,3 +1,90 @@
+/* Cards Page - Enhanced Animations and Styles */
+
+/* Name Animation - Heartbeat/Pulse Effect */
+@keyframes heartbeat {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    25% {
+        transform: scale(1.05);
+        opacity: 0.95;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    75% {
+        transform: scale(1.03);
+        opacity: 0.98;
+    }
+}
+
+.name-heartbeat {
+    animation: heartbeat 2s ease-in-out infinite;
+}
+
+/* Sophisticated Background Animations */
+@keyframes float-slow {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    33% {
+        transform: translateY(-20px) rotate(2deg);
+    }
+    66% {
+        transform: translateY(10px) rotate(-1deg);
+    }
+}
+
+@keyframes float-reverse {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    33% {
+        transform: translateY(15px) rotate(-2deg);
+    }
+    66% {
+        transform: translateY(-10px) rotate(1deg);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+.animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+    animation: float-reverse 10s ease-in-out infinite;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+}
+
 /* Enhanced Card Animations */
 @keyframes fadeInUp {
     from {
@@ -55,7 +142,22 @@
     animation: slideUp 0.3s ease-out;
 }
 
-/* Card Enhancements */
+/* Touch manipulation for better mobile experience */
+.touch-manipulation {
+    touch-action: manipulation;
+}
+
+/* Custom scrollbar for carousel */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Card 3D Effects */
 .perspective-1000 {
     perspective: 1000px;
 }
@@ -66,38 +168,7 @@
 }
 
 .card-3d:hover {
-    transform: rotateY(5deg) rotateX(5deg);
-}
-
-.flipped {
-    transform: rotateY(180deg);
-}
-
-/* Gradient Text */
-.gradient-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Enhanced Shadows */
-.shadow-3xl {
-    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
-}
-
-.shadow-card {
-    box-shadow: 
-        0 10px 25px -5px rgba(0, 0, 0, 0.1),
-        0 10px 10px -5px rgba(0, 0, 0, 0.04),
-        0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-/* Shimmer Effect */
-.shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
+    transform: rotateY(2deg) rotateX(2deg);
 }
 
 /* Card Hover Effects */
@@ -106,8 +177,23 @@
 }
 
 .card-hover-lift:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Enhanced Shadows */
+.shadow-card {
+    box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Shimmer Effect for Loading */
+.shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
 }
 
 /* Button Enhancements */
@@ -122,22 +208,16 @@
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Text Shadows */
+/* Text Effects */
 .text-shadow {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.text-shadow-lg {
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-}
-
-/* Glow Effects */
-.glow-blue {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-}
-
-.glow-emerald {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+.gradient-text {
+    background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* Card Brand Styling */
@@ -148,6 +228,118 @@
         0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Copy Button Hover Effects */
+.copy-btn {
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    transform: scale(1.1);
+}
+
+.copy-btn:active {
+    transform: scale(0.95);
+}
+
+/* Card Visibility Toggle Animation */
+.card-flip {
+    transition: all 0.6s ease-in-out;
+}
+
+.card-number-hidden {
+    filter: blur(4px);
+    transition: filter 0.3s ease;
+}
+
+.card-number-visible {
+    filter: blur(0);
+    transition: filter 0.3s ease;
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+/* Form Input Enhancements */
+.form-input {
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.15);
+}
+
+/* Color Picker Buttons */
+.color-picker-btn {
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.color-picker-btn:hover {
+    transform: scale(1.1);
+}
+
+.color-picker-btn:active {
+    transform: scale(0.95);
+}
+
+.color-picker-btn::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.color-picker-btn:hover::after {
+    opacity: 1;
+}
+
+/* Section Headers */
+.section-header {
+    position: relative;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, #ec4899, #8b5cf6);
+    border-radius: 2px;
+}
+
+/* Carousel Navigation (for future use) */
+.carousel-nav {
+    transition: all 0.3s ease;
+}
+
+.carousel-nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.carousel-nav:active {
+    transform: scale(0.95);
+}
+
+/* Loading States */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
 /* Responsive Enhancements */
 @media (max-width: 640px) {
     .card-3d:hover {
@@ -155,7 +347,12 @@
     }
     
     .card-hover-lift:hover {
-        transform: translateY(-4px) scale(1.01);
+        transform: translateY(-2px) scale(1.005);
+    }
+    
+    .touch-manipulation {
+        min-height: 44px;
+        min-width: 44px;
     }
 }
 
@@ -166,10 +363,26 @@
     .animate-slide-up,
     .shimmer,
     .card-3d,
-    .card-hover-lift {
+    .card-hover-lift,
+    .name-heartbeat,
+    .animate-float-slow,
+    .animate-float-reverse,
+    .animate-float,
+    .animate-pulse-slow {
         animation: none;
         transition: none;
         transform: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .btn-glass {
+        border: 2px solid currentColor;
+    }
+    
+    .card-hover-lift {
+        border: 1px solid currentColor;
     }
 }
 
@@ -183,5 +396,10 @@
     .btn-glass:hover {
         background: rgba(0, 0, 0, 0.3);
         border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .loading-skeleton {
+        background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        background-size: 200% 100%;
     }
 }

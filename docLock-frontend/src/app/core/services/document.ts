@@ -75,8 +75,8 @@ export class DocumentService {
 
             // Check File Type and Size
             const extension = '.' + file.name.split('.').pop()?.toLowerCase();
-            const isImage = config.imgFormatsAllowed.includes(extension);
-            const isDoc = config.otherFormatsAllowed.includes(extension);
+            const isImage = config.imgFormatsAllowed?.includes(extension) ?? false;
+            const isDoc = config.otherFormatsAllowed?.includes(extension) ?? false;
 
             if (!isImage && !isDoc) {
                 return new Observable(observer => {

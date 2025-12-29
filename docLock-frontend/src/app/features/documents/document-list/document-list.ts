@@ -1,11 +1,12 @@
-import { Component, OnInit, OnDestroy, inject, HostListener, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, AfterViewInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth';
+import { NotificationService } from '../../../core/services/notification.service';
 import { DocumentService, Document, Folder } from '../../../core/services/document';
 import { ToastService } from '../../../core/services/toast.service'; // Import ToastService
 import { forkJoin, finalize, timeout } from 'rxjs'; // Import forkJoin, finalize, timeout
-import { ChangeDetectorRef } from '@angular/core';
 import { AppConfigService } from '../../../core/services/app-config.service';
 
 interface Card {
@@ -34,10 +35,18 @@ interface BreadcrumbItem {
 export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('breadcrumbContainer') breadcrumbContainer!: ElementRef;
     private route = inject(ActivatedRoute);
+    // Services
     private documentService = inject(DocumentService);
     private toastService = inject(ToastService);
+    private appConfig = inject(AppConfigService);
+    router = inject(Router);
+    authService = inject(AuthService);
+    notificationService = inject(NotificationService);
+    private configService = inject(AppConfigService); // Added configService injection
+
+    // State
+    isFetchingNotifications = false;
     private cdr = inject(ChangeDetectorRef);
-    private configService = inject(AppConfigService);
     viewMode: 'home' | 'folders' | 'cards' | 'card-folder' | 'qrs' = 'home';
     currentFolderId: string | null = null;
     currentCardFolder: 'debit' | 'credit' | null = null;
@@ -86,6 +95,95 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Start with empty cards - user adds everything
     cards: Card[] = [];
+
+    // Dashboard Data
+    readonly storageLimitBytes = 5 * 1024 * 1024 * 1024; // 5 GB
+    readonly cardLimit = 50;
+    readonly qrLimit = 20;
+
+    get dashboardStats() {
+        const totalSize = this.documents.reduce((acc, doc) => acc + (doc.size || 0), 0);
+        const storageUsedGB = totalSize / (1024 * 1024 * 1024);
+        const storagePercentage = Math.min((totalSize / this.storageLimitBytes) * 100, 100);
+
+        const cardsCount = this.cards.length;
+        const cardsPercentage = Math.min((cardsCount / this.cardLimit) * 100, 100);
+
+        // Placeholder for QRs as logic isn't fully implemented
+        const qrsCount = 5;
+        const qrsPercentage = Math.min((qrsCount / this.qrLimit) * 100, 100);
+
+        return {
+            storage: {
+                used: storageUsedGB.toFixed(2),
+                total: '5',
+                percentage: storagePercentage,
+                color: '#3b82f6' // Blue
+            },
+            cards: {
+                used: cardsCount,
+                total: this.cardLimit,
+                percentage: cardsPercentage,
+                color: '#ec4899' // Pink
+            },
+            qrs: {
+                used: qrsCount,
+                total: this.qrLimit,
+                percentage: qrsPercentage,
+                color: '#22c55e' // Green
+            }
+        };
+    }
+
+    // Helper to calculate SVG dash properties for circular progress
+    getCircleDashArray(percentage: number, radius: number): string {
+        const circumference = 2 * Math.PI * radius;
+        const dash = (percentage / 100) * circumference;
+        return `${dash} ${circumference}`;
+    }
+
+    recentActivities = [
+        {
+            id: 1,
+            title: 'Document uploaded',
+            description: 'passport_scan.pdf added to Identity folder',
+            time: '2 min ago',
+            iconBg: 'bg-blue-50',
+            iconColor: 'text-blue-600',
+            iconPath: 'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5',
+            statusColor: 'bg-green-500'
+        },
+        {
+            id: 2,
+            title: 'Card added',
+            description: 'New credit card saved securely',
+            time: '15 min ago',
+            iconBg: 'bg-pink-50',
+            iconColor: 'text-pink-600',
+            iconPath: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
+            statusColor: 'bg-blue-500'
+        },
+        {
+            id: 3,
+            title: 'File shared',
+            description: 'license.jpg shared with John Doe',
+            time: '1 hour ago',
+            iconBg: 'bg-emerald-50',
+            iconColor: 'text-emerald-600',
+            iconPath: 'M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z',
+            statusColor: 'bg-amber-500'
+        },
+        {
+            id: 4,
+            title: 'Folder created',
+            description: 'New folder "Medical Records" created',
+            time: '3 hours ago',
+            iconBg: 'bg-indigo-50',
+            iconColor: 'text-indigo-600',
+            iconPath: 'M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z',
+            statusColor: 'bg-slate-400'
+        }
+    ];
 
     ngOnInit() {
         this.loadData();
@@ -272,7 +370,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     openFolder(folderId: string) {
         this.currentFolderId = folderId;
         this.viewMode = 'folders'; // Stay in folders view, just change current folder
-        
+
         // Auto-scroll breadcrumb after folder change
         setTimeout(() => {
             if (this.breadcrumbContainer && this.breadcrumbs.length > 3) {
@@ -459,8 +557,8 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         if (!this.newFolderName.trim()) return;
 
         const config = this.configService.config();
-        // Check nesting limit. Breadcrumbs usually include Root + ancestors + current. 
-        // If we are IN a folder, breadcrumbs has that folder. 
+        // Check nesting limit. Breadcrumbs usually include Root + ancestors + current.
+        // If we are IN a folder, breadcrumbs has that folder.
         // If we create a SUB-folder, the depth increases.
         // Approx depth = breadcrumbs.length (Root is 1, subfolder is 2...).
         // User config: maxFolderNestingAllowed (e.g. 5).
@@ -749,7 +847,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     showCardCVV = new Set<string>();
 
     getCardGradient(type: string): string {
-        return type === 'credit' 
+        return type === 'credit'
             ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800'
             : 'bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800';
     }
@@ -1020,5 +1118,27 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.closeDocumentMenu();
         this.closeFolderMenu();
+    }
+
+    // Dashboard / Header Logic
+    get firstName(): string {
+        const name = this.authService.user()?.name || 'User';
+        return name.split(' ')[0];
+    }
+
+    onNotificationClick() {
+        if (this.isFetchingNotifications) return;
+
+        this.isFetchingNotifications = true;
+        this.notificationService.fetchNotifications().subscribe({
+            next: () => {
+                this.isFetchingNotifications = false;
+                this.router.navigate(['/notifications']);
+            },
+            error: () => {
+                this.isFetchingNotifications = false;
+                this.router.navigate(['/notifications']);
+            }
+        });
     }
 }

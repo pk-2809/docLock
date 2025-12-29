@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable, tap } from 'rxjs';
 import { AppConfigService } from '../services/app-config.service';
-import { AuthService } from '../auth/auth';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../auth/firebase';
+
 
 export interface Friend {
     uid: string;
@@ -17,7 +19,7 @@ export interface Friend {
 })
 export class PeopleService {
     private http = inject(HttpClient);
-    private authService = inject(AuthService); // Need to inject Auth to get/check counts if tracked there, or rely on local list length
+    // Auth injection removed to prevent circular dependency (Auth -> People -> Auth)
     private configService = inject(AppConfigService);
     private apiUrl = environment.apiUrl;
 
@@ -25,14 +27,34 @@ export class PeopleService {
     isLoading = signal<boolean>(false);
     loaded = signal<boolean>(false);
 
+    private unsubscribeFriends: (() => void) | null = null;
+
+    subscribeToFriends(uid: string) {
+        if (this.unsubscribeFriends) {
+            this.unsubscribeFriends(); // Clear existing listener if any
+        }
+
+        this.isLoading.set(true);
+        const friendsRef = collection(db, 'users', uid, 'friends');
+
+        this.unsubscribeFriends = onSnapshot(friendsRef, (snapshot) => {
+            const friendsList = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as Friend));
+            this.friends.set(friendsList);
+            this.loaded.set(true);
+            this.isLoading.set(false);
+            console.log(`[PeopleService] Real-time friends updated: ${friendsList.length}`);
+        }, (error) => {
+            console.error('[PeopleService] Real-time error:', error);
+            this.isLoading.set(false);
+        });
+    }
+
+    // Deprecated: HTTP Get (Kept for reference or explicit refresh if needed, but onSnapshot supercedes it)
     getFriends(): Observable<{ friends: Friend[] }> {
-        return this.http.get<{ friends: Friend[] }>(`${this.apiUrl}/api/people`, { withCredentials: true })
-            .pipe(
-                tap(response => {
-                    this.friends.set(response.friends || []);
-                    this.loaded.set(true);
-                })
-            );
+        return new Observable(obs => {
+            obs.next({ friends: this.friends() });
+            obs.complete();
+        });
     }
 
     addFriend(targetUserId: string): Observable<any> {
@@ -45,27 +67,26 @@ export class PeopleService {
             });
         }
 
-        return this.http.post(`${this.apiUrl}/api/people/add`, { targetUserId }, { withCredentials: true })
-            .pipe(
-                tap(() => {
-                    // Refresh friends list on success
-                    this.getFriends().subscribe();
-                })
-            );
+        return this.http.post(`${this.apiUrl}/api/people/add`, { targetUserId }, { withCredentials: true });
+        // No need to manually refresh getFriends() anymore, onSnapshot handles it!
     }
 
     getPublicProfile(userId: string): Observable<Partial<Friend>> {
         return this.http.get<Partial<Friend>>(`${this.apiUrl}/api/people/user/${userId}`, { withCredentials: true });
     }
 
+    clearData() {
+        if (this.unsubscribeFriends) {
+            this.unsubscribeFriends();
+            this.unsubscribeFriends = null;
+        }
+        this.friends.set([]);
+        this.loaded.set(false);
+        this.isLoading.set(false);
+    }
+
     deleteFriend(friendId: string): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/api/people/${friendId}`, { withCredentials: true })
-            .pipe(
-                tap(() => {
-                    // Optimistic update or refresh
-                    this.friends.update(friends => friends.filter(f => f.uid !== friendId));
-                })
-            );
+        return this.http.delete(`${this.apiUrl}/api/people/${friendId}`, { withCredentials: true });
     }
 
     shareItem(recipientUid: string, itemId: string, type: 'document' | 'card'): Observable<any> {

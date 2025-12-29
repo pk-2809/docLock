@@ -131,7 +131,6 @@ export class FriendListComponent implements OnInit {
         this.selectedFriendId.set(friend.uid);
         this.requestType.set(type);
         this.showRequestSheet.set(true);
-        this.closeInteractionCard();
     }
 
     closeRequestSheet() {
@@ -142,10 +141,16 @@ export class FriendListComponent implements OnInit {
 
     sendRequestItem() {
         const friendId = this.selectedFriendId();
+        this.closeInteractionCard();
         const type = this.requestType();
         const name = this.requestQuery();
 
-        if (!friendId || !name.trim()) return;
+        if (!friendId || !name.trim()) {
+            console.warn('Cannot send request: Missing data', { friendId, name });
+            return;
+        }
+
+        console.log('Sending request...', { friendId, type, name });
 
         this.isRequesting.set(true);
         this.peopleService.requestItem(friendId, type, name).subscribe({

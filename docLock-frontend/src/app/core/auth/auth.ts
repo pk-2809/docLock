@@ -5,6 +5,8 @@ import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, Auth } fr
 import { firebaseAuth } from './firebase';
 import { environment } from '../../../environments/environment';
 import { AppConfigService } from '../services/app-config.service';
+import { PeopleService } from '../people/people.service';
+import { NotificationService } from '../services/notification.service';
 
 export interface User {
   uid: string;
@@ -23,6 +25,8 @@ export interface User {
 export class AuthService {
   private http = inject(HttpClient);
   private appConfigService = inject(AppConfigService);
+  private peopleService = inject(PeopleService);
+  private notificationService = inject(NotificationService);
 
   private auth = firebaseAuth;
   private confirmationResult: ConfirmationResult | undefined;
@@ -191,7 +195,7 @@ export class AuthService {
     return this.http.post<{ status: string; uid: string }>(`${this.apiUrl}/login-verify`, { idToken }, { withCredentials: true }).pipe(
       switchMap(() => this.checkSession()), // Reload session to get full user details
       catchError(err => {
-        this.isLoading.set(false);
+        setTimeout(() => this.isLoading.set(false), 0);
         return throwError(() => err);
       }),
       switchMap(user => {
@@ -213,7 +217,7 @@ export class AuthService {
     return this.http.post<{ status: string; uid: string }>(url, { name, idToken, key }, { withCredentials: true }).pipe(
       switchMap(() => this.checkSession()),
       catchError(err => {
-        this.isLoading.set(false);
+        setTimeout(() => this.isLoading.set(false), 0);
         return throwError(() => err);
       }),
       switchMap(user => {
@@ -233,6 +237,9 @@ export class AuthService {
           this.user.set(response.user);
           // Load config if session is active
           this.appConfigService.loadConfig();
+          // Start Real-time Listeners
+          this.peopleService.subscribeToFriends(response.user.uid);
+          this.notificationService.subscribeToNotifications(response.user.uid);
         } else {
           this.user.set(null);
         }
@@ -243,7 +250,7 @@ export class AuthService {
         return of(null);
       }),
       finalize(() => {
-        this.isLoading.set(false);
+        setTimeout(() => this.isLoading.set(false), 0);
       })
     );
   }
@@ -253,9 +260,12 @@ export class AuthService {
     return this.http.post<void>(`${this.apiUrl}/logout`, {}, { withCredentials: true }).pipe(
       tap(() => {
         this.user.set(null);
+        this.appConfigService.clearCache();
+        this.peopleService.clearData(); // Clear friends list & unsubscribe
+        this.notificationService.clearSubscription(); // Clear notifications & unsubscribe
       }),
       finalize(() => {
-        this.isLoading.set(false);
+        setTimeout(() => this.isLoading.set(false), 0);
       })
     );
   }

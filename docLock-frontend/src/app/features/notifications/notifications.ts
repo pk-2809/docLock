@@ -81,7 +81,7 @@ export class NotificationsComponent {
 
         this.requestData.set(notification.metadata);
         this.loadItems(notification.metadata.itemType);
-        this.searchQuery.set(notification.metadata.itemName || ''); // Pre-fill search
+        this.searchQuery.set(''); // Empty search by default
         this.showFulfillSheet.set(true);
     }
 

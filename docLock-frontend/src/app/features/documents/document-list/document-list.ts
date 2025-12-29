@@ -1,66 +1,33 @@
-import { Component, OnInit, OnDestroy, inject, HostListener, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { BottomSheetComponent } from '../../../shared/components/bottom-sheet/bottom-sheet.component';
-import { DropdownComponent, DropdownOption } from '../../../shared/components/dropdown/dropdown.component';
-import { DocumentService, Document as SvcDocument, Folder as SvcFolder } from '../../../core/services/document';
-import { ToastService } from '../../../core/services/toast.service';
+import { DocumentService, Document, Folder } from '../../../core/services/document';
+import { ToastService } from '../../../core/services/toast.service'; // Import ToastService
+import { forkJoin, finalize, timeout } from 'rxjs'; // Import forkJoin, finalize, timeout
+import { ChangeDetectorRef } from '@angular/core';
 import { AppConfigService } from '../../../core/services/app-config.service';
-import { forkJoin, timeout, finalize } from 'rxjs';
 
-// define local type that acts as union or extension for View
-export interface Document {
+interface Card {
     id: string;
     name: string;
-    type?: string;
-    size?: number | string;
-    formattedSize?: string;
-    date?: Date;
-    createdAt?: Date;
-    icon?: string;
-    color?: string;
-    category?: string;
-    isFolder?: boolean;
-    parentId?: string | null;
-    folderId?: string;
-    mimeType?: string;
-    webViewLink?: string;
-    driveFileId?: string;
-}
-
-export interface Folder {
-    id: string;
-    name: string;
-    path: string;
-    parentId?: string | null;
-    icon?: string;
-    color?: string;
-    itemCount?: number;
-    createdAt?: Date;
-}
-
-export interface BreadcrumbItem {
-    id: string | null | 'root';
-    name: string;
-    path?: string;
-}
-
-export interface Card {
-    id: string;
-    name: string;
-    type: string;
+    type: 'debit' | 'credit';
     number: string;
     expiryDate: string;
     cvv?: string;
-    createdAt?: Date;
-    color?: string;
+    createdAt: Date;
+}
+
+interface BreadcrumbItem {
+    id: string;
+    name: string;
+    path: string;
 }
 
 @Component({
     selector: 'app-document-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, BottomSheetComponent, DropdownComponent],
+    imports: [CommonModule, FormsModule],
     templateUrl: './document-list.html',
     styleUrl: './document-list.css'
 })
@@ -71,11 +38,10 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     private toastService = inject(ToastService);
     private cdr = inject(ChangeDetectorRef);
     private configService = inject(AppConfigService);
-    viewMode: 'home' | 'folders' | 'cards' | 'card-folder' | 'qrs' | 'list' | 'grid' = 'home';
+    viewMode: 'home' | 'folders' | 'cards' | 'card-folder' | 'qrs' = 'home';
     currentFolderId: string | null = null;
     currentCardFolder: 'debit' | 'credit' | null = null;
     searchQuery = '';
-    breadcrumbs: BreadcrumbItem[] = [{ id: 'root', name: 'My Documents', path: 'root' }];
 
     // UI States
     // UI States
@@ -100,14 +66,13 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     editFolderName = '';
 
     // Card related properties
-    showAddCardModal = false;
+    showAddCardBottomSheet = false;
+    editingCard: Card | null = null;
     newCardName = '';
     newCardNumber = '';
     newCardExpiry = '';
-    newCardType = 'Credit Card';
     newCardCvv = '';
-    editingCard: Card | null = null;
-    showAddCardBottomSheet = false;
+    newCardType = 'Credit Card';
 
     // Auto-detected folder properties
     public detectedIcon = 'folder';
@@ -115,31 +80,6 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Start with empty folders - user creates everything
     folders: Folder[] = [];
-
-    // Missing stats object
-    usageStats = {
-        storageUsed: 0,
-        storageLimit: 100,
-        qrUsed: 0,
-        qrLimit: 10,
-        cardsUsed: 0,
-        cardsLimit: 5
-    };
-
-    // Bottom Sheet Props
-    showFolderSheet = false;
-    showDocumentSheet = false;
-    newDocName = '';
-    selectedParentId: string | null = null;
-    folderOptions: DropdownOption[] = [];
-    previewIcon = '📁';
-
-    // Mock methods for bottom sheet actions
-    closeFolderSheet() { this.showFolderSheet = false; }
-    closeDocumentSheet() { this.showDocumentSheet = false; }
-    saveFolder() { this.createFolder(); } // Mapping old logic
-    saveDocument() { this.uploadDocument(); } // Mapping old logic
-    onFolderInput(e: any) { this.newFolderName = e.target.value; }
 
     // Start with empty documents - user uploads everything
     documents: Document[] = [];
@@ -158,6 +98,22 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.viewMode = 'qrs';
             }
         });
+
+        // Global Guard removed to prevent blocking valid interactions.
+        // We will handle specific input behavior in the template handlers.
+    }
+
+    ngAfterViewInit() {
+        // Auto-scroll breadcrumb to the end when it has many items
+        setTimeout(() => {
+            if (this.breadcrumbContainer && this.breadcrumbs.length > 3) {
+                const container = this.breadcrumbContainer.nativeElement;
+                const breadcrumbPath = container.querySelector('.overflow-x-auto');
+                if (breadcrumbPath) {
+                    breadcrumbPath.scrollLeft = breadcrumbPath.scrollWidth;
+                }
+            }
+        }, 100);
     }
 
     ngOnDestroy() {
@@ -184,28 +140,25 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                 try {
                     // Process Folders
                     if (res.folders && res.folders.folders) {
-                        this.folders = res.folders.folders.map((f: any) => ({
+                        this.folders = res.folders.folders.map(f => ({
                             ...f,
-                            createdAt: new Date(f.createdAt)
-                        }));
+                            createdAt: new Date(f.createdAt) as any
+                        })) as any;
                     } else {
                         this.folders = [];
                     }
 
                     // Process Documents
                     if (res.documents && res.documents.documents) {
-                        this.documents = res.documents.documents.map((d: any) => ({
+                        this.documents = res.documents.documents.map(d => ({
                             ...d,
                             type: d.mimeType ? d.mimeType.split('/').pop()?.toUpperCase() : 'DOC',
                             size: d.size || 0,
                             formattedSize: d.size ? `${(d.size / (1024 * 1024)).toFixed(2)} MB` : '0 MB',
                             date: d.createdAt ? new Date(d.createdAt) : new Date(),
-                            createdAt: d.createdAt ? new Date(d.createdAt) : new Date(),
                             icon: 'document',
                             color: 'bg-blue-500',
-                            folderId: d.folderId || undefined,
-                            parentId: d.folderId || null, // Map folderId to parentId for local logic
-                            isFolder: false
+                            folderId: d.folderId || undefined
                         }));
                     } else {
                         this.documents = [];
@@ -222,33 +175,78 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
-    ngAfterViewInit() {
-        // Lifecycle hook
-    }
-
     get currentFolder(): Folder | null {
         if (!this.currentFolderId) return null;
         return this.folders.find(f => f.id === this.currentFolderId) || null;
     }
 
-    // Previous breadcrumbs getter removed in favor of property
+    get breadcrumbs(): BreadcrumbItem[] {
+        const items: BreadcrumbItem[] = [
+            { id: 'root', name: 'My Documents', path: 'root' }
+        ];
 
-    // Removed duplicate currentFolders getter here
+        if (this.currentFolderId) {
+            // Build complete path by traversing up the folder hierarchy
+            const pathFolders: Folder[] = [];
+            let currentId: string | null = this.currentFolderId;
+
+            while (currentId) {
+                const folder = this.folders.find(f => f.id === currentId);
+                if (folder) {
+                    pathFolders.unshift(folder);
+                    currentId = folder.parentId;
+                } else {
+                    break;
+                }
+            }
+
+            // Add all folders in the path to breadcrumbs
+            pathFolders.forEach(folder => {
+                items.push({
+                    id: folder.id,
+                    name: folder.name,
+                    path: folder.id
+                });
+            });
+        }
+
+        return items;
+    }
 
     get currentFolders(): Folder[] {
-        // Return folders in current view that match parentId
-        return this.documents.filter(d => d.isFolder && d.parentId === this.currentFolderId) as unknown as Folder[];
+        return this.folders.filter(f => f.parentId === this.currentFolderId);
+    }
+
+    get totalStats() {
+        const totalDocs = this.documents.length;
+        const totalSize = this.documents.reduce((acc, doc) => {
+            return acc + (doc.size || 0);
+        }, 0);
+
+        // Convert to MB
+        const totalSizeMB = totalSize / (1024 * 1024);
+
+        return {
+            documents: totalDocs,
+            folders: this.folders.length,
+            size: `${totalSizeMB.toFixed(1)}MB`
+        };
+    }
+
+    get availableLocations(): Folder[] {
+        // Return all folders that can be parent folders (excluding current folder if editing)
+        return this.folders.filter(f => f.parentId === null);
     }
 
     get currentDocuments(): Document[] {
-        // Filter documents by folderId/parentId
-        let filtered = this.documents.filter(doc => !doc.isFolder && (doc.parentId === this.currentFolderId || doc.folderId === this.currentFolderId));
+        let filtered = this.documents.filter(doc => doc.folderId === this.currentFolderId);
 
         if (this.searchQuery) {
             filtered = filtered.filter(doc =>
                 doc.name.toLowerCase().includes(this.searchQuery.toLowerCase())
             );
         }
+
         return filtered;
     }
 
@@ -260,7 +258,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.showFabMenu = !this.showFabMenu;
     }
 
-    setViewMode(mode: 'home' | 'folders' | 'cards' | 'qrs' | 'list' | 'grid') {
+    setViewMode(mode: 'home' | 'folders' | 'cards' | 'qrs') {
         this.viewMode = mode;
         if (mode === 'home') {
             this.currentFolderId = null;
@@ -271,11 +269,10 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         // You can implement specific logic for cards and QRs later
     }
 
-    openFolder(folderOrId: string | Document) {
-        const folderId = typeof folderOrId === 'string' ? folderOrId : folderOrId.id;
+    openFolder(folderId: string) {
         this.currentFolderId = folderId;
         this.viewMode = 'folders'; // Stay in folders view, just change current folder
-
+        
         // Auto-scroll breadcrumb after folder change
         setTimeout(() => {
             if (this.breadcrumbContainer && this.breadcrumbs.length > 3) {
@@ -288,28 +285,11 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         }, 100);
     }
 
-    navigateToBreadcrumb(item: BreadcrumbItem | number) {
-        if (typeof item === 'number') {
-            this.breadcrumbs = this.breadcrumbs.slice(0, item + 1);
-            this.currentFolderId = this.breadcrumbs[item].id;
-            if (this.currentFolderId === null) this.setViewMode('folders');
-            return;
-        }
-
-        // Handle object item
-        if (item.id === 'root' || item.id === null) {
+    navigateToBreadcrumb(item: BreadcrumbItem) {
+        if (item.id === 'root') {
             this.setViewMode('folders');
-            this.currentFolderId = null;
-            // Reset breadcrumbs if going to root
-            this.breadcrumbs = [{ id: null, name: 'My Documents' }];
         } else {
             this.openFolder(item.id);
-            // Logic to fix breadcrumbs if jumping back?
-            // Usually just slice to that item.
-            const index = this.breadcrumbs.findIndex(b => b.id === item.id);
-            if (index !== -1) {
-                this.breadcrumbs = this.breadcrumbs.slice(0, index + 1);
-            }
         }
     }
 
@@ -473,15 +453,6 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
 
         const folder = this.folders.find(f => f.id === this.selectedLocationId);
         return folder ? folder.name : 'My Documents (Root)';
-    }
-
-    // OPTIMISTIC UPDATE
-    // But we need to update folderOptions as well when folder changes
-    updateFolderOptions() {
-        this.folderOptions = [
-            { label: 'My Documents (Root)', value: null },
-            ...this.folders.map(f => ({ label: f.name, value: f.id }))
-        ];
     }
 
     createFolder() {
@@ -701,12 +672,11 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     deleteFolder(folder: Folder) {
         // OPTIMISTIC DELETE
         const folderToDelete = folder;
-        // constant folderId bug fix
-        const relatedDocs = this.documents.filter(doc => doc.parentId === folder.id);
+        const relatedDocs = this.documents.filter(doc => doc.folderId === folder.id);
 
         // Remove immediately from UI
         this.folders = this.folders.filter(f => f.id !== folder.id);
-        this.documents = this.documents.filter(doc => doc.parentId !== folder.id && doc.id !== folder.id);
+        this.documents = this.documents.filter(doc => doc.folderId !== folder.id);
 
         // Update parent count recursively
         if (folder.parentId) {
@@ -779,7 +749,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     showCardCVV = new Set<string>();
 
     getCardGradient(type: string): string {
-        return type === 'credit'
+        return type === 'credit' 
             ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800'
             : 'bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800';
     }

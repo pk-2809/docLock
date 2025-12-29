@@ -29,8 +29,7 @@ export class MainLayoutComponent {
     }
 
     private updateActiveTab(url: string) {
-        if (url.includes('/dashboard')) this.activeTab = 'home';
-        else if (url.includes('/documents')) this.activeTab = 'docs';
+        if (url.includes('/dashboard') || url.includes('/documents')) this.activeTab = 'home';
         else if (url.includes('/friends')) this.activeTab = 'friends';
         else if (url.includes('/profile')) this.activeTab = 'profile';
     }

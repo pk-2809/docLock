@@ -4,12 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { PeopleService } from '../../../core/people/people.service';
 import { Router, RouterLink } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
-import { ConfirmationSheetComponent } from '../../../shared/components/confirmation-sheet/confirmation-sheet';
 
 @Component({
     selector: 'app-add-friend',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, ConfirmationSheetComponent],
+    imports: [CommonModule, FormsModule, RouterLink],
     templateUrl: './add-friend.html',
     styleUrl: './add-friend.css'
 })

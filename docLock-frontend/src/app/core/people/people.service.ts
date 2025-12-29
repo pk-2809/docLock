@@ -10,8 +10,18 @@ import { db } from '../auth/firebase';
 export interface Friend {
     uid: string;
     name: string;
+    email?: string;
     profileImage?: string;
     addedAt?: string;
+    isVerified?: boolean;
+    sharedDocs?: number;
+    sharedCards?: number;
+    activeRequests?: number;
+    recentActivity?: Array<{
+        id: number;
+        description: string;
+        time: string;
+    }>;
 }
 
 @Injectable({

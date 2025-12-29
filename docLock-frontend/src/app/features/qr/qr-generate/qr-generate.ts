@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-qr-generate',
@@ -9,5 +10,9 @@ import { CommonModule } from '@angular/common';
     styleUrl: './qr-generate.css'
 })
 export class QrGenerateComponent {
-    // TODO: Implement QR generation logic
+    router = inject(Router);
+
+    goBack() {
+        this.router.navigate(['/dashboard']);
+    }
 }

@@ -40,8 +40,9 @@
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-2">Mobile Number</label>
                 <input type="tel" name="mobile" [(ngModel)]="mobileNumber" required #mobileInput="ngModel"
-                    pattern="[0-9]{10}" maxlength="10" (input)="onMobileInput($event)"
-                    class="w-full bg-white border-2 border-slate-200 rounded-3xl px-4 py-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#6366f1] focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                    #mobileInputRef pattern="[0-9]{10}" maxlength="10" (input)="onMobileInput($event)"
+                    [disabled]="authService.isLoading()"
+                    class="w-full bg-white border border-slate-200 rounded-2xl px-4 py-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#6366f1] focus:ring-4 focus:ring-indigo-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="Enter 10-digit number">
 
                 <!-- Validation -->

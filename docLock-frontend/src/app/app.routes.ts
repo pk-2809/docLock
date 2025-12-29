@@ -34,7 +34,7 @@ export const routes: Routes = [
         children: [
             {
                 path: 'dashboard',
-                loadComponent: () => import('./features/documents/document-list/document-list').then(m => m.DocumentListComponent)
+                loadComponent: () => import('./features/dashboard/dashboard').then(m => m.DashboardComponent)
             },
             {
                 path: 'profile',
@@ -74,8 +74,7 @@ export const routes: Routes = [
             },
             {
                 path: 'documents',
-                redirectTo: 'dashboard',
-                pathMatch: 'full'
+                loadComponent: () => import('./features/documents/document-list/document-list').then(m => m.DocumentListComponent)
             },
             {
                 path: 'notifications',

@@ -7,6 +7,30 @@
     scrollbar-width: none;
 }
 
+/* Name Animation - Heartbeat/Pulse Effect */
+@keyframes heartbeat {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    25% {
+        transform: scale(1.05);
+        opacity: 0.95;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    75% {
+        transform: scale(1.03);
+        opacity: 0.98;
+    }
+}
+
+.name-heartbeat {
+    animation: heartbeat 2s ease-in-out infinite;
+}
+
 /* Bottom Sheet Animations */
 @keyframes slide-in-up {
     from {

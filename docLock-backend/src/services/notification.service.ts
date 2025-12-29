@@ -3,7 +3,7 @@ import { db } from '../config/firebase';
 export interface NotificationPayload {
     title: string;
     message: string;
-    icon: 'lock' | 'user' | 'bell' | 'trash'; // restricted icon set for UI mapping
+    icon: 'lock' | 'user' | 'bell' | 'trash' | 'check' | 'check-circle' | 'share'; // restricted icon set for UI mapping
     metadata?: any; // For actionable notifications (e.g., links, dynamic actions)
 }
 
@@ -18,6 +18,7 @@ export class NotificationService {
         try {
             const notificationRef = db.collection(this.COLLECTION).doc(uid).collection(this.SUB_COLLECTION).doc();
 
+            console.log(`[NotificationService] Creating doc in users/${uid}/notifications...`);
             await notificationRef.set({
                 id: notificationRef.id,
                 title: payload.title,
@@ -31,7 +32,7 @@ export class NotificationService {
                 timestamp: Date.now()
             });
 
-            console.log(`[Notification] Created for user ${uid}: ${payload.title}`);
+            console.log(`[Notification] Created successfully for user ${uid}. Doc ID: ${notificationRef.id}`);
         } catch (error) {
             console.error(`[Notification] Failed to create for user ${uid}:`, error);
             // We usually don't throw here to avoid blocking the main action (like profile update)

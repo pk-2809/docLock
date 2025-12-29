@@ -158,6 +158,8 @@ export class SignupComponent implements OnInit, AfterViewInit {
         // Ensure we have a signup key before proceeding
         if (!this.signupKey) return;
 
+        this.authService.isLoading.set(true); // Show loading immediately
+
         try {
             // 1. Verify OTP with Firebase
             const idToken = await this.authService.verifyOtp(code);
@@ -178,6 +180,7 @@ export class SignupComponent implements OnInit, AfterViewInit {
                     console.error('Signup Failed', err);
                     const errorMessage = err?.error?.error || 'Signup failed. Please try again.';
                     this.toast.showError(errorMessage);
+                    this.authService.isLoading.set(false); // Reset loading
                     this.otpComponent.triggerError();
                 }
             });
@@ -185,6 +188,7 @@ export class SignupComponent implements OnInit, AfterViewInit {
             console.error('OTP Verification Error', error);
             const errorMessage = error instanceof Error ? error.message : 'Invalid OTP. Please try again.';
             this.toast.showError(errorMessage);
+            this.authService.isLoading.set(false); // Reset loading
             this.otpComponent.triggerError();
         }
     }

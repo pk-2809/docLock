@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AES, enc } from 'crypto-js';
 
 export interface AppConfig {
     maxStorageLimit: number;
@@ -36,22 +37,87 @@ export class AppConfigService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}/api/config`;
 
-    // Signal to hold the config
+    // Secure Storage Key (Obfuscation only, not military-grade)
+    private readonly STORAGE_KEY = 'enc_app_cfg';
+    private readonly SECRET_KEY = 'DOCLOCK_SECURE_CFG_KEY';
+
     readonly config = signal<AppConfig>(DEFAULT_CONFIG);
     readonly isLoaded = signal<boolean>(false);
 
+    private loadingPromise: Promise<void> | null = null;
+
     async loadConfig(): Promise<void> {
-        try {
-            console.log('Fetching App Config...');
-            const config = await firstValueFrom(this.http.get<AppConfig>(this.apiUrl, { withCredentials: true }));
-            if (config) {
-                this.config.set(config);
-                this.isLoaded.set(true);
-                console.log('✅ App Config Loaded:', config);
+        // 1. Try to load from Cache first
+        if (this.loadFromCache()) {
+            return;
+        }
+
+        // 2. Return existing promise if already loading
+        if (this.loadingPromise) {
+            return this.loadingPromise;
+        }
+
+        // 3. If no cache, fetch from API
+        this.loadingPromise = (async () => {
+            try {
+                console.log('Fetching App Config from network...');
+                const config = await firstValueFrom(this.http.get<AppConfig>(this.apiUrl, { withCredentials: true }));
+                if (config) {
+                    const fullConfig = { ...DEFAULT_CONFIG, ...config };
+                    this.config.set(fullConfig);
+                    this.isLoaded.set(true);
+                    this.saveToCache(fullConfig); // Encrypt and Save
+                    console.log('✅ App Config Loaded (Network)');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load App Config, using defaults:', error);
+            } finally {
+                this.loadingPromise = null;
             }
-        } catch (error) {
-            console.error('❌ Failed to load App Config, using defaults:', error);
-            // We keep defaults, but log error
+        })();
+
+        return this.loadingPromise;
+    }
+
+    private loadFromCache(): boolean {
+        try {
+            const encryptedData = sessionStorage.getItem(this.STORAGE_KEY);
+            if (!encryptedData) return false;
+
+            const bytes = AES.decrypt(encryptedData, this.SECRET_KEY);
+            const decryptedData = JSON.parse(bytes.toString(enc.Utf8));
+
+            if (decryptedData) {
+                // Merge with DEFAULT_CONFIG to ensure new new fields (like imgFormatsAllowed) are present if missing in cache
+                this.config.set({ ...DEFAULT_CONFIG, ...decryptedData });
+                this.isLoaded.set(true);
+                console.log('⚡️ App Config Loaded (Secure Session Cache)');
+                return true;
+            }
+        } catch (e) {
+            console.warn('Cache decryption failed, fetching fresh config.');
+            sessionStorage.removeItem(this.STORAGE_KEY); // Clear corrupted cache
+        }
+        return false;
+    }
+
+    private saveToCache(data: AppConfig): void {
+        try {
+            const encryptedData = AES.encrypt(JSON.stringify(data), this.SECRET_KEY).toString();
+            sessionStorage.setItem(this.STORAGE_KEY, encryptedData);
+        } catch (e) {
+            console.error('Failed to save config to cache', e);
+        }
+    }
+
+    clearCache(): void {
+        try {
+            sessionStorage.removeItem(this.STORAGE_KEY);
+            this.config.set(DEFAULT_CONFIG);
+            this.isLoaded.set(false);
+            console.log('✅ App Config Session Cache Cleared');
+        } catch (e) {
+            console.error('Failed to clear config cache', e);
         }
     }
 }

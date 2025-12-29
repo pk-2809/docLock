@@ -2,6 +2,9 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../auth/firebase';
+import { Observable } from 'rxjs';
 
 export interface Notification {
     id: string;
@@ -27,12 +30,44 @@ export class NotificationService {
 
     constructor() { }
 
-    fetchNotifications() {
-        return this.http.get<{ status: string, data: Notification[] }>(this.apiUrl).pipe(
-            tap((res) => {
-                this.notifications.set(res.data || []);
-            })
-        );
+    private unsubscribeNotifications: (() => void) | null = null;
+
+    subscribeToNotifications(uid: string) {
+        if (this.unsubscribeNotifications) {
+            this.unsubscribeNotifications();
+        }
+
+        const notificationsRef = collection(db, 'users', uid, 'notifications');
+        // Sort by timestamp if possible, or just get all and sort in client.
+        // Firestore requires composite index for complex queries, so let's sort in client for simplicity if volume is low.
+        // Or use orderBy('createdAt', 'desc') if index exists. Let's try client sort first to avoid "index required" errors blocking the user.
+
+        this.unsubscribeNotifications = onSnapshot(notificationsRef, (snapshot) => {
+            const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
+            // Client-side sort
+            list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+            this.notifications.set(list);
+            console.log(`[NotificationService] Real-time updated: ${list.length}`);
+        }, (error) => {
+            console.error('[NotificationService] Real-time error:', error);
+        });
+    }
+
+    clearSubscription() {
+        if (this.unsubscribeNotifications) {
+            this.unsubscribeNotifications();
+            this.unsubscribeNotifications = null;
+        }
+        this.notifications.set([]);
+    }
+
+    // Deprecated: HTTP Fetch (Kept for reference)
+    fetchNotifications(): Observable<any> {
+        return new Observable(obs => {
+            obs.next({ data: this.notifications() });
+            obs.complete();
+        });
     }
 
     clearAll() {

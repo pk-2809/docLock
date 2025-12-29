@@ -1,4 +1,4 @@
-import { Component, signal, inject, ViewChild, type OnInit, type AfterViewInit } from '@angular/core';
+import { Component, signal, inject, ViewChild, ElementRef, type OnInit, type AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, type NavigationExtras } from '@angular/router';
@@ -87,7 +87,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
             return;
         }
 
-        this.authService.isLoading.set(true);
+        setTimeout(() => this.authService.isLoading.set(true), 0);
 
         // 1. Check if user exists
         this.authService.checkUser(mobile).subscribe({
@@ -156,6 +156,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     }
 
     async onOtpVerify(code: string): Promise<void> {
+        setTimeout(() => this.authService.isLoading.set(true), 0); // Show loading immediately (deferred to avoid NG0100)
         try {
             // 1. Verify OTP with Firebase
             const idToken = await this.authService.verifyOtp(code);
@@ -176,6 +177,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
                     console.error('Backend Login Failed', err);
                     const errorMessage = err?.error?.error || 'Login failed. Please try again.';
                     this.toast.showError(errorMessage);
+                    this.authService.isLoading.set(false); // Reset loading
                     this.otpComponent.triggerError();
                 }
             });
@@ -183,6 +185,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
             console.error('OTP Verification Error', error);
             const errorMessage = error instanceof Error ? error.message : 'Invalid OTP. Please try again.';
             this.toast.showError(errorMessage);
+            this.authService.isLoading.set(false); // Reset loading
             this.otpComponent.triggerError();
         }
     }

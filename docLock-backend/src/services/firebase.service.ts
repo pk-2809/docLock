@@ -532,14 +532,55 @@ export class FirebaseService {
             await Promise.allSettled(driveDeletePromises);
             console.log('Deleted Drive files');
 
+            // 3. Cleanup Friendships & Notifications (Cascading)
+            console.log(`Searching for friend connections for user: ${uid}...`);
             const friendsSnapshot = await db.collectionGroup('friends').where('uid', '==', uid).get();
+
             if (!friendsSnapshot.empty) {
-                const friendsBatch = db.batch();
-                friendsSnapshot.docs.forEach((doc) => {
-                    friendsBatch.delete(doc.ref);
+                const cleanupBatch = db.batch();
+                let operationCount = 0;
+
+                // We need to process each friend to find notifications sent by this user
+                // Using Promise.all manually to parallelize the notification lookups before batching deletes
+                const notificationCleanupPromises = friendsSnapshot.docs.map(async (friendDoc) => {
+                    // FriendDoc ref: users/{friendId}/friends/{uid}
+                    // We need to delete this ref.
+                    cleanupBatch.delete(friendDoc.ref);
+                    operationCount++;
+
+                    // Now find the friend's ID from the parent collection
+                    // doc.ref.parent is 'friends', doc.ref.parent.parent is 'users/{friendId}'
+                    const friendId = friendDoc.ref.parent.parent?.id;
+                    if (friendId) {
+                        try {
+                            // Find notifications sent by the deleted user (requests, shared items, etc.)
+                            // Query for metadata.requesterId == uid (for requests) OR metadata.senderId == uid (if we used that)
+                            // Based on people.controller.ts, 'request' type uses 'requesterId'.
+                            const notificationsRef = db.collection('users').doc(friendId).collection('notifications');
+
+                            // Perform a query. Index might be needed for 'metadata.requesterId'.
+                            // If index is missing, this might fail unless we catch it.
+                            const requestsQuery = await notificationsRef.where('metadata.requesterId', '==', uid).get();
+
+                            requestsQuery.docs.forEach(notifDoc => {
+                                cleanupBatch.delete(notifDoc.ref);
+                                operationCount++;
+                            });
+
+                        } catch (err) {
+                            console.warn(`Failed to cleanup notifications for friend ${friendId}:`, err);
+                        }
+                    }
                 });
-                await friendsBatch.commit();
-                console.log(`Removed user from ${friendsSnapshot.size} friend lists`);
+
+                await Promise.all(notificationCleanupPromises);
+
+                if (operationCount > 0) {
+                    // Batches have a limit of 500 operations. If > 500, we'd need to chunk.
+                    // Assuming < 500 for MVP.
+                    await cleanupBatch.commit();
+                    console.log(`Cascading cleanup complete: Removed from ${friendsSnapshot.size} friend lists and deleted related notifications.`);
+                }
             } else {
                 console.log('No friend connections found to clean up');
             }
@@ -564,74 +605,80 @@ export class FirebaseService {
         }
     }
 
+
     /**
      * Shares a document or card with another user.
+     * Returns the name of the shared item.
      */
-    static async shareItem(senderUid: string, recipientUid: string, itemId: string, type: 'document' | 'card'): Promise < void> {
-    if(!isFirebaseInitialized) {
-        console.log('[Mock] Sharing Item', { senderUid, recipientUid, itemId, type });
-        return;
-    }
+    static async shareItem(senderUid: string, recipientUid: string, itemId: string, type: 'document' | 'card'): Promise<string> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Sharing Item', { senderUid, recipientUid, itemId, type });
+            return 'Mock Item';
+        }
 
         try {
-        // 1. Get the item from Sender
-        const collectionName = type === 'document' ? 'documents' : 'cards';
-        const itemRef = db.collection('users').doc(senderUid).collection(collectionName).doc(itemId);
-        const itemDoc = await itemRef.get();
+            // 1. Get the item from Sender
+            const collectionName = type === 'document' ? 'documents' : 'cards';
+            const itemRef = db.collection('users').doc(senderUid).collection(collectionName).doc(itemId);
+            const itemDoc = await itemRef.get();
 
-        if(!itemDoc.exists) {
-    throw new CustomError('Item not found', 404);
-}
+            if (!itemDoc.exists) {
+                throw new CustomError('Item not found', 404);
+            }
 
-const itemData = itemDoc.data();
-if (!itemData) throw new CustomError('Item data empty', 500);
+            const itemData = itemDoc.data();
+            if (!itemData) throw new CustomError('Item data empty', 500);
 
-// 2. Get or Create "Shared" folder for Recipient
-let targetFolderId: string | null = null;
+            const itemName = itemData.name || 'Untitled Item';
 
-if (type === 'document') {
-    const foldersRef = db.collection('users').doc(recipientUid).collection('folders');
-    const sharedFolderQuery = await foldersRef.where('name', '==', 'Shared').limit(1).get();
+            // 2. Get or Create "Shared" folder for Recipient
+            let targetFolderId: string | null = null;
 
-    if (!sharedFolderQuery.empty) {
-        targetFolderId = sharedFolderQuery.docs[0].id;
-    } else {
-        // Create Shared folder
-        const newFolder = await this.createFolder(recipientUid, {
-            name: 'Shared',
-            parentId: null,
-            icon: 'users', // generic icon
-            color: 'bg-purple-500'
-        });
-        targetFolderId = newFolder.id;
-    }
-}
+            if (type === 'document') {
+                const foldersRef = db.collection('users').doc(recipientUid).collection('folders');
+                const sharedFolderQuery = await foldersRef.where('name', '==', 'Shared').limit(1).get();
 
-// 3. Create the item in Recipient's collection
-const newItemData = { ...itemData };
-delete newItemData.id; // Let Firestore generate new ID
+                if (!sharedFolderQuery.empty) {
+                    targetFolderId = sharedFolderQuery.docs[0].id;
+                } else {
+                    // Create Shared folder
+                    const newFolder = await this.createFolder(recipientUid, {
+                        name: 'Shared',
+                        parentId: null,
+                        icon: 'users', // generic icon
+                        color: 'bg-purple-500'
+                    });
+                    targetFolderId = newFolder.id;
+                }
+            }
 
-if (type === 'document') {
-    newItemData.folderId = targetFolderId;
-    newItemData.sharedBy = senderUid;
-    newItemData.sharedAt = new Date().toISOString();
+            // 3. Create the item in Recipient's collection
+            const newItemData = { ...itemData };
+            delete newItemData.id; // Let Firestore generate new ID
 
-    await db.collection('users').doc(recipientUid).collection('documents').add(newItemData);
+            if (type === 'document') {
+                newItemData.folderId = targetFolderId;
+                newItemData.sharedBy = senderUid;
+                newItemData.sharedAt = new Date().toISOString();
 
-    // Update folder count
-    if (targetFolderId) {
-        await this.updateFolderCounts(recipientUid, targetFolderId, 1);
-    }
-} else {
-    // Card
-    newItemData.sharedBy = senderUid;
-    newItemData.sharedAt = new Date().toISOString();
-    await db.collection('users').doc(recipientUid).collection('cards').add(newItemData);
-}
+                await db.collection('users').doc(recipientUid).collection('documents').add(newItemData);
+
+                // Update folder count
+                if (targetFolderId) {
+                    await this.updateFolderCounts(recipientUid, targetFolderId, 1);
+                }
+            } else {
+                // Card
+                newItemData.sharedBy = senderUid;
+                newItemData.sharedAt = new Date().toISOString();
+                await db.collection('users').doc(recipientUid).collection('cards').add(newItemData);
+            }
+
+            return itemName;
 
         } catch (error) {
-    console.error('Error sharing item:', error);
-    throw new CustomError('Failed to share item', 500);
-}
+            console.error('Error sharing item:', error);
+            throw new CustomError('Failed to share item', 500);
+        }
     }
 }

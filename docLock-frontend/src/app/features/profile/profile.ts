@@ -109,6 +109,7 @@ export class ProfileComponent {
     saveName() {
         if (!this.newName() || this.newName().trim() === '') {
             this.toastService.showError('Name cannot be empty');
+            this.nameInput.nativeElement.focus(); // Focus back
             return;
         }
 
@@ -118,6 +119,7 @@ export class ProfileComponent {
         }
 
         this.isSavingName.set(true);
+        this.nameInput.nativeElement.blur(); // Blur while processing
 
         const formData = new FormData();
         formData.append('name', this.newName());
@@ -134,6 +136,7 @@ export class ProfileComponent {
                 console.error('Failed to update name', err);
                 this.toastService.showError('Failed to update name');
                 this.isSavingName.set(false);
+                setTimeout(() => this.nameInput.nativeElement.focus(), 100); // Focus back on error
             }
         });
     }

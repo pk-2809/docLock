@@ -3,6 +3,7 @@ import { db } from '../config/firebase'; // Assuming db is exported from here
 import { AuthRequest } from '../middleware/auth'; // Assuming AuthRequest exists
 import { z, ZodError } from 'zod';
 import { NotificationService } from '../services/notification.service';
+import { FirebaseService } from '../services/firebase.service';
 
 const addFriendSchema = z.object({
     targetUserId: z.string().min(1)
@@ -33,27 +34,52 @@ export const addFriend = async (req: AuthRequest, res: Response): Promise<void> 
 
         const targetUserData = targetUserDoc.data();
 
-        // 2. Add to Friends Collection (Subcollection of User)
-        // Storing basics: uid, name, profileImage, email/mobile if available
-        await db.collection('users').doc(currentUserId).collection('friends').doc(targetUserId).set({
+        // 2. Mutual Friendship (Batch Write)
+        console.log(`[AddFriend] Initiating mutual add: ${currentUserId} <-> ${targetUserId}`);
+        const batch = db.batch();
+
+        // A -> B
+        const senderRef = db.collection('users').doc(currentUserId).collection('friends').doc(targetUserId);
+        console.log(`[AddFriend] 1. Adding to Sender: users/${currentUserId}/friends/${targetUserId}`);
+        batch.set(senderRef, {
             uid: targetUserId,
             name: targetUserData?.name || 'Unknown',
             profileImage: targetUserData?.profileImage || null,
             addedAt: new Date().toISOString()
         });
 
-        // Trigger Notification
-        await NotificationService.createNotification(currentUserId, {
+        // B -> A (Reverse)
+        const senderDoc = await db.collection('users').doc(currentUserId).get(); // Get sender details first
+        const senderData = senderDoc.data();
+
+        const receiverRef = db.collection('users').doc(targetUserId).collection('friends').doc(currentUserId);
+        console.log(`[AddFriend] 2. Adding to Receiver: users/${targetUserId}/friends/${currentUserId}`);
+        batch.set(receiverRef, {
+            uid: currentUserId,
+            name: senderData?.name || 'Unknown',
+            profileImage: senderData?.profileImage || null,
+            addedAt: new Date().toISOString()
+        });
+
+        await batch.commit();
+        console.log(`[AddFriend] Batch Committed.`);
+        console.log(`[AddFriend] Mutual friendship executed successfully.`);
+
+        // Trigger Notification to Target
+        await NotificationService.createNotification(targetUserId, { // Fixed: Send to Target, not current
             title: 'New Connection',
-            message: `You added ${targetUserData?.name || 'a new friend'} to your network.`,
+            message: `${senderData?.name || 'Someone'} added you to their secure circle.`,
             icon: 'user'
         });
 
-        // Optional: Add reverse friendship? Usually "Add Friend" is mutual or request-based.
-        // For simplicity based on prompt "add it to a friends list", we'll treat it as following/direct add.
+        // Notify Sender (User A)
+        await NotificationService.createNotification(currentUserId, {
+            title: 'Friend Added',
+            message: `You have successfully added ${targetUserData?.name || 'User'} to your secure circle.`,
+            icon: 'check-circle'
+        });
 
-        res.status(200).json({ message: 'Friend added successfully' });
-
+        res.status(200).json({ message: 'Friend added successfully (Mutual)' });
     } catch (error) {
         if (error instanceof ZodError) {
             res.status(400).json({ error: (error as any).errors });
@@ -62,7 +88,7 @@ export const addFriend = async (req: AuthRequest, res: Response): Promise<void> 
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-}
+};
 
 
 export const getPublicProfile = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -110,7 +136,7 @@ export const getFriends = async (req: AuthRequest, res: Response): Promise<void>
         }
 
         const friendsSnapshot = await db.collection('users').doc(currentUserId).collection('friends').get();
-        const friends = friendsSnapshot.docs.map(doc => doc.data());
+        const friends = friendsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         res.status(200).json({ friends });
     } catch (error) {
@@ -129,12 +155,38 @@ export const deleteFriend = async (req: AuthRequest, res: Response): Promise<voi
             return;
         }
 
-        await db.collection('users').doc(currentUserId).collection('friends').doc(friendId).delete();
+        // Fetch details before deletion to get names
+        const [currentUserDoc, friendUserDoc] = await Promise.all([
+            db.collection('users').doc(currentUserId).get(),
+            db.collection('users').doc(friendId).get()
+        ]);
 
-        // Trigger Notification
+        const currentUserName = currentUserDoc.data()?.name || 'Someone';
+        const friendName = friendUserDoc.data()?.name || 'User';
+
+        const batch = db.batch();
+
+        // 1. Remove from Current User's List
+        const currentUserRef = db.collection('users').doc(currentUserId).collection('friends').doc(friendId);
+        batch.delete(currentUserRef);
+
+        // 2. Remove from Friend's List
+        const friendUserRef = db.collection('users').doc(friendId).collection('friends').doc(currentUserId);
+        batch.delete(friendUserRef);
+
+        await batch.commit();
+
+        // Notify Deleter (User A)
         await NotificationService.createNotification(currentUserId, {
-            title: 'Connection Removed',
-            message: 'You have removed a friend from your network.',
+            title: 'Connection Severed',
+            message: `You have removed ${friendName} from your secure circle.`,
+            icon: 'trash'
+        });
+
+        // Notify Deleted (User B)
+        await NotificationService.createNotification(friendId, {
+            title: 'Connection Lost',
+            message: `${currentUserName} has removed you from their friend list.`,
             icon: 'trash'
         });
 
@@ -151,7 +203,7 @@ const shareItemSchema = z.object({
     type: z.enum(['document', 'card'])
 });
 
-import { FirebaseService } from '../services/firebase.service';
+
 
 export const shareItem = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
@@ -172,13 +224,17 @@ export const shareItem = async (req: AuthRequest, res: Response): Promise<void> 
             return;
         }
 
-        await FirebaseService.shareItem(currentUserId, recipientUid, itemId, type);
+        const itemName = await FirebaseService.shareItem(currentUserId, recipientUid, itemId, type);
+
+        // Get Sender Name
+        const senderDoc = await db.collection('users').doc(currentUserId).get();
+        const senderName = senderDoc.data()?.name || 'A friend';
 
         // Notify Recipient
         await NotificationService.createNotification(recipientUid, {
             title: 'New Shared Item',
-            message: `A friend shared a ${type} with you. Check your Shared folder.`,
-            icon: 'bell' // Generic icon for now to satisfy type
+            message: `${senderName} shared "${itemName}" (${type}) with you. Check your Shared folder.`,
+            icon: 'share'
         });
 
         res.status(200).json({ message: 'Item shared successfully' });
@@ -208,9 +264,12 @@ export const requestItem = async (req: AuthRequest, res: Response): Promise<void
             return;
         }
 
+        console.log(`[RequestItem] User ${currentUserId} requesting ${itemType} "${itemName}" from ${recipientUid}`);
+
         // Check friendship
         const friendCheck = await db.collection('users').doc(currentUserId).collection('friends').doc(recipientUid).get();
         if (!friendCheck.exists) {
+            console.warn(`[RequestItem] Failed: Not friends (User: ${currentUserId}, Target: ${recipientUid})`);
             res.status(403).json({ error: 'You can only request items from friends' });
             return;
         }
@@ -219,7 +278,9 @@ export const requestItem = async (req: AuthRequest, res: Response): Promise<void
         const requesterDoc = await db.collection('users').doc(currentUserId).get();
         const requesterName = requesterDoc.data()?.name || 'A friend';
 
-        // Notify Recipient
+        console.log(`[RequestItem] Sending notification to ${recipientUid} from ${requesterName}`);
+
+        // 1. Notify Recipient (Actionable)
         await NotificationService.createNotification(recipientUid, {
             title: 'New Request',
             message: `${requesterName} is requesting "${itemName}" (${itemType}). Tap to respond.`,
@@ -234,6 +295,14 @@ export const requestItem = async (req: AuthRequest, res: Response): Promise<void
             }
         });
 
+        // 2. Notify Sender (Confirmation/Log)
+        await NotificationService.createNotification(currentUserId, {
+            title: 'Request Sent',
+            message: `You requested "${itemName}" (${itemType}) from ${friendCheck.data()?.name || 'friend'}.`,
+            icon: 'check-circle'
+        });
+
+        console.log(`[RequestItem] Notifications sent successfully`);
         res.status(200).json({ message: 'Request sent successfully' });
 
     } catch (error) {

@@ -1,3 +1,25 @@
+/* App Wrapper - Constrains app to max 500px width and centers it */
+.app-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    background: #f8fafc;
+}
+
+.layout-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+}
+
+@media (max-width: 500px) {
+    .layout-container {
+        max-width: 100%;
+    }
+}
+
 /* Nav Item Styling */
 .nav-item {
     padding: 0.5rem;

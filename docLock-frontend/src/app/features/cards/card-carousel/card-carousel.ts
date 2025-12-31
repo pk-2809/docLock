@@ -23,6 +23,7 @@ export class CardCarouselComponent implements OnInit {
 
     // Methods passed from parent
     @Input() getCardGradient!: (card: Card) => string;
+    @Input() getCardGradientStyle!: (card: Card) => { [key: string]: string } | null;
     @Input() getDisplayCardNumber!: (card: Card) => string;
     @Input() getDisplayCVV!: (card: Card) => string;
     @Input() formatCardNumber!: (number: string) => string;
@@ -32,7 +33,7 @@ export class CardCarouselComponent implements OnInit {
     @Output() toggleVisibility = new EventEmitter<string>();
     @Output() copyToClipboard = new EventEmitter<{ text: string, label: string }>();
     @Output() editCard = new EventEmitter<Card>();
-    @Output() deleteCard = new EventEmitter<string>();
+    @Output() deleteCard = new EventEmitter<Card>();
 
     selectedCardIndex = 0;
     carouselId = '';
@@ -98,8 +99,8 @@ export class CardCarouselComponent implements OnInit {
         this.editCard.emit(card);
     }
 
-    onDeleteCard(cardId: string) {
-        this.deleteCard.emit(cardId);
+    onDeleteCard(card: Card) {
+        this.deleteCard.emit(card);
     }
 
     getCardTypeLabel(): string {
@@ -140,5 +141,33 @@ export class CardCarouselComponent implements OnInit {
             return 'text-blue-600 hover:text-blue-700';
         }
         return 'text-emerald-600 hover:text-emerald-700';
+    }
+
+    getExpiryStatus(expiryDate: string): 'expired' | 'soon' | 'valid' {
+        if (!expiryDate || !expiryDate.includes('/')) return 'valid';
+
+        try {
+            const [monthStr, yearStr] = expiryDate.split('/');
+            const month = parseInt(monthStr, 10);
+            const year = 2000 + parseInt(yearStr, 10); // Assume 20xx
+
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1; // 0-indexed
+
+            // Check if expired
+            if (year < currentYear || (year === currentYear && month < currentMonth)) {
+                return 'expired';
+            }
+
+            // Check if expiring soon (Next Year rule as per requirement)
+            if (year === currentYear + 1) {
+                return 'soon';
+            }
+
+            return 'valid';
+        } catch (e) {
+            return 'valid';
+        }
     }
 }

@@ -1,9 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { Card, CardService } from '../../../core/services/card';
 import { ToastService } from '../../../core/services/toast.service';
+import { AuthService } from '../../../core/auth/auth';
 
 @Component({
     selector: 'app-add-card',
@@ -13,10 +14,12 @@ import { ToastService } from '../../../core/services/toast.service';
     styleUrl: './add-card.css'
 })
 export class AddCardComponent implements OnInit {
+    authService = inject(AuthService);
     router = inject(Router);
     route = inject(ActivatedRoute);
     toastService = inject(ToastService);
     cardService = inject(CardService);
+    cdr = inject(ChangeDetectorRef);
 
     newCard: Partial<Card> = {
         name: '',
@@ -33,14 +36,20 @@ export class AddCardComponent implements OnInit {
     cardId: string | null = null;
     isLoading = false;
 
-    // Standard app colors for random theming
+    // Standard app colors for random theming (hex colors)
     private standardColors = [
-        'from-yellow-600 to-amber-700',
-        'from-amber-600 to-orange-700',
-        'from-orange-600 to-yellow-600',
-        'from-yellow-500 to-amber-600',
-        'from-amber-500 to-orange-600',
-        'from-orange-500 to-yellow-500'
+        '#FF5555',
+        '#1581BF',
+        '#FF6D1F',
+        '#5459AC',
+        '#007E6E',
+        '#8CA9FF',
+        '#84994F',
+        '#9E1C60',
+        '#9B5DE0',
+        '#34656D',
+        '#D92C54',
+        '#DC3C22'
     ];
 
     ngOnInit() {
@@ -85,6 +94,7 @@ export class AddCardComponent implements OnInit {
                     this.router.navigate(['/cards']);
                 }
                 this.isLoading = false;
+                this.cdr.detectChanges(); // Force update to fix edit state lag
             },
             error: (err) => {
                 console.error('Failed to load card:', err);
@@ -98,6 +108,7 @@ export class AddCardComponent implements OnInit {
     getRandomColor(): string {
         return this.standardColors[Math.floor(Math.random() * this.standardColors.length)];
     }
+
 
     getBrandName(brand: 'visa' | 'mastercard' | 'rupay'): string {
         const brandMap = {
@@ -113,31 +124,92 @@ export class AddCardComponent implements OnInit {
         return number.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
     }
 
+    detectCardNetwork(number: string) {
+        // Remove spaces
+        const cleanNumber = number.replace(/\D/g, '');
+
+        // Visa: Starts with 4
+        if (/^4/.test(cleanNumber)) {
+            this.selectedBrand = 'visa';
+        }
+        // Mastercard: Starts with 51-55 or 2221-2720
+        else if (/^5[1-5]/.test(cleanNumber) || /^2[2-7]/.test(cleanNumber)) {
+            this.selectedBrand = 'mastercard';
+        }
+        // RuPay: Starts with 60, 6521, 6522
+        // Note: RuPay ranges can be complex, catching common starts
+        else if (/^60/.test(cleanNumber) || /^65/.test(cleanNumber) || /^8/.test(cleanNumber) || /^50/.test(cleanNumber)) {
+            this.selectedBrand = 'rupay';
+        }
+        // Default to Visa if unknown (or keep previous)
+    }
+
     formatInputCardNumber(event: Event) {
         const input = event.target as HTMLInputElement;
         let value = input.value.replace(/\s/g, '');
+
+        // Auto-detect network
+        this.detectCardNetwork(value);
+
         value = value.replace(/(.{4})/g, '$1 ').trim();
         this.newCard.number = value;
+    }
+
+    formatInputName(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const value = input.value.replace(/[^a-zA-Z\s]/g, '');
+        this.newCard.name = value;
+        input.value = value;
+    }
+
+    formatInputHolderName(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const value = input.value.replace(/[^a-zA-Z\s]/g, '');
+        this.newCard.holderName = value.toUpperCase();
+        input.value = value.toUpperCase();
+    }
+
+    formatInputCVV(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const value = input.value.replace(/\D/g, '');
+        this.newCard.cvv = value;
+        input.value = value;
     }
 
     formatInputExpiry(event: Event) {
         const input = event.target as HTMLInputElement;
         let value = input.value.replace(/\D/g, '');
+
         if (value.length >= 2) {
+            const month = parseInt(value.substring(0, 2));
+            if (month > 12) {
+                value = '12' + value.substring(2);
+            } else if (month === 0) {
+                // Optionally handle 00, but 01-12 is valid.
+                // Leaving 0 as is might allow 01 typing.
+            }
             value = value.substring(0, 2) + '/' + value.substring(2, 4);
         }
+
         this.newCard.expiryDate = value;
+        input.value = value; // Sync view
+    }
+
+    selectCardType(type: 'debit' | 'credit') {
+        this.newCard.type = type;
+        // Don't assign color here - it will be assigned on submit
     }
 
     resetNewCard() {
+        // Don't set color initially - it will be set when user selects card type
         this.newCard = {
             name: '',
             type: 'credit',
             number: '',
             expiryDate: '',
             cvv: '',
-            holderName: '',
-            color: this.getRandomColor()
+            holderName: this.authService.user()?.name || '',
+            color: '' // Will be set when card type is selected
         };
         this.selectedBrand = 'visa';
         this.editingCard = null;
@@ -156,13 +228,15 @@ export class AddCardComponent implements OnInit {
             ...this.newCard,
             number: cleanNumber,
             bankName: this.getBrandName(this.selectedBrand),
-            type: this.newCard.type as 'credit' | 'debit'
+            type: this.newCard.type as 'credit' | 'debit',
+            // Assign random color only on submit (for new cards, preserve existing color for edits)
+            color: this.editingCard ? (this.newCard.color || this.getRandomColor()) : this.getRandomColor()
         };
 
         this.isLoading = true;
 
         if (this.editingCard && this.cardId) {
-            // Update existing card
+            // Update existing card - preserve existing color if it exists
             this.cardService.updateCard(this.cardId, cardData).subscribe({
                 next: () => {
                     this.toastService.showSuccess('Card updated successfully!');
@@ -175,7 +249,7 @@ export class AddCardComponent implements OnInit {
                 }
             });
         } else {
-            // Add new card
+            // Add new card - assign random color
             this.cardService.createCard(cardData).subscribe({
                 next: () => {
                     this.toastService.showSuccess('Card added successfully!');

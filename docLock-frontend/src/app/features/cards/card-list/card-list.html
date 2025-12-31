@@ -24,115 +24,156 @@
   <div class="w-full max-w-[639px] mx-auto px-4 py-4 flex flex-col overflow-hidden relative z-10"
     style="height: calc(100vh - 5rem); max-height: calc(100vh - 5rem);">
 
-     <header class="flex-shrink-0 pt-8">
-       <div class="flex items-center justify-center mb-6 relative">
-           <!-- Back Button -->
-           <button (click)="goBack()"
-               class="absolute left-0 w-10 h-10 rounded-xl bg-white shadow-lg flex items-center justify-center text-slate-600 active:text-pink-600 transition-all active:scale-95 touch-manipulation">
-               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
-               </svg>
-           </button>
-
-           <!-- Centered Title -->
-           <div class="text-center">
-               <h1 class="text-xl font-bold text-slate-800 tracking-tight">My Cards</h1>
-               <p class="text-xs sm:text-sm text-slate-600 font-medium">Total 4 cards</p>
-              </div>
-
-           <!-- Add Card Button -->
-           <button (click)="openAddCardModal()"
-               class="absolute right-0 w-10 h-10 rounded-xl bg-pink-600 active:bg-pink-700 text-white shadow-lg shadow-pink-500/25 flex items-center justify-center transition-all active:scale-95 touch-manipulation group overflow-hidden">
-               <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-active:translate-x-full transition-transform duration-700"></div>
-               <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
-               </svg>
-           </button>
-       </div>
-   </header>
-
-    <!-- Cards Content -->
-    <div class="flex-1 min-h-0 flex flex-col justify-between">
-      <!-- Empty State -->
-      <div *ngIf="allCards.length === 0" class="text-center py-16">
-        <div class="w-20 h-20 mx-auto mb-6 bg-pink-100 rounded-3xl flex items-center justify-center">
-          <svg class="w-10 h-10 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+    <header class="flex-shrink-0 pt-8">
+      <div class="flex items-center justify-center mb-4 relative">
+        <!-- Back Button -->
+        <button (click)="goBack()"
+          class="absolute left-0 w-10 h-10 rounded-xl bg-white shadow-lg flex items-center justify-center text-slate-600 active:text-pink-600 transition-all active:scale-95 touch-manipulation">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
-        </div>
-        <h3 class="text-xl font-bold text-slate-800 mb-2">No Cards Yet</h3>
-        <p class="text-slate-500 mb-8 font-medium">Add your first card to get started</p>
+        </button>
 
+        <!-- Centered Title -->
+        <div class="text-center">
+          <h1 class="text-xl font-bold text-slate-800 tracking-tight">My Cards</h1>
+          <p class="text-xs sm:text-sm text-slate-600 font-medium">Total 4 cards</p>
+        </div>
+
+        <!-- Add Card Button -->
         <button (click)="openAddCardModal()"
-          class="flex items-center gap-2 px-6 py-3 bg-pink-600 active:bg-pink-700 text-white font-medium rounded-2xl shadow-lg shadow-pink-500/25 transition-all active:scale-95 touch-manipulation mx-auto">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          class="absolute right-0 w-10 h-10 rounded-xl bg-pink-600 active:bg-pink-700 text-white shadow-lg shadow-pink-500/25 flex items-center justify-center transition-all active:scale-95 touch-manipulation group overflow-hidden">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-active:translate-x-full transition-transform duration-700">
+          </div>
+          <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          <span>Add Your First Card</span>
         </button>
       </div>
+    </header>
 
-      <!-- Cards Sections -->
-      <div *ngIf="allCards.length > 0" class="flex flex-col gap-3" style="height: 100%;">
-        <!-- Info Note -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-2 flex-shrink-0 mb-4">
-          <div class="flex items-center gap-2">
-            <svg class="w-3 h-3 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-xs text-blue-800 leading-tight">
-              <span class="font-semibold">Tip:</span> Click any card detail to copy it.
-            </p>
-          </div>
+    <!-- Shimmer Loading State -->
+    <div *ngIf="isLoading" class="flex-1 min-h-0 flex flex-col gap-6 p-1">
+      <!-- Info Note Skeleton -->
+      <div class="h-8 bg-white/50 rounded-lg w-full animate-pulse"></div>
+
+      <!-- Debit Cards Skeleton -->
+      <div class="flex-1 flex flex-col gap-4">
+        <div class="flex justify-between items-center">
+          <div class="h-5 bg-slate-200 rounded w-24 animate-pulse"></div>
+          <div class="h-5 bg-slate-200 rounded w-16 animate-pulse"></div>
+        </div>
+        <div class="relative w-full aspect-[1.586] rounded-2xl overflow-hidden bg-white shadow-xl">
+          <div class="absolute inset-0 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-shimmer"
+            style="background-size: 200% 100%;"></div>
+        </div>
+      </div>
+
+      <!-- Credit Cards Skeleton -->
+      <div class="flex-1 flex flex-col gap-4">
+        <div class="flex justify-between items-center">
+          <div class="h-5 bg-slate-200 rounded w-24 animate-pulse"></div>
+          <div class="h-5 bg-slate-200 rounded w-16 animate-pulse"></div>
+        </div>
+        <div class="relative w-full aspect-[1.586] rounded-2xl overflow-hidden bg-white shadow-xl">
+          <div class="absolute inset-0 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-shimmer"
+            style="background-size: 200% 100%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards Content -->
+    <div *ngIf="!isLoading && allCards.length === 0" class="text-center py-16">
+      <!-- Empty State -->
+      <div class="w-20 h-20 mx-auto mb-6 bg-pink-100 rounded-3xl flex items-center justify-center">
+        <svg class="w-10 h-10 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-slate-800 mb-2">No Cards Yet</h3>
+      <p class="text-slate-500 mb-8 font-medium">Add your first card to get started</p>
+
+      <button (click)="openAddCardModal()"
+        class="flex items-center gap-2 px-6 py-3 bg-pink-600 active:bg-pink-700 text-white font-medium rounded-2xl shadow-lg shadow-pink-500/25 transition-all active:scale-95 touch-manipulation mx-auto">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span>Add Your First Card</span>
+      </button>
+    </div>
+
+    <!-- Cards Sections -->
+    <div *ngIf="!isLoading && allCards.length > 0" class="flex flex-col gap-3" style="height: 100%;">
+      <!-- Info Note -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-2 flex-shrink-0 mb-4">
+        <div class="flex items-center gap-2">
+          <svg class="w-3 h-3 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-xs text-blue-800 leading-tight">
+            <span class="font-semibold">Tip:</span> Click any card detail to copy it.
+          </p>
+        </div>
+      </div>
+
+      <!-- Debit Cards Section -->
+      <div *ngIf="debitCards.length > 0" [style.flex]="creditCards.length > 0 ? '1' : '1'"
+        class="min-h-0 flex flex-col">
+        <div class="flex items-center justify-between mb-2 flex-shrink-0">
+          <h3 class="text-sm font-bold text-slate-800">Debit Cards</h3>
+          <span class="text-xs text-slate-500 bg-emerald-100 px-2 py-0.5 rounded-full">{{debitCards.length}}
+            cards</span>
         </div>
 
-        <!-- Debit Cards Section -->
-        <div *ngIf="debitCards.length > 0" [style.flex]="creditCards.length > 0 ? '1' : '1'"
-          class="min-h-0 flex flex-col">
-          <div class="flex items-center justify-between mb-2 flex-shrink-0">
-            <h3 class="text-sm font-bold text-slate-800">Debit Cards</h3>
-            <span class="text-xs text-slate-500 bg-emerald-100 px-2 py-0.5 rounded-full">{{debitCards.length}}
-              cards</span>
-          </div>
+        <!-- Debit Cards Carousel -->
+        <div class="flex-1 min-h-0">
+          <app-card-carousel [cards]="debitCards" [cardType]="'debit'" [indicatorColor]="'pink'"
+            [cardVisibilityState]="cardVisibilityState" [getCardGradient]="getCardGradient.bind(this)"
+            [getCardGradientStyle]="getCardGradientStyle.bind(this)"
+            [getDisplayCardNumber]="getDisplayCardNumber.bind(this)" [getDisplayCVV]="getDisplayCVV.bind(this)"
+            [formatCardNumber]="formatCardNumber.bind(this)" [getMaskedCardNumber]="getMaskedCardNumber.bind(this)"
+            (toggleVisibility)="toggleCardVisibility($event)"
+            (copyToClipboard)="copyToClipboard($event.text, $event.label)" (editCard)="editCard($event)"
+            (deleteCard)="deleteCard($any($event))">
+          </app-card-carousel>
+        </div>
+      </div>
 
-          <!-- Debit Cards Carousel -->
-          <div class="flex-1 min-h-0">
-            <app-card-carousel [cards]="debitCards" [cardType]="'debit'" [indicatorColor]="'pink'"
-              [cardVisibilityState]="cardVisibilityState" [getCardGradient]="getCardGradient.bind(this)"
-              [getDisplayCardNumber]="getDisplayCardNumber.bind(this)" [getDisplayCVV]="getDisplayCVV.bind(this)"
-              [formatCardNumber]="formatCardNumber.bind(this)" [getMaskedCardNumber]="getMaskedCardNumber.bind(this)"
-              (toggleVisibility)="toggleCardVisibility($event)"
-              (copyToClipboard)="copyToClipboard($event.text, $event.label)" (editCard)="editCard($event)"
-              (deleteCard)="deleteCard($event)">
-            </app-card-carousel>
-          </div>
+      <!-- Credit Cards Section -->
+      <div *ngIf="creditCards.length > 0" [style.flex]="debitCards.length > 0 ? '1' : '1'"
+        class="min-h-0 flex flex-col">
+        <div class="flex items-center justify-between mb-2 flex-shrink-0">
+          <h3 class="text-sm font-bold text-slate-800">Credit Cards</h3>
+          <span class="text-xs text-slate-500 bg-blue-100 px-2 py-0.5 rounded-full">{{creditCards.length}}
+            cards</span>
         </div>
 
-        <!-- Credit Cards Section -->
-        <div *ngIf="creditCards.length > 0" [style.flex]="debitCards.length > 0 ? '1' : '1'"
-          class="min-h-0 flex flex-col">
-          <div class="flex items-center justify-between mb-2 flex-shrink-0">
-            <h3 class="text-sm font-bold text-slate-800">Credit Cards</h3>
-            <span class="text-xs text-slate-500 bg-blue-100 px-2 py-0.5 rounded-full">{{creditCards.length}}
-              cards</span>
-          </div>
-
-          <!-- Credit Cards Carousel -->
-          <div class="flex-1 min-h-0">
-            <app-card-carousel [cards]="creditCards" [cardType]="'credit'" [indicatorColor]="'blue'"
-              [cardVisibilityState]="cardVisibilityState" [getCardGradient]="getCardGradient.bind(this)"
-              [getDisplayCardNumber]="getDisplayCardNumber.bind(this)" [getDisplayCVV]="getDisplayCVV.bind(this)"
-              [formatCardNumber]="formatCardNumber.bind(this)" [getMaskedCardNumber]="getMaskedCardNumber.bind(this)"
-              (toggleVisibility)="toggleCardVisibility($event)"
-              (copyToClipboard)="copyToClipboard($event.text, $event.label)" (editCard)="editCard($event)"
-              (deleteCard)="deleteCard($event)">
-            </app-card-carousel>
-          </div>
+        <!-- Credit Cards Carousel -->
+        <div class="flex-1 min-h-0">
+          <app-card-carousel [cards]="creditCards" [cardType]="'credit'" [indicatorColor]="'blue'"
+            [cardVisibilityState]="cardVisibilityState" [getCardGradient]="getCardGradient.bind(this)"
+            [getCardGradientStyle]="getCardGradientStyle.bind(this)"
+            [getDisplayCardNumber]="getDisplayCardNumber.bind(this)" [getDisplayCVV]="getDisplayCVV.bind(this)"
+            [formatCardNumber]="formatCardNumber.bind(this)" [getMaskedCardNumber]="getMaskedCardNumber.bind(this)"
+            (toggleVisibility)="toggleCardVisibility($event)"
+            (copyToClipboard)="copyToClipboard($event.text, $event.label)" (editCard)="editCard($event)"
+            (deleteCard)="deleteCard($any($event))">
+          </app-card-carousel>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Delete Confirmation Sheet -->
+  @if (showDeleteSheet) {
+  <app-confirmation-sheet title="Delete Card?"
+    [message]="'Are you sure you want to delete your ' + (cardToDelete?.bankName || '') + ' ' + (cardToDelete?.type === 'credit' ? 'Credit' : 'Debit') + ' Card ending in ' + (cardToDelete?.number?.slice(-4)) + '?'"
+    confirmText="Yes, Delete" cancelText="Cancel" type="danger" [isLoading]="isDeleting" (confirm)="confirmDeleteCard()"
+    (cancel)="closeDeleteSheet()">
+  </app-confirmation-sheet>
+  }
 </div>

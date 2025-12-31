@@ -45,8 +45,8 @@
         <!-- Dynamic Card Preview - Fixed Static Position -->
         <div class="flex-none px-4 pb-4">
             <div class="max-w-sm mx-auto">
-                <div class="w-full max-w-[340px] mx-auto aspect-[1.586/1] rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden animate-fade-in"
-                    [class]="newCard.color ? 'bg-gradient-to-br ' + newCard.color : 'bg-gradient-to-br from-yellow-600 to-amber-700'">
+                <div
+                    class="w-full max-w-[340px] mx-auto aspect-[1.586/1] rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden animate-fade-in bg-gradient-to-br from-yellow-600 to-amber-700">
 
                     <!-- Card Pattern Overlay -->
                     <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none">
@@ -102,7 +102,7 @@
                     <div>
                         <label class="block text-sm font-bold text-slate-900 mb-3">Card Type</label>
                         <div class="grid grid-cols-2 gap-3">
-                            <button type="button" (click)="newCard.type = 'debit'; newCard.color = getRandomColor()"
+                            <button type="button" (click)="selectCardType('debit')"
                                 [class]="newCard.type === 'debit' ? 'bg-emerald-500 text-white shadow-lg border-2 border-emerald-500' : 'bg-white/90 backdrop-blur-xl border border-yellow-600/30 text-slate-600 hover:bg-slate-50'"
                                 class="flex items-center justify-center gap-2 p-3 rounded-2xl font-medium transition-all active:scale-95">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@
                                 </svg>
                                 Debit Card
                             </button>
-                            <button type="button" (click)="newCard.type = 'credit'; newCard.color = getRandomColor()"
+                            <button type="button" (click)="selectCardType('credit')"
                                 [class]="newCard.type === 'credit' ? 'bg-yellow-500 text-white shadow-lg border-2 border-yellow-500' : 'bg-white/90 backdrop-blur-xl border border-yellow-600/30 text-slate-600 hover:bg-slate-50'"
                                 class="flex items-center justify-center gap-2 p-3 rounded-2xl font-medium transition-all active:scale-95">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,41 +123,7 @@
                         </div>
                     </div>
 
-                    <!-- Card Brand Selection -->
-                    <div>
-                        <label class="block text-sm font-bold text-slate-900 mb-3">Card Brand</label>
-                        <div class="grid grid-cols-3 gap-3">
-                            <button type="button" (click)="selectedBrand = 'visa'"
-                                [class]="selectedBrand === 'visa' ? 'bg-blue-500 text-white shadow-lg border-2 border-blue-500' : 'bg-white/90 backdrop-blur-xl border border-yellow-600/30 text-slate-600 hover:bg-slate-50'"
-                                class="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl font-medium transition-all active:scale-95">
-                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M9.5 8.5h-2.5l-1.5 7h2.5l1-4.5 1 4.5h2.5l-1-7zm8.5 0h-2.5l-1.5 7h2.5l1.5-7zm-5 0h-2.5l-1.5 7h2.5l1.5-7z" />
-                                </svg>
-                                <span class="text-xs font-bold">VISA</span>
-                            </button>
-                            <button type="button" (click)="selectedBrand = 'mastercard'"
-                                [class]="selectedBrand === 'mastercard' ? 'bg-orange-500 text-white shadow-lg border-2 border-orange-500' : 'bg-white/90 backdrop-blur-xl border border-yellow-600/30 text-slate-600 hover:bg-slate-50'"
-                                class="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl font-medium transition-all active:scale-95">
-                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                                    <circle cx="9" cy="12" r="5" fill="currentColor" />
-                                    <circle cx="15" cy="12" r="5" fill="currentColor" />
-                                </svg>
-                                <span class="text-xs font-bold text-center">MASTERCARD</span>
-                            </button>
-                            <button type="button" (click)="selectedBrand = 'rupay'"
-                                [class]="selectedBrand === 'rupay' ? 'bg-indigo-500 text-white shadow-lg border-2 border-indigo-500' : 'bg-white/90 backdrop-blur-xl border border-yellow-600/30 text-slate-600 hover:bg-slate-50'"
-                                class="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl font-medium transition-all active:scale-95">
-                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-                                    <path
-                                        d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" />
-                                </svg>
-                                <span class="text-xs font-bold">RUPAY</span>
-                            </button>
-                        </div>
-                    </div>
+
 
                     <!-- Card Name -->
                     <div>
@@ -165,8 +131,9 @@
                         <div class="relative">
                             <div class="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-amber-500/5 rounded-2xl">
                             </div>
-                            <input [(ngModel)]="newCard.name" type="text" autocomplete="cc-name"
-                                placeholder="e.g., Personal Visa, Business Card" (contextmenu)="$event.preventDefault()"
+                            <input [(ngModel)]="newCard.name" (input)="formatInputName($event)" type="text"
+                                autocomplete="cc-name" maxlength="40" placeholder="e.g., Personal Visa, Business Card"
+                                (contextmenu)="$event.preventDefault()"
                                 class="relative w-full bg-white/90 backdrop-blur-xl border-2 border-white/60 rounded-2xl px-4 py-4 text-slate-800 placeholder-slate-500 focus:outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-500/10 transition-all shadow-lg">
                         </div>
                     </div>
@@ -190,8 +157,9 @@
                         <div class="relative">
                             <div class="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-amber-500/5 rounded-2xl">
                             </div>
-                            <input [(ngModel)]="newCard.holderName" type="text" autocomplete="cc-name"
-                                placeholder="JOHN DOE" (contextmenu)="$event.preventDefault()"
+                            <input [(ngModel)]="newCard.holderName" (input)="formatInputHolderName($event)" type="text"
+                                autocomplete="cc-name" maxlength="24" placeholder="JOHN DOE"
+                                (contextmenu)="$event.preventDefault()"
                                 class="relative w-full bg-white/90 backdrop-blur-xl border-2 border-white/60 rounded-2xl px-4 py-4 text-slate-800 uppercase placeholder-slate-500 focus:outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-500/10 transition-all shadow-lg">
                         </div>
                     </div>
@@ -216,8 +184,9 @@
                                 <div
                                     class="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-amber-500/5 rounded-2xl">
                                 </div>
-                                <input [(ngModel)]="newCard.cvv" type="password" autocomplete="cc-csc" placeholder="123"
-                                    maxlength="4" (contextmenu)="$event.preventDefault()"
+                                <input [(ngModel)]="newCard.cvv" (input)="formatInputCVV($event)" type="password"
+                                    autocomplete="cc-csc" placeholder="123" maxlength="3"
+                                    (contextmenu)="$event.preventDefault()"
                                     class="relative w-full bg-white/90 backdrop-blur-xl border-2 border-white/60 rounded-2xl px-4 py-4 font-mono text-slate-800 placeholder-slate-500 focus:outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-500/10 transition-all shadow-lg">
                             </div>
                         </div>

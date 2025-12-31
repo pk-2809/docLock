@@ -6,10 +6,12 @@ import { CardCarouselComponent } from '../card-carousel/card-carousel';
 import { Card, CardService } from '../../../core/services/card';
 import { ToastService } from '../../../core/services/toast.service';
 
+import { ConfirmationSheetComponent } from '../../../shared/components/confirmation-sheet/confirmation-sheet';
+
 @Component({
     selector: 'app-card-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, CardCarouselComponent],
+    imports: [CommonModule, FormsModule, CardCarouselComponent, ConfirmationSheetComponent],
     templateUrl: './card-list.html',
     styleUrl: './card-list.css'
 })
@@ -21,6 +23,12 @@ export class CardListComponent implements OnInit {
 
     showAddCardModal = false;
     editingCard: Card | null = null;
+    isLoading = true; // Add loading state
+
+    // Delete Confirmation State
+    showDeleteSheet = false;
+    cardToDelete: Card | null = null;
+    isDeleting = false;
 
     // Track which cards show CVV (true) or card number (false)
     cardVisibilityState = new Map<string, 'number' | 'cvv'>();
@@ -48,14 +56,20 @@ export class CardListComponent implements OnInit {
 
     selectedBrand: 'visa' | 'mastercard' | 'rupay' = 'visa';
 
-    // Standard app colors for random theming
+    // Standard app colors for random theming (hex colors)
     private standardColors = [
-        'from-blue-600 to-purple-700',
-        'from-emerald-600 to-teal-700',
-        'from-purple-600 to-pink-600',
-        'from-pink-600 to-rose-600',
-        'from-indigo-600 to-blue-700',
-        'from-cyan-600 to-blue-600'
+        '#FF5555',
+        '#1581BF',
+        '#FF6D1F',
+        '#5459AC',
+        '#007E6E',
+        '#8CA9FF',
+        '#84994F',
+        '#9E1C60',
+        '#9B5DE0',
+        '#34656D',
+        '#D92C54',
+        '#DC3C22'
     ];
 
     getRandomColor(): string {
@@ -68,6 +82,7 @@ export class CardListComponent implements OnInit {
     }
 
     private loadCards() {
+        this.isLoading = true;
         this.cardService.getCards().subscribe({
             next: (response) => {
                 this.allCards = response.cards.map(card => ({
@@ -79,11 +94,13 @@ export class CardListComponent implements OnInit {
                     this.cardVisibilityState.set(card.id, 'number');
                 });
                 // Manually trigger change detection to update the view
+                this.isLoading = false;
                 this.cdr.detectChanges();
             },
             error: (err) => {
                 console.error('Failed to load cards:', err);
                 this.toastService.showError('Failed to load cards');
+                this.isLoading = false;
             }
         });
     }
@@ -92,12 +109,42 @@ export class CardListComponent implements OnInit {
         this.router.navigate(['/dashboard']);
     }
 
-    openAddCardModal() {
-        this.router.navigate(['/cards/add']);
+    deleteCard(card: Card) {
+        this.cardToDelete = card;
+        this.showDeleteSheet = true;
+    }
+
+    confirmDeleteCard() {
+        if (!this.cardToDelete) return;
+
+        this.isDeleting = true;
+        this.cardService.deleteCard(this.cardToDelete.id).subscribe({
+            next: () => {
+                this.toastService.showSuccess('Card deleted successfully');
+                this.loadCards(); // Refresh list
+                this.closeDeleteSheet();
+            },
+            error: (err) => {
+                console.error('Failed to delete card:', err);
+                this.toastService.showError('Failed to delete card');
+                this.isDeleting = false;
+                this.closeDeleteSheet();
+            }
+        });
+    }
+
+    closeDeleteSheet() {
+        this.showDeleteSheet = false;
+        this.cardToDelete = null;
+        this.isDeleting = false;
     }
 
     editCard(card: Card) {
         this.router.navigate(['/cards/add'], { queryParams: { id: card.id } });
+    }
+
+    openAddCardModal() {
+        this.router.navigate(['/cards/add']);
     }
 
     getBrandName(brand: 'visa' | 'mastercard' | 'rupay'): string {
@@ -109,27 +156,44 @@ export class CardListComponent implements OnInit {
         return brandMap[brand];
     }
 
-    deleteCard(cardId: string) {
-        if (confirm('Are you sure you want to delete this card?')) {
-            this.cardService.deleteCard(cardId).subscribe({
-                next: () => {
-                    this.allCards = this.allCards.filter(card => card.id !== cardId);
-                    this.cardVisibilityState.delete(cardId);
-                    this.toastService.showSuccess('Card deleted successfully');
-                    this.cdr.detectChanges();
-                },
-                error: (err) => {
-                    console.error('Failed to delete card:', err);
-                    this.toastService.showError('Failed to delete card');
-                }
-            });
-        }
-    }
+
 
     // Card display methods
     getCardGradient(card: Card): string {
-        return card.color ? `bg-gradient-to-br ${card.color}` :
-            (card.type === 'credit' ? 'bg-gradient-to-br from-blue-600 to-purple-700' : 'bg-gradient-to-br from-emerald-600 to-teal-700');
+        if (!card.color) {
+            // Default gradient if no color is set
+            return card.type === 'credit' ? 'bg-gradient-to-br from-blue-600 to-purple-700' : 'bg-gradient-to-br from-emerald-600 to-teal-700';
+        }
+
+        // If color is a hex value, return empty string (we'll handle it with inline styles)
+        if (card.color.startsWith('#')) {
+            return '';
+        }
+
+        // Otherwise, it's a Tailwind gradient class
+        return `bg-gradient-to-br ${card.color}`;
+    }
+
+    // Get CSS gradient style for hex colors
+    getCardGradientStyle(card: Card): { [key: string]: string } | null {
+        if (!card.color || !card.color.startsWith('#')) return null;
+
+        // Create a darker shade for gradient end
+        const hex = card.color.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+
+        // Create darker shade (multiply by 0.75)
+        const darkerR = Math.max(0, Math.floor(r * 0.75));
+        const darkerG = Math.max(0, Math.floor(g * 0.75));
+        const darkerB = Math.max(0, Math.floor(b * 0.75));
+
+        const darkerHex = `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
+
+        return {
+            'background': `linear-gradient(to bottom right, ${card.color}, ${darkerHex})`
+        };
     }
 
     formatCardNumber(number: string): string {

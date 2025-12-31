@@ -2,16 +2,19 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/auth/auth';
+import { ToastService } from '../../../core/services/toast.service';
+import html2canvas from 'html2canvas';
 
 interface QRCode {
-  id: string;
-  name: string;
-  type: 'profile' | 'contact' | 'wifi' | 'url' | 'text' | 'email' | 'phone';
-  data: string;
-  createdAt: Date;
-  lastUsed?: Date;
-  scanCount: number;
-  isActive: boolean;
+    id: string;
+    name: string;
+    type: 'profile' | 'contact' | 'wifi' | 'url' | 'text' | 'email' | 'phone';
+    data: string;
+    createdAt: Date;
+    lastUsed?: Date;
+    scanCount: number;
+    isActive: boolean;
 }
 
 @Component({
@@ -23,11 +26,12 @@ interface QRCode {
 })
 export class QrListComponent implements OnInit {
     router = inject(Router);
-    
-    searchQuery = '';
-    selectedFilter = 'all';
-    showCreateMenu = false;
-    
+    authService = inject(AuthService);
+    toastService = inject(ToastService);
+
+    qrCodeImageUrl: string | null = null; // For actual QR code image if available
+    isGeneratingQR: boolean = false;
+
     qrCodes: QRCode[] = [
         {
             id: '1',
@@ -67,53 +71,27 @@ export class QrListComponent implements OnInit {
         }
     ];
 
-    filteredQRCodes: QRCode[] = [];
+    currentQR: QRCode | null = null; // Single QR code to display
 
     ngOnInit() {
-        this.filterQRCodes();
+        // Show first active QR code, or first QR code if none are active
+        const selectedQR = this.qrCodes.find(qr => qr.isActive) || this.qrCodes[0] || null;
+        this.setCurrentQR(selectedQR);
+    }
+
+    setCurrentQR(qr: QRCode | null) {
+        this.currentQR = qr;
+        if (this.currentQR) {
+            this.generateQRCode();
+        } else {
+            this.qrCodeImageUrl = null;
+        }
     }
 
     goBack() {
         this.router.navigate(['/dashboard']);
     }
 
-    filterQRCodes() {
-        let filtered = this.qrCodes;
-
-        // Apply search filter
-        if (this.searchQuery.trim()) {
-            filtered = filtered.filter(qr => 
-                qr.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                qr.type.toLowerCase().includes(this.searchQuery.toLowerCase())
-            );
-        }
-
-        // Apply type filter
-        if (this.selectedFilter !== 'all') {
-            filtered = filtered.filter(qr => qr.type === this.selectedFilter);
-        }
-
-        this.filteredQRCodes = filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    }
-
-    onSearchChange() {
-        this.filterQRCodes();
-    }
-
-    onFilterChange(filter: string) {
-        this.selectedFilter = filter;
-        this.filterQRCodes();
-    }
-
-    toggleCreateMenu() {
-        this.showCreateMenu = !this.showCreateMenu;
-    }
-
-    createQR(type: string) {
-        this.showCreateMenu = false;
-        // Navigate to create QR page with type parameter
-        this.router.navigate(['/qr/create'], { queryParams: { type } });
-    }
 
     viewQR(qr: QRCode) {
         // Navigate to QR detail/view page
@@ -137,7 +115,6 @@ export class QrListComponent implements OnInit {
             scanCount: 0
         };
         this.qrCodes.unshift(duplicate);
-        this.filterQRCodes();
     }
 
     toggleQRStatus(qr: QRCode, event: Event) {
@@ -149,7 +126,6 @@ export class QrListComponent implements OnInit {
         event.stopPropagation();
         if (confirm(`Are you sure you want to delete "${qr.name}"?`)) {
             this.qrCodes = this.qrCodes.filter(q => q.id !== qr.id);
-            this.filterQRCodes();
         }
     }
 
@@ -183,15 +159,139 @@ export class QrListComponent implements OnInit {
         const now = new Date();
         const diffTime = Math.abs(now.getTime() - date.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays === 1) return 'Today';
         if (diffDays === 2) return 'Yesterday';
         if (diffDays <= 7) return `${diffDays - 1} days ago`;
-        
+
         return date.toLocaleDateString();
     }
 
     getActiveQRCount(): number {
         return this.qrCodes.filter(qr => qr.isActive).length;
+    }
+
+    // Get display name from user or QR code
+    getDisplayName(): string {
+        if (!this.currentQR) return 'User Name';
+        const user = this.authService.user();
+        return user?.name || this.currentQR.name || 'User Name';
+    }
+
+    // Get display email from user
+    getDisplayEmail(): string {
+        const user = this.authService.user();
+        // @ts-ignore - email might not be in the interface
+        return user?.email || 'user@example.com';
+    }
+
+    // Get initials for avatar
+    getInitials(): string {
+        const name = this.getDisplayName();
+        const parts = name.split(' ');
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    // Get member since year
+    getMemberSinceYear(): string {
+        const user = this.authService.user();
+        if (user?.createdAt) {
+            return new Date(user.createdAt).getFullYear().toString();
+        }
+        return new Date().getFullYear().toString();
+    }
+
+    // Generate QR code image dynamically
+    generateQRCode() {
+        if (!this.currentQR) {
+            this.qrCodeImageUrl = null;
+            return;
+        }
+
+        this.isGeneratingQR = true;
+
+        // Use QR Server API to generate QR code
+        // This is a free service that generates QR codes without requiring any library
+        const qrData = encodeURIComponent(this.currentQR.data);
+        const size = 256; // QR code size in pixels
+        const margin = 1; // Margin around QR code
+
+        // Generate QR code URL using QR Server API
+        // Using ECC level M for better error correction and smaller size
+        this.qrCodeImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${qrData}&margin=${margin}&color=000000&bgcolor=ffffff&ecc=M`;
+    }
+
+    // Generate a simple QR code pattern (8x8 grid) for fallback placeholder
+    generateQRPattern(): boolean[] {
+        // Simple pattern - fallback if QR code image fails to load
+        const pattern: boolean[] = [];
+        for (let i = 0; i < 64; i++) {
+            // Create a simple checkerboard-like pattern
+            const row = Math.floor(i / 8);
+            const col = i % 8;
+            // Add some fixed patterns (corners, alignment patterns)
+            if ((row < 2 && col < 2) || (row < 2 && col >= 6) || (row >= 6 && col < 2)) {
+                pattern.push(true); // Corner squares
+            } else if ((row >= 2 && row < 6 && col >= 2 && col < 6)) {
+                pattern.push((row + col) % 2 === 0); // Center pattern
+            } else {
+                pattern.push(Math.random() > 0.5); // Random pattern
+            }
+        }
+        return pattern;
+    }
+
+    // Handle QR image load
+    onQRImageLoad() {
+        this.isGeneratingQR = false;
+    }
+
+    // Handle QR image error
+    onQRImageError() {
+        // If QR code image fails to load, try regenerating
+        this.qrCodeImageUrl = null;
+        setTimeout(() => {
+            if (this.currentQR) {
+                this.generateQRCode();
+            }
+        }, 1000);
+    }
+
+    // Download QR card as image
+    downloadQRCard() {
+        if (!this.currentQR) return;
+
+        const cardElement = document.getElementById('qr-card-container');
+        if (!cardElement) {
+            this.toastService.showError('Card element not found');
+            return;
+        }
+
+        this.toastService.showSuccess('Preparing download...');
+
+        // Small delay to ensure any rendering is finished
+        setTimeout(() => {
+            html2canvas(cardElement, {
+                scale: 3, // High quality
+                useCORS: true, // Allow cross-origin images
+                backgroundColor: null, // Transparent background or defined by CSS
+                logging: false,
+                allowTaint: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `DocLock-ID-${this.currentQR?.name.replace(/\s+/g, '-') || 'Card'}.png`;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.toastService.showSuccess('Card downloaded successfully');
+            }).catch(err => {
+                console.error('Download failed', err);
+                this.toastService.showError('Failed to generate image');
+            });
+        }, 100);
     }
 }

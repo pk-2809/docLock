@@ -14,6 +14,7 @@ export interface Card {
     holderName: string;
     bankName?: string;
     color?: string;
+    sharedBy?: string;
     createdAt: Date;
 }
 

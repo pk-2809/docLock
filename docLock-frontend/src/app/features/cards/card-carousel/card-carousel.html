@@ -1,55 +1,115 @@
 <!-- Card Carousel Component -->
 <div class="relative h-full flex flex-col overflow-hidden">
-    <div [id]="carouselId" (scroll)="scrollCarousel($event)" class="flex-1 min-h-0 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory scroll-smooth" style="scroll-padding: 0.5rem;">
+    <div [id]="carouselId" (scroll)="scrollCarousel($event)"
+        class="flex-1 min-h-0 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory scroll-smooth"
+        style="scroll-padding: 0.5rem;">
         <div class="flex gap-4 py-2 px-2 items-center" style="width: max-content; height: 100%;">
-            <div *ngFor="let card of cards; let i = index" class="flex-shrink-0 snap-center" style="width: clamp(222px, calc(30vh * 1.586), 318px);">
+            <div *ngFor="let card of cards; let i = index" class="flex-shrink-0 snap-center"
+                style="width: clamp(222px, calc(30vh * 1.586), 318px);">
                 <!-- Card Display -->
                 <div class="w-full aspect-[1.586/1] rounded-2xl text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-300 select-none transform"
-                     style="padding: clamp(0.75rem, 2vw, 1.5rem);"
-                     [class]="getCardGradient(card)"
-                     [ngClass]="getCardScale(i) + ' ' + getCardOpacity(i)">
-                    
+                    style="padding: clamp(0.75rem, 2vw, 1.5rem);" [class]="getCardGradient(card)"
+                    [ngStyle]="getCardGradientStyle(card)" [ngClass]="getCardScale(i) + ' ' + getCardOpacity(i)">
+
                     <!-- Card Pattern Overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
-                    <div class="absolute top-3 right-3 px-2 py-1 bg-white/20 rounded-lg" style="font-size: clamp(0.625rem, 2vw, 0.75rem);">
-                        <div class="font-bold whitespace-nowrap text-center">{{card.bankName || getBrandName()}}</div>
+                    <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none">
                     </div>
-                    
-                    <div class="relative z-10 flex flex-col justify-between h-full">
-                        <div class="flex justify-between items-start">
-                            <div [class.cursor-pointer]="i === selectedCardIndex" 
-                                 [class.cursor-default]="i !== selectedCardIndex"
-                                 (click)="onCopyToClipboard(card.name, 'Card name', i); $event.stopPropagation()">
-                                <span class="text-xs font-medium opacity-80 uppercase tracking-wider">{{card.name}}</span>
+
+                    <!-- Expiry Status Badge (Centered) -->
+                    @if (getExpiryStatus(card.expiryDate) === 'expired') {
+                    <div
+                        class="absolute top-3.5 left-1/2 -translate-x-1/2 z-20 px-2 py-0.5 bg-red-500/90 text-white text-[8px] font-bold rounded-sm shadow-sm backdrop-blur-sm whitespace-nowrap border border-white/10 tracking-wide">
+                        EXPIRED
+                    </div>
+                    }
+                    @if (getExpiryStatus(card.expiryDate) === 'soon') {
+                    <div
+                        class="absolute top-3.5 left-1/2 -translate-x-1/2 z-20 px-2 py-0.5 bg-amber-500/90 text-white text-[8px] font-bold rounded-sm shadow-sm backdrop-blur-sm whitespace-nowrap border border-white/10 tracking-wide">
+                        EXPIRING SOON
+                    </div>
+                    }
+
+                    <!-- Action Buttons (Edit & Delete) - Only for active card -->
+                    @if (i === selectedCardIndex) {
+                    <div class="absolute top-3 left-3 flex gap-2 z-20">
+                        <!-- Edit Button -->
+                        <button
+                            class="w-7 h-7 flex items-center justify-center bg-black/20 hover:bg-white/20 rounded-full backdrop-blur-sm transition-all duration-300 text-white/70 hover:text-white"
+                            (click)="onEditCard(card); $event.stopPropagation()" title="Edit Card">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+
+                        <!-- Delete Button -->
+                        <button
+                            class="w-7 h-7 flex items-center justify-center bg-black/20 hover:bg-red-500/80 rounded-full backdrop-blur-sm transition-all duration-300 text-white/70 hover:text-white"
+                            (click)="onDeleteCard(card); $event.stopPropagation()" title="Delete Card">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                    }
+                    <div class="absolute top-3 right-3 flex flex-col gap-1.5 items-end z-20">
+                        <!-- Shared Badge -->
+                        @if (card.sharedBy) {
+                        <div class="px-2 py-0.5 bg-indigo-500/90 text-white rounded-md shadow-sm backdrop-blur-md border border-white/10"
+                            style="font-size: clamp(0.5rem, 1.5vw, 0.65rem);">
+                            <div class="font-bold whitespace-nowrap text-center uppercase tracking-wider">SHARED</div>
+                        </div>
+                        }
+
+                        <!-- Brand Badge -->
+                        <div class="px-2 py-1 bg-white/20 rounded-lg backdrop-blur-sm"
+                            style="font-size: clamp(0.625rem, 2vw, 0.75rem);">
+                            <div class="font-bold whitespace-nowrap text-center">{{card.bankName || getBrandName()}}
                             </div>
                         </div>
-                        
-                        <div class="text-center my-3" 
-                             [class.cursor-pointer]="i === selectedCardIndex"
-                             [class.cursor-default]="i !== selectedCardIndex"
-                             (click)="onCopyCardNumber(card, i); $event.stopPropagation()">
-                            <p class="font-mono tracking-widest drop-shadow-sm" style="font-size: clamp(0.875rem, 4vw, 1.125rem);">
+                    </div>
+
+                    <div class="relative z-10 flex flex-col justify-between h-full pt-8">
+                        <div class="flex justify-between items-start">
+                            <div [class.cursor-pointer]="i === selectedCardIndex"
+                                [class.cursor-default]="i !== selectedCardIndex"
+                                (click)="onCopyToClipboard(card.name, 'Card name', i); $event.stopPropagation()">
+                                <span
+                                    class="text-xs font-medium opacity-80 uppercase tracking-wider">{{card.name}}</span>
+                            </div>
+                        </div>
+
+                        <div class="text-center my-3" [class.cursor-pointer]="i === selectedCardIndex"
+                            [class.cursor-default]="i !== selectedCardIndex"
+                            (click)="onCopyCardNumber(card, i); $event.stopPropagation()">
+                            <p class="font-mono tracking-widest drop-shadow-sm"
+                                style="font-size: clamp(0.875rem, 4vw, 1.125rem);">
                                 {{getMaskedCardNumber(card.number)}}
                             </p>
                         </div>
 
                         <div class="flex justify-between items-end">
                             <div [class.cursor-pointer]="i === selectedCardIndex"
-                                 [class.cursor-default]="i !== selectedCardIndex"
-                                 (click)="onCopyToClipboard(card.holderName || '', 'Card holder name', i); $event.stopPropagation()">
+                                [class.cursor-default]="i !== selectedCardIndex"
+                                (click)="onCopyToClipboard(card.holderName || '', 'Card holder name', i); $event.stopPropagation()">
                                 <p class="text-xs opacity-60 uppercase mb-1">Card Holder</p>
                                 <p class="text-sm font-medium tracking-wide uppercase">{{card.holderName}}</p>
                             </div>
                             <div class="flex gap-4">
                                 <div [class.cursor-pointer]="i === selectedCardIndex"
-                                     [class.cursor-default]="i !== selectedCardIndex"
-                                     (click)="onCopyToClipboard(card.expiryDate, 'Expiry date', i); $event.stopPropagation()">
+                                    [class.cursor-default]="i !== selectedCardIndex"
+                                    (click)="onCopyToClipboard(card.expiryDate, 'Expiry date', i); $event.stopPropagation()">
                                     <p class="text-xs opacity-60 uppercase mb-1">Expires</p>
-                                    <p class="font-mono text-sm">{{card.expiryDate}}</p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-mono text-sm">{{card.expiryDate}}</p>
+
+                                        <!-- Expiry Status Tags Removed -->
+                                    </div>
                                 </div>
                                 <div [class.cursor-pointer]="i === selectedCardIndex"
-                                     [class.cursor-default]="i !== selectedCardIndex"
-                                     (click)="onCopyToClipboard(card.cvv, 'CVV', i); $event.stopPropagation()">
+                                    [class.cursor-default]="i !== selectedCardIndex"
+                                    (click)="onCopyToClipboard(card.cvv, 'CVV', i); $event.stopPropagation()">
                                     <p class="text-xs opacity-60 uppercase mb-1">CVV</p>
                                     <p class="font-mono text-sm">{{getDisplayCVV(card)}}</p>
                                 </div>
@@ -64,9 +124,8 @@
     @if (cards.length > 1) {
     <div class="flex justify-center gap-2 mt-3 flex-shrink-0">
         @for (card of cards; track card.id; let i = $index) {
-        <button (click)="scrollToCard(i)"
-                class="rounded-full transition-all duration-300"
-                [ngClass]="i === selectedCardIndex ? getIndicatorColorClasses() + ' w-6 h-1.5' : getIndicatorInactiveClasses() + ' w-1.5 h-1.5'">
+        <button (click)="scrollToCard(i)" class="rounded-full transition-all duration-300"
+            [ngClass]="i === selectedCardIndex ? getIndicatorColorClasses() + ' w-6 h-1.5' : getIndicatorInactiveClasses() + ' w-1.5 h-1.5'">
         </button>
         }
     </div>

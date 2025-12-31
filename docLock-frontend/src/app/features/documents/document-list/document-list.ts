@@ -354,42 +354,97 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         ];
 
         if (this.currentFolderId) {
-            // Build complete path by traversing up the folder hierarchy
-            const pathFolders: Folder[] = [];
-            let currentId: string | null = this.currentFolderId;
-
-            while (currentId) {
-                const folder = this.folders.find(f => f.id === currentId);
-                if (folder) {
-                    pathFolders.unshift(folder);
-                    currentId = folder.parentId;
-                } else {
-                    break;
-                }
-            }
-
-            // Add all folders in the path to breadcrumbs
-            pathFolders.forEach(folder => {
+            // Handle Shared folder (virtual folder)
+            if (this.currentFolderId === 'shared-folder') {
                 items.push({
-                    id: folder.id,
-                    name: folder.name,
-                    path: folder.id
+                    id: 'shared-folder',
+                    name: 'Shared',
+                    path: 'shared-folder'
                 });
-            });
+            } else {
+                // Build complete path by traversing up the folder hierarchy
+                const pathFolders: Folder[] = [];
+                let currentId: string | null = this.currentFolderId;
+
+                while (currentId) {
+                    const folder = this.folders.find(f => f.id === currentId);
+                    if (folder) {
+                        pathFolders.unshift(folder);
+                        currentId = folder.parentId;
+                    } else {
+                        break;
+                    }
+                }
+
+                // Add all folders in the path to breadcrumbs
+                pathFolders.forEach(folder => {
+                    items.push({
+                        id: folder.id,
+                        name: folder.name,
+                        path: folder.id
+                    });
+                });
+            }
         }
 
         return items;
     }
 
     get currentFolders(): Folder[] {
-        return this.folders.filter(f => f.parentId === this.currentFolderId);
+        let regularFolders = this.folders.filter(f => f.parentId === this.currentFolderId);
+
+        // Add "Shared" folder at the top only if:
+        // 1. We're at root level (currentFolderId === null)
+        // 2. There are shared documents
+        if (this.currentFolderId === null && this.hasSharedDocuments()) {
+            // Filter out any existing "Shared" folder from regular folders to avoid duplicates
+            regularFolders = regularFolders.filter(f => f.name.toLowerCase() !== 'shared');
+
+            const sharedFolder: Folder = {
+                id: 'shared-folder',
+                name: 'Shared',
+                parentId: null,
+                icon: 'share',
+                color: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+                itemCount: this.getSharedDocumentsCount(),
+                createdAt: new Date().toISOString()
+            };
+            // Put Shared folder at the top, then regular folders
+            return [sharedFolder, ...regularFolders];
+        }
+
+        return regularFolders;
+    }
+
+    // Check if there are any shared documents
+    hasSharedDocuments(): boolean {
+        return this.documents.some(doc => this.isSharedDocument(doc));
+    }
+
+    // Check if a document is shared
+    isSharedDocument(doc: Document): boolean {
+        // Check if document is in a folder named "Shared"
+        if (doc.folderId) {
+            const folder = this.folders.find(f => f.id === doc.folderId);
+            if (folder && folder.name.toLowerCase() === 'shared') {
+                return true;
+            }
+        }
+        // Also check if document has sharedBy property (if the backend provides this)
+        // @ts-ignore - sharedBy might not be in the interface yet
+        const sharedBy = (doc as any).sharedBy;
+        return sharedBy !== undefined && sharedBy !== null && sharedBy !== '';
+    }
+
+    // Get count of shared documents
+    getSharedDocumentsCount(): number {
+        return this.documents.filter(doc => this.isSharedDocument(doc)).length;
     }
 
     // Check if current folder is "Shared"
     get isSharedFolder(): boolean {
-        if (!this.currentFolderId) return false;
-        const currentFolder = this.folders.find(f => f.id === this.currentFolderId);
-        return currentFolder?.name?.toLowerCase() === 'shared';
+        return this.currentFolderId === 'shared-folder' ||
+            (this.currentFolderId !== null && this.folders.find(f => f.id === this.currentFolderId)?.name?.toLowerCase() === 'shared');
     }
 
     // Get sharer name for a document (placeholder - connect to backend later)
@@ -406,11 +461,11 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     // Format file size properly (KB, MB, GB)
     formatFileSize(bytes: number): string {
         if (!bytes || bytes === 0) return '0 B';
-        
+
         const kb = 1024;
         const mb = kb * 1024;
         const gb = mb * 1024;
-        
+
         if (bytes < kb) {
             return `${bytes} B`;
         } else if (bytes < mb) {
@@ -444,7 +499,15 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     get currentDocuments(): Document[] {
-        let filtered = this.documents.filter(doc => doc.folderId === this.currentFolderId);
+        let filtered: Document[];
+
+        // If we're in the "Shared" folder, show all shared documents
+        if (this.currentFolderId === 'shared-folder') {
+            filtered = this.documents.filter(doc => this.isSharedDocument(doc));
+        } else {
+            // Regular folder filtering
+            filtered = this.documents.filter(doc => doc.folderId === this.currentFolderId);
+        }
 
         if (this.searchQuery) {
             filtered = filtered.filter(doc =>
@@ -500,12 +563,17 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
 
     goBack() {
         if (this.currentFolderId) {
-            // If we're in a subfolder, go back to parent folder or root
-            const currentFolder = this.folders.find(f => f.id === this.currentFolderId);
-            if (currentFolder && currentFolder.parentId) {
-                this.currentFolderId = currentFolder.parentId;
-            } else {
+            // Handle Shared folder (virtual folder - always go back to root)
+            if (this.currentFolderId === 'shared-folder') {
                 this.currentFolderId = null;
+            } else {
+                // If we're in a subfolder, go back to parent folder or root
+                const currentFolder = this.folders.find(f => f.id === this.currentFolderId);
+                if (currentFolder && currentFolder.parentId) {
+                    this.currentFolderId = currentFolder.parentId;
+                } else {
+                    this.currentFolderId = null;
+                }
             }
         } else {
             // If we're at root level, navigate back to dashboard
@@ -923,9 +991,65 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
             'home': 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
             'truck': 'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m15.75 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125A1.125 1.125 0 0021 17.625v-3.375m-9-3.75h5.25m0 0V8.25a2.25 2.25 0 00-2.25-2.25H9a2.25 2.25 0 00-2.25 2.25v1.5m5.25-1.5a1.5 1.5 0 00-1.5-1.5H9.75a1.5 1.5 0 00-1.5 1.5v1.5M12 9.75v1.5m0-1.5h3.75m-3.75 0H8.25',
             'folder': 'M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z',
-            'document': 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z'
+            'document': 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z',
+            'share': 'M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z'
         };
         return icons[iconName] || icons['folder'];
+    }
+
+    // Get gradient classes for folder/document icons (matching friends page style)
+    // Get background classes for folder icons (Pastel style)
+    getFolderIconBackground(index: number): string {
+        const backgrounds = [
+            'bg-blue-50',
+            'bg-emerald-50',
+            'bg-purple-50',
+            'bg-amber-50',
+            'bg-pink-50',
+            'bg-cyan-50',
+            'bg-teal-50',
+            'bg-indigo-50'
+        ];
+        return backgrounds[index % backgrounds.length];
+    }
+
+    // Get text color classes for folder icons
+    getFolderIconColor(index: number): string {
+        const colors = [
+            'text-blue-600',
+            'text-emerald-600',
+            'text-purple-600',
+            'text-amber-600',
+            'text-pink-600',
+            'text-cyan-600',
+            'text-teal-600',
+            'text-indigo-600'
+        ];
+        return colors[index % colors.length];
+    }
+
+    getDocumentIconGradient(index: number): string {
+        const backgrounds = [
+            'bg-blue-50',
+            'bg-emerald-50',
+            'bg-purple-50',
+            'bg-amber-50',
+            'bg-pink-50',
+            'bg-cyan-50'
+        ];
+        return backgrounds[index % backgrounds.length];
+    }
+
+    getDocumentIconColor(index: number): string {
+        const colors = [
+            'text-blue-600',
+            'text-emerald-600',
+            'text-purple-600',
+            'text-amber-600',
+            'text-pink-600',
+            'text-cyan-600'
+        ];
+        return colors[index % colors.length];
     }
 
     // Card Management Methods

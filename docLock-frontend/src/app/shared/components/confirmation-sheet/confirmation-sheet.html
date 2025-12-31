@@ -1,14 +1,14 @@
-<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
-    (click)="onCancel()">
-    <div class="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden relative animate-fade-in"
+<div class="fixed inset-0 z-[100] flex items-end justify-center p-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+    (click)="onCancel()" style="overscroll-behavior: none;">
+    <div class="w-full bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.2)] overflow-hidden relative animate-slide-up-mobile pb-8"
         (click)="$event.stopPropagation()">
 
         <div class="p-8 text-center relative z-10">
             <!-- Close Button -->
-            <button (click)="onCancel()" 
+            <button (click)="onCancel()"
                 class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
 
@@ -23,8 +23,10 @@
             @if (!image) {
             <!-- Danger / Delete -->
             @if (type === 'danger') {
-            <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-red-100 to-red-100 rounded-3xl flex items-center justify-center">
-                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center">
+            <div
+                class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-red-100 to-red-100 rounded-3xl flex items-center justify-center">
+                <div
+                    class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -35,8 +37,10 @@
 
             <!-- Profile / Add Friend -->
             @if (type === 'profile') {
-            <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-indigo-100 to-indigo-100 rounded-3xl flex items-center justify-center">
-                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center">
+            <div
+                class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-indigo-100 to-indigo-100 rounded-3xl flex items-center justify-center">
+                <div
+                    class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
@@ -47,8 +51,10 @@
 
             <!-- Info / Default -->
             @if (type !== 'danger' && type !== 'profile') {
-            <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-indigo-100 to-indigo-100 rounded-3xl flex items-center justify-center">
-                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center">
+            <div
+                class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-indigo-100 to-indigo-100 rounded-3xl flex items-center justify-center">
+                <div
+                    class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
@@ -60,7 +66,7 @@
 
             <!-- Title -->
             <h3 class="text-2xl font-bold text-slate-900 mb-3">{{ title }}</h3>
-            
+
             <!-- Message with HTML support for highlighting -->
             <div class="text-slate-600 font-medium mb-8 leading-relaxed" [innerHTML]="message"></div>
         </div>

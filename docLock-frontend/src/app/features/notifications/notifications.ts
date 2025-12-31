@@ -2,7 +2,6 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
-import { ConfirmationSheetComponent } from '../../shared/components/confirmation-sheet/confirmation-sheet';
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
 import { DocumentService, Document } from '../../core/services/document';
 import { CardService, Card } from '../../core/services/card';
@@ -13,9 +12,23 @@ import { FormsModule } from '@angular/forms';
 @Component({
     selector: 'app-notifications',
     standalone: true,
-    imports: [CommonModule, RouterLink, ConfirmationSheetComponent, TimeAgoPipe, FormsModule],
+    imports: [CommonModule, RouterLink, TimeAgoPipe, FormsModule],
     templateUrl: './notifications.html',
-    styles: []
+    styles: [`
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-slide-up {
+            animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+    `]
 })
 export class NotificationsComponent {
     notificationService = inject(NotificationService);

@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-teal-50 flex flex-col overflow-hidden relative">
     <!-- Teal top border line -->
     <div class="absolute top-0 left-0 right-0 h-1 bg-[#2EC4B6] z-50"></div>
-    
+
     <!-- Sophisticated Background Elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute -top-32 -right-32 w-64 h-64 bg-[#2EC4B6]/10 rounded-full animate-float-slow"></div>
@@ -11,259 +11,297 @@
     </div>
 
     <!-- Content Wrapper with Max Width -->
-    <div class="w-full max-w-[639px] mx-auto flex flex-col relative z-10" style="height: calc(100vh - 5rem); max-height: calc(100vh - 5rem);">
-    <!-- Mobile-First Header -->
-    <header class="flex-none p-4 pt-12 mb-4">
-        <div class="flex items-center justify-center mb-6 relative">
-            <!-- Centered Title -->
-            <div class="text-center">
-                <h1 class="text-xl font-bold text-slate-800 tracking-tight">My Profile</h1>
-            </div>
-
-            <!-- Share Button -->
-            <button (click)="copyProfileLink()"
-                class="absolute right-0 w-10 h-10 rounded-xl bg-[#2EC4B6] active:bg-[#26B3A6] text-white shadow-lg shadow-[#2EC4B6]/25 flex items-center justify-center transition-all active:scale-95 touch-manipulation group overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-active:translate-x-full transition-transform duration-700"></div>
-                <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                </svg>
-            </button>
-        </div>
-    </header>
-
-    <!-- Enhanced Profile Card -->
-    <section class="flex-none px-4 mb-6">
-        <div class="max-w-sm mx-auto animate-fade-in">
-            <div class="bg-[#2EC4B6] rounded-3xl p-6 pb-8 shadow-2xl shadow-[#2EC4B6]/25 relative text-white text-center pt-16 overflow-visible">
-                
-                <!-- Floating decorative elements -->
-                <div class="absolute top-4 right-4 w-3 h-3 bg-white/20 rounded-full animate-bounce delay-300"></div>
-                <div class="absolute bottom-8 left-6 w-2 h-2 bg-white/30 rounded-full animate-pulse delay-700"></div>
-                <div class="absolute top-1/2 right-8 w-1.5 h-1.5 bg-white/25 rounded-full animate-bounce delay-500"></div>
-
-                <!-- Floating Avatar (Top Center) -->
-                <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full p-1.5 bg-white shadow-xl cursor-pointer group animate-float z-20"
-                    (click)="fileInput.click()">
-                    <div class="w-full h-full rounded-full overflow-hidden bg-slate-100 relative">
-                        @if (user()?.role === 'user' && user()?.profileImage) {
-                        <img [src]="user()?.profileImage" class="w-full h-full object-cover object-center" alt="Profile">
-                        }
-
-                        @if (!(user()?.profileImage)) {
-                        <div class="w-full h-full flex items-center justify-center text-slate-300">
-                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        }
-
-                        <!-- Edit Overlay -->
-                        @if (!isUploading()) {
-                        <div class="absolute inset-0 bg-black/30 opacity-0 group-active:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                        </div>
-                        }
-
-                        <!-- Loading Overlay -->
-                        @if (isUploading()) {
-                        <div class="absolute inset-0 bg-white/80 flex items-center justify-center">
-                            <div class="w-6 h-6 border-2 border-[#2EC4B6] border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                        }
-                    </div>
+    <div class="w-full max-w-[639px] mx-auto flex flex-col relative z-10"
+        style="height: calc(100vh - 5rem); max-height: calc(100vh - 5rem);">
+        <!-- Mobile-First Header -->
+        <header class="flex-none p-4 pt-12 mb-4">
+            <div class="flex items-center justify-center mb-6 relative">
+                <!-- Centered Title -->
+                <div class="text-center">
+                    <h1 class="text-xl font-bold text-slate-800 tracking-tight">My Profile</h1>
                 </div>
 
-                <!-- Hidden File Input -->
-                <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden">
+                <!-- Share Button -->
+                <button (click)="copyProfileLink()"
+                    class="absolute right-0 w-10 h-10 rounded-xl bg-[#2EC4B6] active:bg-[#26B3A6] text-white shadow-lg shadow-[#2EC4B6]/25 flex items-center justify-center transition-all active:scale-95 touch-manipulation group overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-active:translate-x-full transition-transform duration-700">
+                    </div>
+                    <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
 
-                <!-- User Details -->
-                <div class="relative z-10">
-                    <div class="flex items-center justify-center gap-2 mb-1 min-h-[40px]">
-                        @if (!isEditingName()) {
-                        <h2 class="text-2xl font-bold">{{ (user()?.name) || 'User' }}</h2>
-                        <button (click)="toggleEditName()"
-                            class="p-1.5 rounded-full active:bg-white/10 text-white/70 active:text-white transition-colors group touch-manipulation">
+        <!-- Enhanced Profile Card -->
+        <section class="flex-none px-4 mb-6">
+            <div class="max-w-sm mx-auto animate-fade-in">
+                <div
+                    class="bg-[#2EC4B6] rounded-3xl p-6 pb-8 shadow-2xl shadow-[#2EC4B6]/25 relative text-white text-center pt-16 overflow-visible">
+
+                    <!-- Floating decorative elements -->
+                    <div class="absolute top-4 right-4 w-3 h-3 bg-white/20 rounded-full animate-bounce delay-300"></div>
+                    <div class="absolute bottom-8 left-6 w-2 h-2 bg-white/30 rounded-full animate-pulse delay-700">
+                    </div>
+                    <div class="absolute top-1/2 right-8 w-1.5 h-1.5 bg-white/25 rounded-full animate-bounce delay-500">
+                    </div>
+
+                    <!-- Floating Avatar (Top Center) -->
+                    <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full p-1.5 bg-white shadow-xl cursor-pointer group animate-float z-20"
+                        (click)="fileInput.click()">
+                        <div class="w-full h-full rounded-full overflow-hidden bg-slate-100 relative">
+                            @if (user()?.role === 'user' && user()?.profileImage) {
+                            <img [src]="user()?.profileImage" class="w-full h-full object-cover object-center"
+                                alt="Profile">
+                            }
+
+                            @if (!(user()?.profileImage)) {
+                            <div class="w-full h-full flex items-center justify-center text-slate-300">
+                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            }
+
+                            <!-- Edit Overlay -->
+                            @if (!isUploading()) {
+                            <div
+                                class="absolute inset-0 bg-black/30 opacity-0 group-active:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                </svg>
+                            </div>
+                            }
+
+                            <!-- Loading Overlay -->
+                            @if (isUploading()) {
+                            <div class="absolute inset-0 bg-white/80 flex items-center justify-center">
+                                <div
+                                    class="w-6 h-6 border-2 border-[#2EC4B6] border-t-transparent rounded-full animate-spin">
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Hidden File Input -->
+                    <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden">
+
+                    <!-- User Details -->
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-center gap-2 mb-1 min-h-[40px]">
+                            @if (!isEditingName()) {
+                            <h2 class="text-2xl font-bold">{{ (user()?.name) || 'User' }}</h2>
+                            <button (click)="toggleEditName()"
+                                class="p-1.5 rounded-full active:bg-white/10 text-white/70 active:text-white transition-colors group touch-manipulation">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                </svg>
+                            </button>
+                            } @else {
+                            <div class="flex items-center gap-2 animate-fade-in">
+                                <input #nameInput type="text" [ngModel]="newName()"
+                                    (ngModelChange)="newName.set($event)" (keydown)="onInputKeydown($event)"
+                                    (keydown.enter)="saveName()" [disabled]="isSavingName()"
+                                    class="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-white placeholder-white/50 focus:outline-none focus:border-white w-40 text-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                                    placeholder="Enter name">
+                                <button (click)="saveName()" [disabled]="isSavingName()"
+                                    class="p-1.5 rounded-full bg-white text-[#2EC4B6] active:scale-110 transition-transform flex items-center justify-center w-8 h-8 touch-manipulation">
+                                    @if(isSavingName()) {
+                                    <div
+                                        class="w-4 h-4 border-2 border-[#2EC4B6] border-t-transparent rounded-full animate-spin">
+                                    </div>
+                                    } @else {
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    }
+                                </button>
+                                <button (click)="cancelEditName()"
+                                    class="p-1.5 rounded-full bg-white/10 text-white active:bg-white/20 transition-colors flex items-center justify-center w-8 h-8 touch-manipulation">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            }
+                        </div>
+                        <p class="text-white/80 text-sm font-medium mb-8 font-mono tracking-wide">{{ (user()?.mobile) ||
+                            'No mobile' }}</p>
+
+                        <!-- Enhanced Stats Row -->
+                        <div class="grid grid-cols-2 gap-6 mb-8 border-t border-white/30 pt-6">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold mb-1">{{ stats.documents }}</p>
+                                <p class="text-xs text-white/90 uppercase tracking-wider font-bold">Total Docs</p>
+                            </div>
+                            <div class="text-center border-l border-white/30">
+                                <p class="text-3xl font-bold mb-1">{{ stats.storagePercentage }}<span
+                                        class="text-base ml-1 opacity-70">%</span></p>
+                                <p class="text-xs text-white/90 uppercase tracking-wider font-bold">Used</p>
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Storage Progress -->
+                        <div class="w-full bg-black/20 rounded-full h-3 p-0.5 backdrop-blur-sm">
+                            <div class="h-full bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.4)] transition-all duration-1000 ease-out"
+                                [style.width.%]="stats.storagePercentage">
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-white/90 mt-2 text-right w-full">Storage Left: {{ (100 -
+                            stats.storagePercentage).toFixed(1) }}%</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enhanced Menu Actions -->
+        <section class="flex-1 min-h-0 overflow-y-auto px-4 mb-2">
+            <div class="max-w-sm mx-auto space-y-4 animate-fade-in" style="animation-delay: 200ms;">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider px-2">Settings</h3>
+
+                <div
+                    class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white/60 overflow-hidden">
+                    <!-- Security -->
+                    <button (click)="changeMpin()"
+                        class="w-full p-4 flex items-center justify-between group active:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 touch-manipulation">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded-2xl bg-[#2EC4B6]/10 flex items-center justify-center text-[#2EC4B6] group-active:scale-110 transition-transform duration-300 shadow-lg shadow-[#2EC4B6]/10">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">Security</h4>
+                                <p class="text-xs text-slate-500 font-medium">Change MPIN & Biometrics</p>
+                            </div>
+                        </div>
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-[#2EC4B6]/10 group-active:text-[#2EC4B6] transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
                             </svg>
-                        </button>
-                        } @else {
-                        <div class="flex items-center gap-2 animate-fade-in">
-                            <input #nameInput type="text" [ngModel]="newName()" (ngModelChange)="newName.set($event)"
-                                (keydown)="onInputKeydown($event)" (keydown.enter)="saveName()" [disabled]="isSavingName()"
-                                class="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-white placeholder-white/50 focus:outline-none focus:border-white w-40 text-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                                placeholder="Enter name">
-                            <button (click)="saveName()" [disabled]="isSavingName()"
-                                class="p-1.5 rounded-full bg-white text-[#2EC4B6] active:scale-110 transition-transform flex items-center justify-center w-8 h-8 touch-manipulation">
-                                @if(isSavingName()) {
-                                <div class="w-4 h-4 border-2 border-[#2EC4B6] border-t-transparent rounded-full animate-spin"></div>
-                                } @else {
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                                }
-                            </button>
-                            <button (click)="cancelEditName()"
-                                class="p-1.5 rounded-full bg-white/10 text-white active:bg-white/20 transition-colors flex items-center justify-center w-8 h-8 touch-manipulation">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
                         </div>
-                        }
-                    </div>
-                    <p class="text-white/80 text-sm font-medium mb-8 font-mono tracking-wide">{{ (user()?.mobile) || 'No mobile' }}</p>
+                    </button>
 
-                    <!-- Enhanced Stats Row -->
-                    <div class="grid grid-cols-2 gap-6 mb-8 border-t border-white/30 pt-6">
-                        <div class="text-center">
-                            <p class="text-3xl font-bold mb-1">{{ stats.documents }}</p>
-                            <p class="text-xs text-white/90 uppercase tracking-wider font-bold">Total Docs</p>
+                    <!-- QR Code -->
+                    <a routerLink="/my-qr"
+                        class="w-full p-4 flex items-center justify-between group active:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 block touch-manipulation">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded-2xl bg-[#2EC4B6]/10 flex items-center justify-center text-[#2EC4B6] group-active:scale-110 transition-transform duration-300 shadow-lg shadow-[#2EC4B6]/10">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3.75v3.75H13.5V13.5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">My QR Code</h4>
+                                <p class="text-xs text-slate-500 font-medium">Share your profile</p>
+                            </div>
                         </div>
-                        <div class="text-center border-l border-white/30">
-                            <p class="text-3xl font-bold mb-1">{{ stats.storagePercentage }}<span class="text-base ml-1 opacity-70">%</span></p>
-                            <p class="text-xs text-white/90 uppercase tracking-wider font-bold">Used</p>
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-[#2EC4B6]/10 group-active:text-[#2EC4B6] transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
+                            </svg>
                         </div>
-                    </div>
+                    </a>
+                </div>
 
-                    <!-- Enhanced Storage Progress -->
-                    <div class="w-full bg-black/20 rounded-full h-3 p-0.5 backdrop-blur-sm">
-                        <div class="h-full bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.4)] transition-all duration-1000 ease-out"
-                            [style.width.%]="stats.storagePercentage">
+                <div
+                    class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white/60 overflow-hidden mt-6">
+                    <!-- About Us -->
+                    <a routerLink="/about-us"
+                        class="w-full p-4 flex items-center justify-between group active:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 block touch-manipulation">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center text-orange-600 group-active:scale-110 transition-transform duration-300 shadow-lg shadow-orange-500/10">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">About DocLock</h4>
+                                <p class="text-xs text-slate-500 font-medium">Why we are safe & secure</p>
+                            </div>
                         </div>
-                    </div>
-                    <p class="text-[10px] text-white/90 mt-2 text-right w-full">Storage Left: {{ (100 - stats.storagePercentage).toFixed(1) }}%</p>
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-orange-50 group-active:text-orange-500 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <button (click)="initiateLogout()"
+                        class="w-full p-4 flex items-center justify-between group active:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 block touch-manipulation">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 flex items-center justify-center text-indigo-600 group-active:scale-110 transition-transform duration-300 shadow-lg shadow-indigo-500/10">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">Logout</h4>
+                                <p class="text-xs text-slate-500 font-medium">Sign out of this device</p>
+                            </div>
+                        </div>
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-indigo-50 group-active:text-indigo-500 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
+                            </svg>
+                        </div>
+                    </button>
+
+                    <button (click)="initiateDeleteAccount()"
+                        class="w-full p-4 flex items-center justify-between group active:bg-red-50 transition-colors text-left touch-manipulation">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center text-red-600 group-active:scale-110 transition-transform duration-300 shadow-lg shadow-red-500/10">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 group-active:text-red-600 transition-colors">Delete
+                                    Account</h4>
+                                <p class="text-xs text-slate-500 group-active:text-red-400 font-medium">Permanently
+                                    remove your account</p>
+                            </div>
+                        </div>
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-red-50 group-active:text-red-500 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
+                            </svg>
+                        </div>
+                    </button>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Enhanced Menu Actions -->
-    <section class="flex-1 min-h-0 overflow-y-auto px-4 pb-24">
-        <div class="max-w-sm mx-auto space-y-4 animate-fade-in" style="animation-delay: 200ms;">
-            <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider px-2">Settings</h3>
-
-            <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white/60 overflow-hidden">
-                <!-- Security -->
-                <button (click)="changeMpin()"
-                    class="w-full p-4 flex items-center justify-between group active:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 touch-manipulation">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-[#2EC4B6]/10 flex items-center justify-center text-[#2EC4B6] group-active:scale-110 transition-transform duration-300 shadow-lg shadow-[#2EC4B6]/10">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800">Security</h4>
-                            <p class="text-xs text-slate-500 font-medium">Change MPIN & Biometrics</p>
-                        </div>
-                    </div>
-                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-[#2EC4B6]/10 group-active:text-[#2EC4B6] transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </div>
-                </button>
-
-                <!-- QR Code -->
-                <a routerLink="/my-qr"
-                    class="w-full p-4 flex items-center justify-between group active:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 block touch-manipulation">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-[#2EC4B6]/10 flex items-center justify-center text-[#2EC4B6] group-active:scale-110 transition-transform duration-300 shadow-lg shadow-[#2EC4B6]/10">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3.75v3.75H13.5V13.5z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800">My QR Code</h4>
-                            <p class="text-xs text-slate-500 font-medium">Share your profile</p>
-                        </div>
-                    </div>
-                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-[#2EC4B6]/10 group-active:text-[#2EC4B6] transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </div>
-                </a>
-            </div>
-
-            <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white/60 overflow-hidden mt-6">
-                <!-- About Us -->
-                <a routerLink="/about-us"
-                    class="w-full p-4 flex items-center justify-between group active:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 block touch-manipulation">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center text-orange-600 group-active:scale-110 transition-transform duration-300 shadow-lg shadow-orange-500/10">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800">About DocLock</h4>
-                            <p class="text-xs text-slate-500 font-medium">Why we are safe & secure</p>
-                        </div>
-                    </div>
-                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-orange-50 group-active:text-orange-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </div>
-                </a>
-
-                <button (click)="initiateLogout()"
-                    class="w-full p-4 flex items-center justify-between group active:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 block touch-manipulation">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 flex items-center justify-center text-indigo-600 group-active:scale-110 transition-transform duration-300 shadow-lg shadow-indigo-500/10">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800">Logout</h4>
-                            <p class="text-xs text-slate-500 font-medium">Sign out of this device</p>
-                        </div>
-                    </div>
-                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-indigo-50 group-active:text-indigo-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </div>
-                </button>
-
-                <button (click)="initiateDeleteAccount()"
-                    class="w-full p-4 flex items-center justify-between group active:bg-red-50 transition-colors text-left touch-manipulation">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center text-red-600 group-active:scale-110 transition-transform duration-300 shadow-lg shadow-red-500/10">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800 group-active:text-red-600 transition-colors">Delete Account</h4>
-                            <p class="text-xs text-slate-500 group-active:text-red-400 font-medium">Permanently remove your account</p>
-                        </div>
-                    </div>
-                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-active:bg-red-50 group-active:text-red-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </div>
-                </button>
-            </div>
-        </div>
-    </section>
+        </section>
     </div>
 
     <!-- Delete Confirmation Sheet -->

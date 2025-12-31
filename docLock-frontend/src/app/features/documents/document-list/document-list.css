@@ -105,7 +105,13 @@
 }
 
 .animate-fade-in {
-    animation: fade-in 0.6s ease-out;
+    animation: fade-in 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+/* Animation delay utility */
+[style*="animation-delay"] {
+    animation-fill-mode: both;
 }
 
 /* Bottom Sheet Animations */
@@ -127,4 +133,13 @@
 /* Touch manipulation for better mobile experience */
 .touch-manipulation {
     touch-action: manipulation;
+}
+
+/* Animation delays for staggered animations */
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+.delay-700 {
+    animation-delay: 700ms;
 }

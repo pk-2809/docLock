@@ -398,6 +398,66 @@ export class FirebaseService {
     }
 
     /**
+     * Adds a card to the user's subcollection.
+     */
+    static async addCard(uid: string, cardData: any): Promise<any> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Adding Card', { uid, cardData });
+            return { id: 'mock-card-id-' + Date.now(), ...cardData };
+        }
+
+        try {
+            const docRef = await db.collection('users').doc(uid).collection('cards').add({
+                ...cardData,
+                createdAt: new Date().toISOString()
+            });
+
+            return { id: docRef.id, ...cardData };
+        } catch (error) {
+            console.error('Error adding card:', error);
+            throw new CustomError('Failed to save card', 500);
+        }
+    }
+
+    /**
+     * Updates a card.
+     */
+    static async updateCard(uid: string, cardId: string, updates: any): Promise<void> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Updating Card', { uid, cardId, updates });
+            return;
+        }
+
+        try {
+            const cardRef = db.collection('users').doc(uid).collection('cards').doc(cardId);
+            await cardRef.update({
+                ...updates,
+                updatedAt: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error('Error updating card:', error);
+            throw new CustomError('Failed to update card', 500);
+        }
+    }
+
+    /**
+     * Deletes a card.
+     */
+    static async deleteCard(uid: string, cardId: string): Promise<void> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Deleting Card', { uid, cardId });
+            return;
+        }
+
+        try {
+            await db.collection('users').doc(uid).collection('cards').doc(cardId).delete();
+        } catch (error) {
+            console.error('Error deleting card:', error);
+            throw new CustomError('Failed to delete card', 500);
+        }
+    }
+
+    /**
      * Deletes a folder and all its contents (recursive).
      */
     static async deleteFolder(uid: string, folderId: string): Promise<void> {

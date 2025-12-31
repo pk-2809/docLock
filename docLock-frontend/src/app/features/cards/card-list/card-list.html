@@ -1,515 +1,138 @@
 <!-- Cards Page - Redesigned -->
-<div class="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex flex-col overflow-hidden relative">
-    <!-- Pink top border line -->
-    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 z-50"></div>
-    
-    <!-- Sophisticated Background Elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-pink-400/10 to-purple-500/10 rounded-full animate-float-slow"></div>
-        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-indigo-400/8 to-pink-500/8 rounded-full animate-float-reverse"></div>
-        <div class="absolute top-1/4 right-1/3 w-32 h-32 bg-gradient-to-br from-purple-300/6 to-pink-400/6 rounded-full animate-pulse-slow"></div>
-        <div class="absolute bottom-1/3 left-1/4 w-20 h-20 bg-gradient-to-br from-slate-300/8 to-purple-300/8 rounded-full animate-float"></div>
+<div
+  class="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex flex-col overflow-hidden relative">
+  <!-- Pink top border line -->
+  <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 z-50"></div>
+
+  <!-- Sophisticated Background Elements -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div
+      class="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-pink-400/10 to-purple-500/10 rounded-full animate-float-slow">
     </div>
+    <div
+      class="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-indigo-400/8 to-pink-500/8 rounded-full animate-float-reverse">
+    </div>
+    <div
+      class="absolute top-1/4 right-1/3 w-32 h-32 bg-gradient-to-br from-purple-300/6 to-pink-400/6 rounded-full animate-pulse-slow">
+    </div>
+    <div
+      class="absolute bottom-1/3 left-1/4 w-20 h-20 bg-gradient-to-br from-slate-300/8 to-purple-300/8 rounded-full animate-float">
+    </div>
+  </div>
 
-    <!-- Main Content -->
-    <div class="px-4 sm:px-6 py-4 flex flex-col overflow-hidden relative z-10" style="height: calc(100vh - 7rem); max-height: calc(100vh - 7rem);">
-        <!-- Enhanced Header -->
-        <header class="mb-4 sm:mb-6 flex-shrink-0 pt-8 sm:pt-12">
-            <!-- Top Navigation -->
-            <div class="flex items-center gap-4 mb-6">
-                <button (click)="goBack()"
-                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-lg flex items-center justify-center text-slate-600 active:text-pink-600 transition-all active:scale-95 touch-manipulation">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                    </svg>
-                </button>
-                <div class="flex-1">
-                    <h2 class="text-slate-500 text-xs sm:text-sm uppercase tracking-wider font-bold mb-2">
-                        Digital Wallet
-                    </h2>
-                    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 name-heartbeat">
-                        My Cards
-                    </h1>
-                    <p class="text-slate-500 font-medium text-sm">{{allCards.length}} cards • {{debitCards.length}} debit • {{creditCards.length}} credit</p>
-                </div>
-                
-                <!-- Add Card Button -->
-                <button (click)="openAddCardModal()"
-                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-pink-600 active:bg-pink-700 text-white shadow-lg flex items-center justify-center transition-all active:scale-95 touch-manipulation">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                </button>
-            </div>
-        </header>
+  <!-- Main Content -->
+  <div class="w-full max-w-[639px] mx-auto px-4 py-4 flex flex-col overflow-hidden relative z-10"
+    style="height: calc(100vh - 5rem); max-height: calc(100vh - 5rem);">
 
-        <!-- Cards Content -->
-        <div class="flex-1 overflow-y-auto">
-            <!-- Empty State -->
-            <div *ngIf="allCards.length === 0" class="text-center py-16">
-                <div class="w-20 h-20 mx-auto mb-6 bg-pink-100 rounded-3xl flex items-center justify-center">
-                    <svg class="w-10 h-10 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">No Cards Yet</h3>
-                <p class="text-slate-500 mb-8 font-medium">Add your first card to get started</p>
+     <header class="flex-shrink-0 pt-8">
+       <div class="flex items-center justify-center mb-6 relative">
+           <!-- Back Button -->
+           <button (click)="goBack()"
+               class="absolute left-0 w-10 h-10 rounded-xl bg-white shadow-lg flex items-center justify-center text-slate-600 active:text-pink-600 transition-all active:scale-95 touch-manipulation">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+               </svg>
+           </button>
 
-                <button (click)="openAddCardModal()" 
-                        class="flex items-center gap-2 px-6 py-3 bg-pink-600 active:bg-pink-700 text-white font-medium rounded-2xl shadow-lg shadow-pink-500/25 transition-all active:scale-95 touch-manipulation mx-auto">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    <span>Add Your First Card</span>
-                </button>
-            </div>
+           <!-- Centered Title -->
+           <div class="text-center">
+               <h1 class="text-xl font-bold text-slate-800 tracking-tight">My Cards</h1>
+               <p class="text-xs sm:text-sm text-slate-600 font-medium">Total 4 cards</p>
+              </div>
 
-            <!-- Cards Sections -->
-            <div *ngIf="allCards.length > 0" class="space-y-8">
-                <!-- Debit Cards Section -->
-                <div *ngIf="debitCards.length > 0">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-slate-800">Debit Cards</h3>
-                        <span class="text-sm text-slate-500 bg-emerald-100 px-3 py-1 rounded-full">{{debitCards.length}} cards</span>
-                    </div>
-                    
-                    <!-- Debit Cards Carousel -->
-                    <div class="relative">
-                        <div class="overflow-x-auto scrollbar-hide">
-                            <div class="flex gap-4 pb-4" style="width: max-content;">
-                                <div *ngFor="let card of debitCards; let i = index" class="flex-shrink-0 w-80">
-                                    <!-- Card Display -->
-                                    <div (click)="toggleCardVisibility(card.id)"
-                                         class="w-full aspect-[1.586/1] rounded-2xl p-6 text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none"
-                                         [class]="getCardGradient(card)">
-                                        
-                                        <!-- Card Pattern Overlay -->
-                                        <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
-                                        <div class="absolute top-4 right-4 w-12 h-8 bg-white/20 rounded-lg"></div>
-                                        
-                                        <div class="relative z-10 flex flex-col justify-between h-full">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <span class="text-xs font-medium opacity-80 uppercase tracking-wider">{{card.name}}</span>
-                                                    <div class="text-xs opacity-60 mt-1">DEBIT CARD</div>
-                                                </div>
-                                                <div class="text-right">
-                                                    <div class="text-sm font-bold">MASTERCARD</div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="text-center my-4">
-                                                <p class="font-mono text-xl tracking-widest drop-shadow-sm">
-                                                    {{getDisplayCardNumber(card)}}
-                                                </p>
-                                            </div>
+           <!-- Add Card Button -->
+           <button (click)="openAddCardModal()"
+               class="absolute right-0 w-10 h-10 rounded-xl bg-pink-600 active:bg-pink-700 text-white shadow-lg shadow-pink-500/25 flex items-center justify-center transition-all active:scale-95 touch-manipulation group overflow-hidden">
+               <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-active:translate-x-full transition-transform duration-700"></div>
+               <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
+               </svg>
+           </button>
+       </div>
+   </header>
 
-                                            <div class="flex justify-between items-end">
-                                                <div>
-                                                    <p class="text-xs opacity-60 uppercase mb-1">Card Holder</p>
-                                                    <p class="text-sm font-medium tracking-wide uppercase">{{card.holderName}}</p>
-                                                </div>
-                                                <div class="flex gap-6">
-                                                    <div>
-                                                        <p class="text-xs opacity-60 uppercase mb-1">Expires</p>
-                                                        <p class="font-mono text-sm">{{card.expiryDate}}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p class="text-xs opacity-60 uppercase mb-1">CVV</p>
-                                                        <p class="font-mono text-sm">{{getDisplayCVV(card)}}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Card Details & Actions -->
-                                    <div class="mt-4 bg-white/90 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60">
-                                        <!-- Details with Copy Buttons -->
-                                        <div class="space-y-3">
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-slate-600">Card Holder</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm text-slate-800 font-medium">{{card.holderName}}</span>
-                                                    <button (click)="copyToClipboard(card.holderName!, 'Card holder name')" 
-                                                            class="text-emerald-500 hover:text-emerald-600 transition-colors">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-slate-600">Card Number</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm text-slate-800 font-mono">{{formatCardNumber(card.number)}}</span>
-                                                    <button (click)="copyToClipboard(card.number, 'Card number')" 
-                                                            class="text-emerald-500 hover:text-emerald-600 transition-colors">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-slate-600">Expiry Date</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm text-slate-800 font-mono">{{card.expiryDate}}</span>
-                                                    <button (click)="copyToClipboard(card.expiryDate, 'Expiry date')" 
-                                                            class="text-emerald-500 hover:text-emerald-600 transition-colors">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-slate-600">CVV</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm text-slate-800 font-mono">{{card.cvv}}</span>
-                                                    <button (click)="copyToClipboard(card.cvv, 'CVV')" 
-                                                            class="text-emerald-500 hover:text-emerald-600 transition-colors">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Action Buttons -->
-                                        <div class="flex justify-end gap-3 mt-4 pt-3 border-t border-slate-200">
-                                            <button (click)="editCard(card)" 
-                                                    class="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
-                                                Edit
-                                            </button>
-                                            <button (click)="deleteCard(card.id)" 
-                                                    class="text-sm font-medium text-red-500 hover:text-red-600 transition-colors">
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Credit Cards Section -->
-                <div *ngIf="creditCards.length > 0">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-slate-800">Credit Cards</h3>
-                        <span class="text-sm text-slate-500 bg-blue-100 px-3 py-1 rounded-full">{{creditCards.length}} cards</span>
-                    </div>
-                    
-                    <!-- Credit Cards Carousel -->
-                    <div class="relative">
-                        <div class="overflow-x-auto scrollbar-hide">
-                            <div class="flex gap-4 pb-4" style="width: max-content;">
-                                <div *ngFor="let card of creditCards; let i = index" class="flex-shrink-0 w-80">
-                                    <!-- Card Display -->
-                                    <div (click)="toggleCardVisibility(card.id)"
-                                         class="w-full aspect-[1.586/1] rounded-2xl p-6 text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.98] transition-all select-none"
-                                         [class]="getCardGradient(card)">
-                                        
-                                        <!-- Card Pattern Overlay -->
-                                        <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
-                                        <div class="absolute top-4 right-4 w-12 h-8 bg-white/20 rounded-lg"></div>
-                                        
-                                        <div class="relative z-10 flex flex-col justify-between h-full">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <span class="text-xs font-medium opacity-80 uppercase tracking-wider">{{card.name}}</span>
-                                                    <div class="text-xs opacity-60 mt-1">CREDIT CARD</div>
-                                                </div>
-                                                <div class="text-right">
-                                                    <div class="text-sm font-bold">VISA</div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="text-center my-4">
-                                                <p class="font-mono text-xl tracking-widest drop-shadow-sm">
-                                                    {{getDisplayCardNumber(card)}}
-                                                </p>
-                                            </div>
-
-                                            <div class="flex justify-between items-end">
-                                                <div>
-                                                    <p class="text-xs opacity-60 uppercase mb-1">Card Holder</p>
-                                                    <p class="text-sm font-medium tracking-wide uppercase">{{card.holderName}}</p>
-                                                </div>
-                                                <div class="flex gap-6">
-                                                    <div>
-                                                        <p class="text-xs opacity-60 uppercase mb-1">Expires</p>
-                                                        <p class="font-mono text-sm">{{card.expiryDate}}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p class="text-xs opacity-60 uppercase mb-1">CVV</p>
-                                                        <p class="font-mono text-sm">{{getDisplayCVV(card)}}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Card Details & Actions -->
-                                    <div class="mt-4 bg-white/90 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60">
-                                        <!-- Details with Copy Buttons -->
-                                        <div class="space-y-3">
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-slate-600">Card Holder</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm text-slate-800 font-medium">{{card.holderName}}</span>
-                                                    <button (click)="copyToClipboard(card.holderName!, 'Card holder name')" 
-                                                            class="text-blue-500 hover:text-blue-600 transition-colors">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-slate-600">Card Number</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm text-slate-800 font-mono">{{formatCardNumber(card.number)}}</span>
-                                                    <button (click)="copyToClipboard(card.number, 'Card number')" 
-                                                            class="text-blue-500 hover:text-blue-600 transition-colors">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-slate-600">Expiry Date</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm text-slate-800 font-mono">{{card.expiryDate}}</span>
-                                                    <button (click)="copyToClipboard(card.expiryDate, 'Expiry date')" 
-                                                            class="text-blue-500 hover:text-blue-600 transition-colors">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-slate-600">CVV</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm text-slate-800 font-mono">{{card.cvv}}</span>
-                                                    <button (click)="copyToClipboard(card.cvv, 'CVV')" 
-                                                            class="text-blue-500 hover:text-blue-600 transition-colors">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Action Buttons -->
-                                        <div class="flex justify-end gap-3 mt-4 pt-3 border-t border-slate-200">
-                                            <button (click)="editCard(card)" 
-                                                    class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
-                                                Edit
-                                            </button>
-                                            <button (click)="deleteCard(card.id)" 
-                                                    class="text-sm font-medium text-red-500 hover:text-red-600 transition-colors">
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Cards Content -->
+    <div class="flex-1 min-h-0 flex flex-col justify-between">
+      <!-- Empty State -->
+      <div *ngIf="allCards.length === 0" class="text-center py-16">
+        <div class="w-20 h-20 mx-auto mb-6 bg-pink-100 rounded-3xl flex items-center justify-center">
+          <svg class="w-10 h-10 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+          </svg>
         </div>
-    </div>
+        <h3 class="text-xl font-bold text-slate-800 mb-2">No Cards Yet</h3>
+        <p class="text-slate-500 mb-8 font-medium">Add your first card to get started</p>
 
-    <!-- Add/Edit Card Modal -->
-    <div *ngIf="showAddCardModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" (click)="showAddCardModal = false"></div>
-        
-        <!-- Modal -->
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden transform transition-all animate-scale-in">
-            <!-- Close Button -->
-            <button (click)="showAddCardModal = false" 
-                    class="absolute right-4 top-4 text-slate-400 hover:text-slate-600 z-20 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+        <button (click)="openAddCardModal()"
+          class="flex items-center gap-2 px-6 py-3 bg-pink-600 active:bg-pink-700 text-white font-medium rounded-2xl shadow-lg shadow-pink-500/25 transition-all active:scale-95 touch-manipulation mx-auto">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span>Add Your First Card</span>
+        </button>
+      </div>
 
-            <div class="p-6">
-                <h3 class="text-xl font-bold text-slate-900 text-center mb-6">
-                    {{editingCard ? 'Edit Card' : 'Add New Card'}}
-                </h3>
-
-                <!-- Live Card Preview -->
-                <div class="mb-6 mx-auto w-full aspect-[1.586/1] rounded-2xl p-5 text-white shadow-xl relative overflow-hidden"
-                     [class]="newCard.color ? 'bg-gradient-to-br ' + newCard.color : 'bg-gradient-to-br from-blue-600 to-purple-700'">
-                     
-                     <!-- Card Pattern Overlay -->
-                     <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
-                     <div class="absolute top-4 right-4 w-10 h-6 bg-white/20 rounded-md"></div>
-                     
-                     <div class="flex flex-col h-full justify-between relative z-10">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs opacity-80 font-medium uppercase tracking-wider">{{newCard.name || 'Card Name'}}</span>
-                                <div class="text-xs opacity-60 mt-1">{{newCard.type === 'credit' ? 'CREDIT CARD' : 'DEBIT CARD'}}</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-sm font-bold">{{newCard.type === 'credit' ? 'VISA' : 'MASTERCARD'}}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="text-center my-3">
-                            <p class="font-mono text-lg tracking-widest">
-                                {{ newCard.number || '0000 0000 0000 0000' }}
-                            </p>
-                        </div>
-                        
-                        <div class="flex justify-between items-end">
-                            <div>
-                                <p class="text-xs uppercase opacity-60 mb-1">Card Holder</p>
-                                <p class="uppercase text-sm font-medium tracking-wide">{{ newCard.holderName || 'YOUR NAME' }}</p>
-                            </div>
-                            <div class="flex gap-4">
-                                <div>
-                                    <p class="text-xs uppercase opacity-60 mb-1">Expires</p>
-                                    <p class="font-mono text-sm">{{ newCard.expiryDate || 'MM/YY' }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs uppercase opacity-60 mb-1">CVV</p>
-                                    <p class="font-mono text-sm">{{ newCard.cvv || '123' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                     </div>
-                </div>
-
-                <!-- Form -->
-                <div class="space-y-4">
-                    <!-- Card Type Selection -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Card Type</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button type="button" 
-                                    (click)="newCard.type = 'debit'; newCard.color = 'from-emerald-600 to-teal-700'"
-                                    [class]="newCard.type === 'debit' ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                                    class="flex items-center justify-center gap-2 p-3 rounded-xl font-medium transition-all">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                Debit Card
-                            </button>
-                            <button type="button" 
-                                    (click)="newCard.type = 'credit'; newCard.color = 'from-blue-600 to-purple-700'"
-                                    [class]="newCard.type === 'credit' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                                    class="flex items-center justify-center gap-2 p-3 rounded-xl font-medium transition-all">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                                Credit Card
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Card Name -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Card Name</label>
-                        <input [(ngModel)]="newCard.name" 
-                               type="text" 
-                               placeholder="e.g., Personal Visa, Business Card"
-                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all placeholder-slate-400">
-                    </div>
-
-                    <!-- Card Number -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Card Number</label>
-                        <input type="text" 
-                               [value]="newCard.number" 
-                               (input)="formatInputCardNumber($event)" 
-                               placeholder="0000 0000 0000 0000" 
-                               maxlength="19"
-                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-mono text-slate-800 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all placeholder-slate-400">
-                    </div>
-
-                    <!-- Card Holder Name -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Card Holder Name</label>
-                        <input [(ngModel)]="newCard.holderName" 
-                               type="text" 
-                               placeholder="JOHN DOE"
-                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 uppercase focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all placeholder-slate-400">
-                    </div>
-
-                    <!-- Expiry and CVV -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Expiry Date</label>
-                            <input type="text" 
-                                   [value]="newCard.expiryDate" 
-                                   (input)="formatInputExpiry($event)" 
-                                   placeholder="MM/YY" 
-                                   maxlength="5"
-                                   class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-mono text-slate-800 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all placeholder-slate-400">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">CVV</label>
-                            <input [(ngModel)]="newCard.cvv" 
-                                   type="password" 
-                                   placeholder="123" 
-                                   maxlength="4"
-                                   class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-mono text-slate-800 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all placeholder-slate-400">
-                        </div>
-                    </div>
-                    
-                    <!-- Color Picker -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Card Color</label>
-                        <div class="flex justify-center gap-3">
-                            <button type="button" 
-                                    (click)="newCard.color = 'from-blue-600 to-purple-700'" 
-                                    [class]="newCard.color === 'from-blue-600 to-purple-700' ? 'ring-2 ring-blue-500 ring-offset-2' : ''"
-                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-purple-700 hover:scale-110 transition-transform"></button>
-                            <button type="button" 
-                                    (click)="newCard.color = 'from-emerald-600 to-teal-700'" 
-                                    [class]="newCard.color === 'from-emerald-600 to-teal-700' ? 'ring-2 ring-emerald-500 ring-offset-2' : ''"
-                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 hover:scale-110 transition-transform"></button>
-                            <button type="button" 
-                                    (click)="newCard.color = 'from-purple-600 to-pink-600'" 
-                                    [class]="newCard.color === 'from-purple-600 to-pink-600' ? 'ring-2 ring-purple-500 ring-offset-2' : ''"
-                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 hover:scale-110 transition-transform"></button>
-                            <button type="button" 
-                                    (click)="newCard.color = 'from-slate-700 to-slate-900'" 
-                                    [class]="newCard.color === 'from-slate-700 to-slate-900' ? 'ring-2 ring-slate-500 ring-offset-2' : ''"
-                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 hover:scale-110 transition-transform"></button>
-                            <button type="button" 
-                                    (click)="newCard.color = 'from-orange-500 to-red-600'" 
-                                    [class]="newCard.color === 'from-orange-500 to-red-600' ? 'ring-2 ring-orange-500 ring-offset-2' : ''"
-                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-600 hover:scale-110 transition-transform"></button>
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button (click)="addCard()" 
-                            class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-pink-500/25 active:scale-[0.98] transition-all">
-                        {{editingCard ? 'Update Card' : 'Add Card'}}
-                    </button>
-                </div>
-            </div>
+      <!-- Cards Sections -->
+      <div *ngIf="allCards.length > 0" class="flex flex-col gap-3" style="height: 100%;">
+        <!-- Info Note -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-2 flex-shrink-0 mb-4">
+          <div class="flex items-center gap-2">
+            <svg class="w-3 h-3 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-xs text-blue-800 leading-tight">
+              <span class="font-semibold">Tip:</span> Click any card detail to copy it.
+            </p>
+          </div>
         </div>
+
+        <!-- Debit Cards Section -->
+        <div *ngIf="debitCards.length > 0" [style.flex]="creditCards.length > 0 ? '1' : '1'"
+          class="min-h-0 flex flex-col">
+          <div class="flex items-center justify-between mb-2 flex-shrink-0">
+            <h3 class="text-sm font-bold text-slate-800">Debit Cards</h3>
+            <span class="text-xs text-slate-500 bg-emerald-100 px-2 py-0.5 rounded-full">{{debitCards.length}}
+              cards</span>
+          </div>
+
+          <!-- Debit Cards Carousel -->
+          <div class="flex-1 min-h-0">
+            <app-card-carousel [cards]="debitCards" [cardType]="'debit'" [indicatorColor]="'pink'"
+              [cardVisibilityState]="cardVisibilityState" [getCardGradient]="getCardGradient.bind(this)"
+              [getDisplayCardNumber]="getDisplayCardNumber.bind(this)" [getDisplayCVV]="getDisplayCVV.bind(this)"
+              [formatCardNumber]="formatCardNumber.bind(this)" [getMaskedCardNumber]="getMaskedCardNumber.bind(this)"
+              (toggleVisibility)="toggleCardVisibility($event)"
+              (copyToClipboard)="copyToClipboard($event.text, $event.label)" (editCard)="editCard($event)"
+              (deleteCard)="deleteCard($event)">
+            </app-card-carousel>
+          </div>
+        </div>
+
+        <!-- Credit Cards Section -->
+        <div *ngIf="creditCards.length > 0" [style.flex]="debitCards.length > 0 ? '1' : '1'"
+          class="min-h-0 flex flex-col">
+          <div class="flex items-center justify-between mb-2 flex-shrink-0">
+            <h3 class="text-sm font-bold text-slate-800">Credit Cards</h3>
+            <span class="text-xs text-slate-500 bg-blue-100 px-2 py-0.5 rounded-full">{{creditCards.length}}
+              cards</span>
+          </div>
+
+          <!-- Credit Cards Carousel -->
+          <div class="flex-1 min-h-0">
+            <app-card-carousel [cards]="creditCards" [cardType]="'credit'" [indicatorColor]="'blue'"
+              [cardVisibilityState]="cardVisibilityState" [getCardGradient]="getCardGradient.bind(this)"
+              [getDisplayCardNumber]="getDisplayCardNumber.bind(this)" [getDisplayCVV]="getDisplayCVV.bind(this)"
+              [formatCardNumber]="formatCardNumber.bind(this)" [getMaskedCardNumber]="getMaskedCardNumber.bind(this)"
+              (toggleVisibility)="toggleCardVisibility($event)"
+              (copyToClipboard)="copyToClipboard($event.text, $event.label)" (editCard)="editCard($event)"
+              (deleteCard)="deleteCard($event)">
+            </app-card-carousel>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+
 </div>

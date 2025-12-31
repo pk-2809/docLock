@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gradient-to-br from-pink-50 via-pink-50 to-pink-50 flex flex-col overflow-hidden relative">
     <!-- Pink top border line -->
     <div class="absolute top-0 left-0 right-0 h-1 bg-[#ec4899] z-50"></div>
-    
+
     <!-- Sophisticated Background Elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute -top-32 -right-32 w-64 h-64 bg-[#ec4899]/10 rounded-full animate-float-slow"></div>
@@ -39,7 +39,7 @@
                 @if (friends().length > 0) {
         <div class="relative">
             <div class="absolute inset-0 bg-[#ec4899]/5 rounded-xl sm:rounded-2xl"></div>
-            <input type="text" [(ngModel)]="searchQuery" 
+            <input type="text" [(ngModel)]="searchQuery"
                 placeholder="Search your trusted circle..."
                 class="relative w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-white/90 backdrop-blur-xl border-2 border-white/60 rounded-xl sm:rounded-2xl text-slate-800 placeholder-slate-500 focus:outline-none focus:border-[#ec4899] focus:ring-4 focus:ring-[#ec4899]/10 transition-all shadow-lg font-medium text-sm sm:text-base">
                     <div class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-500">
@@ -53,7 +53,7 @@
 
             <!-- Mobile-First Stats Dashboard -->
             @if (!isLoading() && friends().length > 0) {
-            <div class="px-4 sm:px-6 mb-4 sm:mb-6">
+            <div class="px-4 sm:px-6">
                 <div class="grid grid-cols-3 gap-2 sm:gap-3">
                     <!-- Documents Shared -->
                     <div class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/60 shadow-lg active:shadow-xl transition-all active:scale-105 touch-manipulation">
@@ -141,7 +141,7 @@
                 <p class="text-slate-600 leading-relaxed mb-8 font-medium">
                     Connect with trusted friends and family to securely share important documents and cards.
                 </p>
-                <a routerLink="/add-friend" 
+                <a routerLink="/add-friend"
                     class="group inline-flex items-center gap-3 bg-[#ec4899] hover:bg-[#db2777] text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-[#ec4899]/25 hover:shadow-[#ec4899]/40 transition-all hover:scale-105 active:scale-95 relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                     <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -159,7 +159,7 @@
         <div class="space-y-3 animate-fade-in">
             @for (friend of filteredFriends(); track friend.uid; let i = $index) {
             <div class="bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60 transition-all">
-                
+
                 <!-- Mobile-friendly friend info layout -->
                 <div class="flex items-center gap-3 mb-3">
                     <!-- Profile Avatar -->
@@ -267,7 +267,7 @@
 
                 <!-- Title -->
                 <h3 class="text-2xl font-bold text-slate-900 mb-3 text-center">Remove from Circle?</h3>
-                
+
                 <!-- Message -->
                 <div class="text-center mb-8">
                     <p class="text-slate-600 font-medium mb-2">
@@ -292,7 +292,7 @@
                         <span>Yes, Remove</span>
                         }
                     </button>
-                    
+
                     <button (click)="closeConfirmation()"
                         class="w-full py-4 text-slate-600 font-bold active:text-slate-800 transition-colors touch-manipulation">
                         Cancel
@@ -322,7 +322,7 @@
                 <div class="w-16 h-16 mx-auto mb-6 bg-[#ec4899]/10 rounded-3xl flex items-center justify-center">
                     <div class="w-10 h-10 bg-[#ec4899] rounded-2xl flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 [attr.d]="requestType() === 'document' ? 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' : 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'"/>
                         </svg>
                     </div>
@@ -330,7 +330,7 @@
 
                 <!-- Title -->
                 <h3 class="text-2xl font-bold text-slate-900 mb-3 text-center">Request {{ requestType() | titlecase }}</h3>
-                
+
                 <!-- Subtitle -->
                 <p class="text-slate-600 font-medium mb-6 text-center">
                     Send a secure request to <span class="font-bold text-slate-900">{{ getSelectedFriend()?.name }}</span>
@@ -357,7 +357,7 @@
                         <span>Send Request</span>
                         }
                     </button>
-                    
+
                     <button (click)="closeRequestSheet()"
                         class="w-full py-4 text-slate-600 font-bold active:text-slate-800 transition-colors touch-manipulation">
                         Cancel

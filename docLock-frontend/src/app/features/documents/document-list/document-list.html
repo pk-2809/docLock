@@ -30,41 +30,38 @@
     @if (viewMode === 'folders') {
     <div class="px-4 sm:px-6 py-4 flex flex-col overflow-hidden relative z-10" style="height: calc(100vh - 7rem); max-height: calc(100vh - 7rem);">
         <!-- Enhanced Header -->
-        <header class="mb-4 sm:mb-6 flex-shrink-0 pt-8 sm:pt-12">
+        <header class="mb-4 flex-shrink-0 p-4 pt-12">
             <!-- Top Navigation -->
-            <div class="flex items-center gap-4 mb-6">
+            <div class="flex items-center justify-center mb-6 relative">
+                <!-- Centered Title -->
+                <div class="text-center">
+                    <h1 class="text-xl font-bold text-slate-800 tracking-tight">My Documents</h1>
+                </div>
+
+                <!-- Back Button (when not in root) -->
                 @if (!currentFolderId) {
                 <button (click)="goBack()"
-                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white shadow-lg flex items-center justify-center text-slate-600 active:text-blue-600 transition-all active:scale-95 touch-manipulation">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="absolute left-0 w-10 h-10 rounded-xl bg-white shadow-lg flex items-center justify-center text-slate-600 active:text-blue-600 transition-all active:scale-95 touch-manipulation">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                     </svg>
                 </button>
                 }
-                <div class="flex-1">
-                    <h2 class="text-slate-500 text-xs sm:text-sm uppercase tracking-wider font-bold mb-2">
-                        Document Vault
-                    </h2>
-                    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 name-heartbeat">
-                        My Documents
-                    </h1>
-                    <p class="text-slate-500 font-medium text-sm">{{currentFolders.length + currentDocuments.length}} items</p>
-                </div>
             </div>
 
             <!-- Enhanced Search Bar -->
             <div class="mb-4">
                 <div class="bg-white rounded-2xl p-2 shadow-lg border border-slate-200">
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <input type="text" placeholder="Search documents..." (input)="onSearch($event)"
+                            class="w-full bg-blue-50 border-0 rounded-xl pl-12 pr-4 py-3 text-slate-800 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all font-medium">
+                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 pointer-events-none">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0110.607 10.607z" />
                             </svg>
                         </div>
-                        <input type="text" placeholder="Search documents..." (input)="onSearch($event)"
-                            class="w-full bg-blue-50 border-0 rounded-xl pl-12 pr-4 py-3 text-slate-800 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all font-medium">
                     </div>
                 </div>
             </div>

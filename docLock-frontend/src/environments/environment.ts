@@ -10,5 +10,6 @@ export const environment = {
     messagingSenderId: "620656800474",
     appId: "1:620656800474:web:30774da91e601c72e9ebe3",
     measurementId: "G-PZP2JYR0DQ"
-  }
+  },
+  encryptionKey: 'doclock-super-secret-key-v1'
 };

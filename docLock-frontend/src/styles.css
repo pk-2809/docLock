@@ -74,23 +74,21 @@ textarea {
    ENHANCED-UI: Utility Classes & Animations
    ========================================= */
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
+/* Hide Scrollbars Globally */
+html,
+body,
+* {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 
-::-webkit-scrollbar-track {
-    background: #1e293b;
-    /* Adjusted for dark theme */
-}
-
-::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+    width: 0;
+    height: 0;
+    background: transparent;
 }
 
 /* Smooth UI Animations (from Enhanced-UI) */

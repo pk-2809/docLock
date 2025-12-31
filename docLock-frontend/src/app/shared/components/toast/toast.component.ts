@@ -9,14 +9,14 @@ import { ToastService } from '../../../core/services/toast.service';
     template: `
     <div class="fixed top-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
         @for (toast of toastService.toasts(); track toast.id) {
-            <div class="pointer-events-auto min-w-[320px] max-w-md p-4 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/10 animate-slide-in flex items-start gap-3"
+            <div class="pointer-events-auto min-w-[320px] max-w-md p-4 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/10 animate-slide-in flex items-center gap-3"
                  [ngClass]="{
                     'bg-slate-900/90 text-white': true,
                     'shadow-green-500/20 border-green-500/20': toast.type === 'success',
                     'shadow-red-500/20 border-red-500/20': toast.type === 'error',
                     'shadow-blue-500/20 border-blue-500/20': toast.type === 'info'
                  }">
-                
+
                 <!-- Icon -->
                 <div class="mt-0.5 shrink-0">
                     @if (toast.type === 'success') {

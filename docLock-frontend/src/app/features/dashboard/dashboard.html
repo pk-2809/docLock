@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 flex flex-col overflow-hidden relative">
     <!-- Indigo top border line -->
     <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-500 z-50"></div>
-    
+
     <!-- Sophisticated Background Elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-indigo-400/10 to-blue-500/10 rounded-full animate-float-slow"></div>
@@ -11,27 +11,27 @@
     </div>
 
     <!-- Dashboard View -->
-    <div class="px-4 sm:px-6 py-4 flex flex-col overflow-hidden relative z-10" style="height: calc(100vh - 7rem); max-height: calc(100vh - 7rem);">
+    <div class="w-full max-w-[639px] mx-auto px-4 py-4 flex flex-col overflow-hidden relative z-10" style="height: calc(100vh - 5rem); max-height: calc(100vh - 5rem);">
         <!-- Enhanced Welcome Header -->
-        <header class="flex justify-between items-center mb-4 sm:mb-6 flex-shrink-0 pt-8 sm:pt-12">
+        <header class="flex justify-between items-center mb-4 flex-shrink-0 pt-8">
             <div class="welcome-section">
-                <h2 class="text-slate-500 text-xs sm:text-sm uppercase tracking-wider font-bold mb-2">
+                <h2 class="text-slate-500 text-xs uppercase tracking-wider font-bold mb-2">
                     Welcome back,
                 </h2>
-                <h1 class="font-black tracking-tight flex items-center gap-3 text-slate-900 name-heartbeat text-3xl sm:text-4xl" style="line-height: 1.2;">
+                <h1 class="font-black tracking-tight flex items-center gap-3 text-slate-900 name-heartbeat text-3xl" style="line-height: 1.2; font-size: 40px;">
                     {{ firstName }}
-                    <span class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-indigo-500 animate-ping"></span>
+                    <span class="w-3 h-3 rounded-full bg-indigo-500 animate-ping"></span>
                 </h1>
             </div>
 
             <!-- Enhanced Notification Bell -->
             <button (click)="onNotificationClick()" [disabled]="isFetchingNotifications"
-                class="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#6366f1] active:bg-[#4f46e5] text-white shadow-lg shadow-[#6366f1]/25 flex items-center justify-center transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation group overflow-visible">
-                
+                class="relative w-10 h-10 rounded-xl bg-[#6366f1] active:bg-[#4f46e5] text-white shadow-lg shadow-[#6366f1]/25 flex items-center justify-center transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation group overflow-visible">
+
                 <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-active:translate-x-full transition-transform duration-700"></div>
 
                 @if (!isFetchingNotifications) {
-                <svg class="w-5 h-5 sm:w-6 sm:h-6 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                 </svg>
@@ -41,7 +41,7 @@
                 }
 
                 @if (isFetchingNotifications) {
-                <svg class="animate-spin w-4 h-4 sm:w-5 sm:h-5 text-white relative z-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin w-4 h-4 text-white relative z-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -53,7 +53,7 @@
         <div class="flex-1 flex flex-col items-center justify-center min-h-0 mb-4 animate-fade-in">
             <div class="w-full flex flex-col items-center">
                 <!-- Enhanced Circular Chart with glassmorphism -->
-                <div class="relative w-64 h-64 sm:w-72 sm:h-72 mb-6 bg-white/20 backdrop-blur-xl rounded-full p-4 shadow-xl border border-white/30">
+                <div class="relative w-64 h-64 mb-6 bg-white/20 backdrop-blur-xl rounded-full p-4 shadow-xl border border-white/30">
                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 200 200">
                         <!-- Enhanced Track Circles -->
                         <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(226, 232, 240, 0.3)" stroke-width="16" stroke-linecap="round" />
@@ -82,58 +82,58 @@
 
                     <!-- Enhanced Center Label with glassmorphism -->
                     <div class="absolute inset-0 flex flex-col items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20" style="padding: 1.5rem;">
-                        <span class="text-3xl sm:text-4xl font-black tracking-tight transition-colors duration-300 leading-none"
+                        <span class="text-3xl font-black tracking-tight transition-colors duration-300 leading-none"
                             [class.text-indigo-600]="selectedChartStat === 'storage'"
                             [class.text-pink-600]="selectedChartStat === 'cards'"
                             [class.text-green-600]="selectedChartStat === 'qrs'">
-                            {{getCurrentChartValue().toFixed(0)}}<span class="text-2xl sm:text-3xl">%</span>
+                            {{getCurrentChartValue().toFixed(0)}}<span class="text-2xl">%</span>
                         </span>
-                        <span class="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">{{getCurrentChartLabel()}}</span>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{getCurrentChartLabel()}}</span>
                     </div>
                 </div>
 
                 <!-- Enhanced Interactive Tabs -->
-                <div class="flex justify-center gap-2 sm:gap-3 mb-6">
-                    <button (click)="selectChartStat('storage')" 
+                <div class="flex justify-center gap-2 mb-6">
+                    <button (click)="selectChartStat('storage')"
                         [class]="selectedChartStat === 'storage' ? 'bg-indigo-100 text-indigo-700 border-indigo-400 shadow-md' : 'bg-indigo-50 text-indigo-600 border-indigo-100'"
-                        class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full border-2 transition-all active:scale-95 touch-manipulation">
+                        class="flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all active:scale-95 touch-manipulation">
                         <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
-                        <span class="text-xs sm:text-sm font-bold">Storage</span>
+                        <span class="text-xs font-bold">Storage</span>
                     </button>
-                    <button (click)="selectChartStat('cards')" 
+                    <button (click)="selectChartStat('cards')"
                         [class]="selectedChartStat === 'cards' ? 'bg-pink-100 text-pink-700 border-pink-400 shadow-md' : 'bg-pink-50 text-pink-600 border-pink-100'"
-                        class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full border-2 transition-all active:scale-95 touch-manipulation">
+                        class="flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all active:scale-95 touch-manipulation">
                         <div class="w-3 h-3 rounded-full bg-pink-500"></div>
-                        <span class="text-xs sm:text-sm font-bold">Cards</span>
+                        <span class="text-xs font-bold">Cards</span>
                     </button>
-                    <button (click)="selectChartStat('qrs')" 
+                    <button (click)="selectChartStat('qrs')"
                         [class]="selectedChartStat === 'qrs' ? 'bg-green-100 text-green-700 border-green-400 shadow-md' : 'bg-green-50 text-green-600 border-green-100'"
-                        class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full border-2 transition-all active:scale-95 touch-manipulation">
+                        class="flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all active:scale-95 touch-manipulation">
                         <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span class="text-xs sm:text-sm font-bold">QRs</span>
+                        <span class="text-xs font-bold">QRs</span>
                     </button>
                 </div>
 
                 <!-- Enhanced Details Section -->
-                <div class="bg-white/95 backdrop-blur-xl rounded-2xl p-4 sm:p-5 shadow-xl border border-white/60 w-full max-w-md">
+                <div class="bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-white/60 w-full max-w-md">
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">{{getSelectedStatDetails().label}} Details</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{{getSelectedStatDetails().label}} Details</p>
                             <div class="flex items-baseline gap-2">
-                                <span class="text-xl sm:text-2xl font-black transition-colors duration-300"
+                                <span class="text-xl font-black transition-colors duration-300"
                                     [class.text-indigo-600]="selectedChartStat === 'storage'"
                                     [class.text-pink-600]="selectedChartStat === 'cards'"
                                     [class.text-green-600]="selectedChartStat === 'qrs'">
                                     {{getSelectedStatDetails().used}}
                                 </span>
-                                <span class="text-sm sm:text-lg font-bold text-slate-500">{{getSelectedStatDetails().unit}}</span>
-                                <span class="text-sm sm:text-lg font-bold text-slate-400">/</span>
-                                <span class="text-lg sm:text-xl font-bold text-slate-600">{{getSelectedStatDetails().total}} {{getSelectedStatDetails().unit}}</span>
+                                <span class="text-sm font-bold text-slate-500">{{getSelectedStatDetails().unit}}</span>
+                                <span class="text-sm font-bold text-slate-400">/</span>
+                                <span class="text-lg font-bold text-slate-600">{{getSelectedStatDetails().total}} {{getSelectedStatDetails().unit}}</span>
                             </div>
                         </div>
                         <div class="text-right">
                             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Used</p>
-                            <p class="text-xl sm:text-2xl font-black transition-colors duration-300"
+                            <p class="text-xl font-black transition-colors duration-300"
                                 [class.text-indigo-600]="selectedChartStat === 'storage'"
                                 [class.text-pink-600]="selectedChartStat === 'cards'"
                                 [class.text-green-600]="selectedChartStat === 'qrs'">
@@ -150,15 +150,15 @@
             <div class="grid grid-cols-3 gap-3">
                 <!-- Enhanced Documents Card -->
                 <div (click)="navigateToDocuments()"
-                    class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-300 transition-all duration-300 cursor-pointer active:scale-[0.98] overflow-hidden flex flex-col items-center justify-center touch-manipulation">
-                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-blue-500/5 rounded-xl sm:rounded-2xl opacity-0 group-active:opacity-100 transition-opacity"></div>
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 group-active:scale-110 transition-transform mb-2 relative z-10">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="group relative bg-white/95 backdrop-blur-xl rounded-xl p-3 border border-slate-300 transition-all duration-300 cursor-pointer active:scale-[0.98] overflow-hidden flex flex-col items-center justify-center touch-manipulation">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-blue-500/5 rounded-xl opacity-0 group-active:opacity-100 transition-opacity"></div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 group-active:scale-110 transition-transform mb-2 relative z-10">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <h2 class="text-xs sm:text-sm font-bold text-slate-800 group-active:text-indigo-600 transition-colors mb-1 text-center relative z-10">
+                    <h2 class="text-xs font-bold text-slate-800 group-active:text-indigo-600 transition-colors mb-1 text-center relative z-10">
                         Documents</h2>
                     <p class="text-xs text-slate-500 group-active:text-indigo-400 text-center relative z-10">
                         {{totalStats.documents}} Files</p>
@@ -166,15 +166,15 @@
 
                 <!-- Enhanced Cards Card -->
                 <div (click)="router.navigate(['/cards'])"
-                    class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-300 transition-all duration-300 cursor-pointer active:scale-[0.98] overflow-hidden flex flex-col items-center justify-center touch-manipulation">
-                    <div class="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-rose-500/5 rounded-xl sm:rounded-2xl opacity-0 group-active:opacity-100 transition-opacity"></div>
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl flex items-center justify-center text-pink-600 group-active:scale-110 transition-transform mb-2 relative z-10">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="group relative bg-white/95 backdrop-blur-xl rounded-xl p-3 border border-slate-300 transition-all duration-300 cursor-pointer active:scale-[0.98] overflow-hidden flex flex-col items-center justify-center touch-manipulation">
+                    <div class="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-rose-500/5 rounded-xl opacity-0 group-active:opacity-100 transition-opacity"></div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl flex items-center justify-center text-pink-600 group-active:scale-110 transition-transform mb-2 relative z-10">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
                     </div>
-                    <h2 class="text-xs sm:text-sm font-bold text-slate-800 group-active:text-pink-600 transition-colors mb-1 text-center relative z-10">
+                    <h2 class="text-xs font-bold text-slate-800 group-active:text-pink-600 transition-colors mb-1 text-center relative z-10">
                         Cards</h2>
                     <p class="text-xs text-slate-500 group-active:text-pink-400 text-center relative z-10">
                         {{cardsCount}} Active</p>
@@ -182,17 +182,17 @@
 
                 <!-- Enhanced QRs Card -->
                 <div (click)="router.navigate(['/my-qr'])"
-                    class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-300 transition-all duration-300 cursor-pointer active:scale-[0.98] overflow-hidden flex flex-col items-center justify-center touch-manipulation">
-                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 rounded-xl sm:rounded-2xl opacity-0 group-active:opacity-100 transition-opacity"></div>
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-green-50 to-green-100 rounded-xl flex items-center justify-center text-green-600 group-active:scale-110 transition-transform mb-2 relative z-10">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="group relative bg-white/95 backdrop-blur-xl rounded-xl p-3 border border-slate-300 transition-all duration-300 cursor-pointer active:scale-[0.98] overflow-hidden flex flex-col items-center justify-center touch-manipulation">
+                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 rounded-xl opacity-0 group-active:opacity-100 transition-opacity"></div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-50 to-green-100 rounded-xl flex items-center justify-center text-green-600 group-active:scale-110 transition-transform mb-2 relative z-10">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3.75v3.75H13.5V13.5z" />
                         </svg>
                     </div>
-                    <h2 class="text-xs sm:text-sm font-bold text-slate-800 group-active:text-green-600 transition-colors mb-1 text-center relative z-10">
+                    <h2 class="text-xs font-bold text-slate-800 group-active:text-green-600 transition-colors mb-1 text-center relative z-10">
                         QRs</h2>
                     <p class="text-xs text-slate-500 group-active:text-green-400 text-center relative z-10">
                         Synced</p>

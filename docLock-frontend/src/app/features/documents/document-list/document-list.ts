@@ -264,6 +264,8 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.viewMode = 'cards';
             } else if (params['view'] === 'qrs') {
                 this.viewMode = 'qrs';
+            } else if (params['folderId']) {
+                this.openFolder(params['folderId']);
             }
         });
 
@@ -1373,4 +1375,11 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         });
     }
+    openDocument(doc: Document) {
+        this.router.navigate(['/documents/preview', doc.id], {
+            queryParams: { folderId: this.currentFolderId }
+        });
+    }
+
+
 }

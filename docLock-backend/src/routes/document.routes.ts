@@ -10,6 +10,7 @@ router.get('/list', DocumentController.getDocuments);
 router.get('/cards', DocumentController.getCards);
 router.get('/:id/download', DocumentController.downloadDocument);
 
+
 // Folder Routes
 router.post('/folder', DocumentController.createFolder);
 router.get('/folders', DocumentController.getFolders);
@@ -17,6 +18,7 @@ router.delete('/folder/:id', DocumentController.deleteFolder);
 router.put('/folder/:id', DocumentController.updateFolder);
 
 // Generic ID Routes (Must be last)
+router.get('/:id', DocumentController.getDocument);
 router.delete('/:id', DocumentController.deleteDocument);
 
 export default router;

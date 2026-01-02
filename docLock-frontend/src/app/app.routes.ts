@@ -28,6 +28,12 @@ export const routes: Routes = [
     },
 
     {
+        path: 'documents/preview/:id',
+        loadComponent: () => import('./features/documents/document-preview/document-preview').then(m => m.DocumentPreviewComponent),
+        canActivate: [authGuard]
+    },
+
+    {
         path: '',
         loadComponent: () => import('./layouts/main-layout/main-layout').then(m => m.MainLayoutComponent),
         canActivate: [authGuard],
@@ -88,6 +94,7 @@ export const routes: Routes = [
                 path: 'documents',
                 loadComponent: () => import('./features/documents/document-list/document-list').then(m => m.DocumentListComponent)
             },
+
             {
                 path: 'notifications',
                 loadComponent: () => import('./features/notifications/notifications').then(m => m.NotificationsComponent)

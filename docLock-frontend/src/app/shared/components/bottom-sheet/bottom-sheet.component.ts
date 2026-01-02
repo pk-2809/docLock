@@ -3,12 +3,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-bottom-sheet',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-bottom-sheet',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     @if (isOpen) {
-      <div class="fixed inset-0 z-[60] flex items-end justify-center" role="dialog">
+      <div class="fixed inset-0 z-[200] flex items-end justify-center" role="dialog">
         <!-- Backdrop -->
         <div class="absolute inset-0 bg-black/30 backdrop-blur-sm animate-fade-in" (click)="close()"></div>
         
@@ -25,7 +25,7 @@ import { CommonModule } from '@angular/common';
       </div>
     }
   `,
-    styles: [`
+  styles: [`
     .animate-fade-in { animation: fadeIn 0.2s ease-out; }
     .animate-slide-in-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     
@@ -41,10 +41,10 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class BottomSheetComponent {
-    @Input() isOpen = false;
-    @Output() closed = new EventEmitter<void>();
+  @Input() isOpen = false;
+  @Output() closed = new EventEmitter<void>();
 
-    close() {
-        this.closed.emit();
-    }
+  close() {
+    this.closed.emit();
+  }
 }

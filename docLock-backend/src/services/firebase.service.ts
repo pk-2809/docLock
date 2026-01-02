@@ -273,6 +273,27 @@ export class FirebaseService {
     }
 
     /**
+     * Gets a single document by ID.
+     */
+    static async getDocument(uid: string, docId: string): Promise<any | null> {
+        if (!isFirebaseInitialized) {
+            console.log('[Mock] Getting Document', { uid, docId });
+            return { id: docId, name: 'Mock Document', mimeType: 'application/pdf', size: 1024, createdAt: new Date().toISOString() };
+        }
+
+        try {
+            const doc = await db.collection('users').doc(uid).collection('documents').doc(docId).get();
+            if (doc.exists) {
+                return { id: doc.id, ...doc.data() };
+            }
+            return null;
+        } catch (error) {
+            console.error('Error getting document:', error);
+            return null;
+        }
+    }
+
+    /**
      * Deletes a document reference from Firestore.
      */
     static async deleteDocument(uid: string, docId: string, size: number = 0): Promise<void> {

@@ -29,7 +29,7 @@
     <!-- Folders View -->
     @if (viewMode === 'folders') {
     <div class="px-4 sm:px-6 py-4 flex flex-col overflow-hidden relative z-10"
-        style="height: calc(100vh - 7rem); max-height: calc(100vh - 7rem);">
+        style="height: calc(100vh - 5rem); max-height: calc(100vh - 5rem);">
         <!-- Enhanced Header -->
         <header class="mb-4 flex-shrink-0 pt-8">
             <!-- Top Navigation -->
@@ -112,7 +112,8 @@
                 <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider px-2 mb-3">Folders</h3>
                 @for (folder of currentFolders; track folder.id; let i = $index) {
                 <div class="group bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60 active:shadow-xl active:border-blue-200/60 active:scale-[0.98] transition-all cursor-pointer relative touch-manipulation animate-fade-in"
-                    [style.animation-delay]="(i * 50) + 'ms'" (click)="openFolder(folder.id)">
+                    [class.z-50]="activeFolderMenu === folder.id" [style.animation-delay]="(i * 50) + 'ms'"
+                    (click)="openFolder(folder.id)">
 
                     <!-- Hover overlay effect -->
                     <div
@@ -212,7 +213,9 @@
             <div class="space-y-3">
                 @for (doc of currentDocuments; track doc.id; let i = $index) {
                 <div class="group bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60 active:shadow-xl active:border-blue-200/60 active:scale-[0.98] transition-all cursor-pointer relative touch-manipulation animate-fade-in"
-                    [style.animation-delay]="((currentFolders.length * 50) + (i * 50)) + 'ms'">
+                    [class.z-50]="activeDocumentMenu === doc.id"
+                    [style.animation-delay]="((currentFolders.length * 50) + (i * 50)) + 'ms'"
+                    (click)="openDocument(doc)">
 
                     <!-- Hover overlay effect -->
                     <div
@@ -358,7 +361,7 @@
 
     <!-- Enhanced Floating Action Button -->
     @if (viewMode === 'folders' && (currentFolders.length > 0 || currentDocuments.length > 0)) {
-    <div class="fixed bottom-32 right-1/2 transform translate-x-1/2 z-40">
+    <div class="fixed bottom-[3.5rem] right-1/2 transform translate-x-1/2 z-30">
         <div class="relative">
             <!-- Main FAB -->
             <button (click)="toggleFabMenu()"

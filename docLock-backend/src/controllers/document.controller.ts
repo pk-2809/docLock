@@ -64,9 +64,8 @@ export class DocumentController {
 
         const { id } = req.params;
 
-        // 1. Get Document Metadata
-        const documents = await FirebaseService.getDocuments(decodedClaims.uid);
-        const doc = documents.find(d => d.id === id);
+        // 1. Get Document Metadata (Efficiently)
+        const doc = await FirebaseService.getDocument(decodedClaims.uid, id);
 
         if (!doc) throw new CustomError('Document not found', 404);
         if (!doc.driveFileId || !doc.iv) throw new CustomError('Invalid document record', 500);
@@ -76,11 +75,25 @@ export class DocumentController {
             const stream = await GoogleDriveService.getFileStream(doc.driveFileId, doc.iv);
 
             res.setHeader('Content-Type', doc.mimeType);
-            res.setHeader('Content-Disposition', `attachment; filename="${doc.name}"`);
+            if (doc.mimeType === 'application/pdf' || doc.mimeType.startsWith('image/')) {
+                // Inline for previewable types
+                res.setHeader('Content-Disposition', `inline; filename="${doc.name}"`);
+            } else {
+                res.setHeader('Content-Disposition', `attachment; filename="${doc.name}"`);
+            }
+
+            stream.on('error', (err) => {
+                console.error('Stream Error during download:', err);
+                if (!res.headersSent) {
+                    res.status(500).json({ error: 'Streaming failed' });
+                } else {
+                    res.end();
+                }
+            });
 
             stream.pipe(res);
         } catch (error) {
-            console.error('Download Error:', error);
+            console.error('Download setup error:', error);
             throw new CustomError('Failed to download document', 500);
         }
     });
@@ -94,6 +107,21 @@ export class DocumentController {
 
         const documents = await FirebaseService.getDocuments(decodedClaims.uid);
         res.json({ status: 'success', documents });
+    });
+
+    static getDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const sessionCookie = req.cookies.session || '';
+        if (!sessionCookie) throw new CustomError('Unauthorized', 401);
+
+        const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
+        if (!decodedClaims) throw new CustomError('Unauthorized', 401);
+
+        const { id } = req.params;
+        const doc = await FirebaseService.getDocument(decodedClaims.uid, id);
+
+        if (!doc) throw new CustomError('Document not found', 404);
+
+        res.json({ status: 'success', document: doc });
     });
 
     static getCards = asyncHandler(async (req: Request, res: Response): Promise<void> => {

@@ -45,11 +45,47 @@ export class DocumentService {
     private configService = inject(AppConfigService);
     private apiUrl = `${environment.apiUrl}/api/documents`;
 
+    // Cache State
+    private documentsCache: { data: { status: string; documents: Document[] }; timestamp: number } | null = null;
+    private readonly CACHE_DURATION = 30000; // 30 seconds
+
     getDocuments(): Observable<{ status: string; documents: Document[] }> {
-        return this.http.get<{ status: string; documents: Document[] }>(`${this.apiUrl}/list`, { withCredentials: true });
+        // Return cached data if valid
+        if (this.documentsCache && (Date.now() - this.documentsCache.timestamp < this.CACHE_DURATION)) {
+            return new Observable(observer => {
+                observer.next(this.documentsCache!.data);
+                observer.complete();
+            });
+        }
+
+        // Fetch new data
+        return new Observable(observer => {
+            this.http.get<{ status: string; documents: Document[] }>(`${this.apiUrl}/list`, { withCredentials: true })
+                .subscribe({
+                    next: (res) => {
+                        // Update cache
+                        this.documentsCache = {
+                            data: res,
+                            timestamp: Date.now()
+                        };
+                        observer.next(res);
+                        observer.complete();
+                    },
+                    error: (err) => observer.error(err)
+                });
+        });
+    }
+
+    clearCache() {
+        this.documentsCache = null;
+    }
+
+    getDocument(id: string): Observable<{ status: string; document: Document }> {
+        return this.http.get<{ status: string; document: Document }>(`${this.apiUrl}/${id}`, { withCredentials: true });
     }
 
     uploadDocument(file: File, category: string = 'Personal', folderId: string | null = null, name?: string): Observable<any> {
+        this.clearCache();
         const formData = new FormData();
         formData.append('file', file);
         formData.append('category', category);
@@ -108,6 +144,7 @@ export class DocumentService {
     }
 
     deleteDocument(id: string, driveFileId: string, size: number): Observable<any> {
+        this.clearCache();
         // Send body with delete request to pass driveId and size optimization
         return this.http.delete(`${this.apiUrl}/${id}`, {
             withCredentials: true,
@@ -116,6 +153,7 @@ export class DocumentService {
     }
 
     createFolder(name: string, parentId: string | null, icon: string, color: string): Observable<{ status: string; folder: Folder }> {
+        this.clearCache();
         return this.http.post<{ status: string; folder: Folder }>(`${this.apiUrl}/folder`, {
             name, parentId, icon, color
         }, { withCredentials: true });
@@ -126,10 +164,12 @@ export class DocumentService {
     }
 
     deleteFolder(id: string): Observable<any> {
+        this.clearCache();
         return this.http.delete(`${this.apiUrl}/folder/${id}`, { withCredentials: true });
     }
 
     updateFolder(id: string, name: string): Observable<any> {
+        this.clearCache();
         return this.http.put(`${this.apiUrl}/folder/${id}`, { name }, { withCredentials: true });
     }
 }

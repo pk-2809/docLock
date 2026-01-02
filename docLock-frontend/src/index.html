@@ -6,7 +6,7 @@
   <title>DocLock</title>
   <base href="/">
   <meta name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover">
+    content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
   <meta name="theme-color" content="#0F172A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -46,10 +46,13 @@
       }
 
       @keyframes splashScreen {
-        0%, 85% {
+
+        0%,
+        85% {
           opacity: 1;
           visibility: visible;
         }
+
         100% {
           opacity: 0;
           visibility: hidden;
@@ -115,12 +118,16 @@
       }
 
       @keyframes blobFloat {
-        0%, 100% {
+
+        0%,
+        100% {
           transform: translate(0px, 0px) scale(1);
         }
+
         33% {
           transform: translate(20px, -30px) scale(1.1);
         }
+
         66% {
           transform: translate(-15px, 15px) scale(0.9);
         }
@@ -170,13 +177,16 @@
           transform: translateY(100vh) scale(0.3) rotate(180deg);
           opacity: 0;
         }
+
         70% {
           transform: translateY(-30px) scale(1.15) rotate(10deg);
           opacity: 1;
         }
+
         85% {
           transform: translateY(15px) scale(0.9) rotate(-5deg);
         }
+
         100% {
           transform: translateY(0px) scale(1) rotate(0deg);
           opacity: 1;
@@ -188,6 +198,7 @@
           box-shadow: 0 20px 60px rgba(99, 102, 241, 0.15);
           transform: scale(1);
         }
+
         100% {
           box-shadow: 0 25px 80px rgba(99, 102, 241, 0.25);
           transform: scale(1.02);
@@ -212,10 +223,12 @@
           opacity: 0;
           transform: translateY(30px) scale(0.8);
         }
+
         60% {
           opacity: 1;
           transform: translateY(-8px) scale(1.08);
         }
+
         100% {
           opacity: 1;
           transform: translateY(0px) scale(1);
@@ -237,6 +250,7 @@
           opacity: 0;
           transform: translateY(20px);
         }
+
         to {
           opacity: 1;
           transform: translateY(0);
@@ -274,6 +288,7 @@
         0% {
           transform: translateX(-100%);
         }
+
         100% {
           transform: translateX(100%);
         }
@@ -335,13 +350,18 @@
       }
 
       @keyframes smallBlobFloat {
-        0%, 100% {
+
+        0%,
+        100% {
           transform: translateY(0px);
           opacity: 0;
         }
-        20%, 80% {
+
+        20%,
+        80% {
           opacity: 0.4;
         }
+
         50% {
           transform: translateY(-10px);
           opacity: 0.6;
@@ -353,14 +373,17 @@
         .app-name {
           font-size: 36px;
         }
+
         .lock-container {
           width: 80px;
           height: 80px;
         }
+
         .lock-svg {
           width: 40px;
           height: 40px;
         }
+
         .loading-container {
           width: 160px;
         }
@@ -368,6 +391,7 @@
 
       /* Accessibility */
       @media (prefers-reduced-motion: reduce) {
+
         .blob,
         .lock-container,
         .small-blob,
@@ -401,18 +425,19 @@
           <div class="lock-background"></div>
           <svg class="lock-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Modern Lock Icon -->
-            <rect x="6" y="10" width="12" height="8" rx="2" fill="#6366f1"/>
-            <circle cx="12" cy="14" r="1.5" fill="white"/>
-            <path d="M8 10V7C8 4.79 9.79 3 12 3s4 1.79 4 4v3" stroke="#6366f1" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <rect x="6" y="10" width="12" height="8" rx="2" fill="#6366f1" />
+            <circle cx="12" cy="14" r="1.5" fill="white" />
+            <path d="M8 10V7C8 4.79 9.79 3 12 3s4 1.79 4 4v3" stroke="#6366f1" stroke-width="2.5" fill="none"
+              stroke-linecap="round" />
           </svg>
         </div>
-        
+
         <!-- DocLock Text -->
         <div class="app-name">docLock</div>
-        
+
         <!-- Tagline -->
         <div class="tagline">Your secure digital sanctuary</div>
-        
+
         <!-- Loading Progress -->
         <div class="loading-container">
           <div class="loading-bar-container">

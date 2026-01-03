@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3000',
-  // apiUrl: 'https://us-central1-doclock-96a20.cloudfunctions.net/api',
+  // apiUrl: 'http://localhost:3000',
+  apiUrl: 'https://us-central1-doclock-96a20.cloudfunctions.net/api',
   firebaseConfig: {
     apiKey: "AIzaSyDbXNt4Ok-bj1X39omcn9fjRcN5hTilfR8",
     authDomain: "doclock-96a20.firebaseapp.com",

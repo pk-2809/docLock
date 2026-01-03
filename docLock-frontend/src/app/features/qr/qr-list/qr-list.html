@@ -1,1 +1,166 @@
-<div>qr list</div>
+<!-- QR Page - Secure Vault Theme -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 flex flex-col overflow-hidden relative selection:bg-blue-100 selection:text-blue-900">
+    <!-- Top Border -->
+    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 z-50"></div>
+
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-blue-400/5 to-cyan-500/5 rounded-full animate-float-slow"></div>
+        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-indigo-400/5 to-blue-500/5 rounded-full animate-float-reverse"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w-full max-w-[639px] mx-auto px-4 py-4 flex flex-col overflow-hidden relative z-10 h-[calc(100vh-5rem)]">
+        
+        <!-- Header -->
+        <header class="flex-shrink-0 pt-8 mb-6">
+            <div class="flex items-center justify-center mb-4 relative">
+                 <!-- Back Button -->
+                <button [routerLink]="['/dashboard']"
+                    class="absolute left-0 w-10 h-10 rounded-xl bg-white shadow-lg shadow-slate-200/50 flex items-center justify-center text-slate-600 active:text-blue-600 transition-all active:scale-95 touch-manipulation border border-slate-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                </button>
+
+                <div class="text-center">
+                    <h1 class="text-xl font-bold text-slate-800 tracking-tight">Secure QR</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium">{{ qrCodes.length }} active codes</p>
+                </div>
+
+                <!-- Add Button -->
+                <button (click)="toggleCreateMode()"
+                    class="absolute right-0 w-10 h-10 rounded-xl bg-blue-600 active:bg-blue-700 text-white shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all active:scale-95 touch-manipulation group overflow-hidden border border-blue-500">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                    <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- QR List -->
+        <div class="flex-1 overflow-y-auto px-1 pb-20 custom-scrollbar">
+            @for (qr of qrCodes; track qr.id; let i = $index) {
+                <!-- Card Item -->
+                <div class="mb-5 relative group" (click)="viewQR(qr)">
+                    <!-- Main Card -->
+                    <!-- Main Card -->
+                    <div class="relative w-full aspect-[1.8] rounded-2xl overflow-hidden shadow-xl shadow-slate-200/60 transition-transform active:scale-[0.98] cursor-pointer"
+                         [ngClass]="getCardGradient(i)">
+                        
+                        <!-- Card Decor/Texture -->
+                        <div class="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
+                        <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/30 to-transparent"></div>
+
+                        <!-- Card Content Wrapper -->
+                        <div class="absolute inset-0 p-6 flex items-center justify-between text-white">
+                            
+                            <!-- Left: Info -->
+                            <div class="flex flex-col justify-between h-full flex-1 pr-4">
+                                <div>
+                                    <!-- Chip Decor -->
+                                    <div class="w-10 h-7 rounded bg-gradient-to-br from-yellow-200 to-yellow-500 opacity-80 flex items-center justify-center overflow-hidden border border-yellow-600/30 mb-4 shadow-sm">
+                                        <div class="w-full h-[1px] bg-black/20 absolute top-1/2"></div>
+                                        <div class="h-full w-[1px] bg-black/20 absolute left-1/3"></div>
+                                        <div class="h-full w-[1px] bg-black/20 absolute right-1/3"></div>
+                                    </div>
+                                    
+                                    <h3 class="font-bold text-2xl tracking-wide drop-shadow-sm font-mono truncate" style="text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        {{ qr.name }}
+                                    </h3>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2 text-white/90">
+                                        <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                        <p class="font-medium text-xs tracking-wide">{{ qr.linkedDocumentIds.length }} Linked Files</p>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-white/70">
+                                        <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <p class="font-medium text-[10px] tracking-wider uppercase">{{ formatDate(qr.createdAt) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Large QR -->
+                            <div class="flex-shrink-0">
+                                <div class="bg-white p-2 rounded-xl shadow-lg border-2 border-white/20">
+                                    <img [src]="generateQRCode(getPublicUrl(qr))" class="w-24 h-24 md:w-28 md:h-28 object-contain">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Delete Button -->
+                    <button (click)="deleteQR(qr.id, $event)" 
+                            class="absolute -top-2 -right-2 bg-white text-red-500 hover:text-red-600 rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:scale-110 border border-slate-100">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            }
+            @empty {
+                <div class="flex flex-col items-center justify-center py-20 text-center">
+                    <div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">No QR Codes</h3>
+                    <p class="text-slate-500 text-sm max-w-[200px]">Create a secure access point for your documents.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Create Modal -->
+    @if (isCreating) {
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm w-full shadow-2xl animate-fade-in-up overflow-hidden border border-slate-100">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="font-bold text-slate-800">New Secure QR</h3>
+                <button (click)="toggleCreateMode()" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-5 space-y-4">
+                <div>
+                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Label</label>
+                     <input [(ngModel)]="newQrName" type="text" placeholder="e.g. Travel, Health" 
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium transition-all">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Select Documents</label>
+                    <div class="border border-slate-200 rounded-xl max-h-40 overflow-y-auto custom-scrollbar">
+                        @if (isLoadingDocs) {
+                            <div class="p-4 text-center text-xs text-slate-400">Loading...</div>
+                        } @else {
+                            @for (doc of documents; track doc.id) {
+                                <label class="flex items-center gap-3 p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 active:bg-slate-100 cursor-pointer transition-colors">
+                                    <input type="checkbox" [checked]="selectedDocumentIds.has(doc.id)" (change)="toggleDocumentSelection(doc.id)"
+                                           class="rounded text-blue-600 focus:ring-blue-500 border-gray-300">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-slate-700 truncate">{{ doc.name }}</div>
+                                        <div class="text-[10px] text-slate-400">{{ doc.type }}</div>
+                                    </div>
+                                </label>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <button (click)="createQR()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all hover:bg-blue-700">
+                    Generate Secure QR
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+
+</div>

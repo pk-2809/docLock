@@ -56,7 +56,7 @@ export const routes: Routes = [
             },
             {
                 path: 'my-qr',
-                loadComponent: () => import('./features/qr/qr-generate/qr-generate').then(m => m.QrGenerateComponent)
+                loadComponent: () => import('./features/qr/qr-list/qr-list').then(m => m.QrListComponent)
             },
             {
                 path: 'qrs',

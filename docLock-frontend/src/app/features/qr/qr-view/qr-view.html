@@ -1,222 +1,94 @@
-<!-- QR View Page -->
-<div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col overflow-hidden relative">
-    <!-- Green top border line -->
-    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-green-500 z-50"></div>
+<!-- public-qr-view.html -->
+<div class="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
     
-    <!-- Sophisticated Background Elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full animate-float-slow"></div>
-        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-teal-400/8 to-green-500/8 rounded-full animate-float-reverse"></div>
-        <div class="absolute top-1/4 right-1/3 w-32 h-32 bg-gradient-to-br from-emerald-300/6 to-green-400/6 rounded-full animate-pulse-slow"></div>
-        <div class="absolute bottom-1/3 left-1/4 w-20 h-20 bg-gradient-to-br from-slate-300/8 to-green-300/8 rounded-full animate-float"></div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="px-4 sm:px-6 py-4 flex flex-col overflow-hidden relative z-10" style="height: calc(100vh - 7rem); max-height: calc(100vh - 7rem);">
-        
-        <!-- Not Found State -->
-        <div *ngIf="!qrCode" class="flex-1 flex items-center justify-center">
-            <div class="text-center">
-                <div class="w-20 h-20 mx-auto mb-6 bg-red-100 rounded-3xl flex items-center justify-center">
-                    <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">QR Code Not Found</h3>
-                <p class="text-slate-500 mb-8 font-medium">The QR code you're looking for doesn't exist</p>
-                <button (click)="goBack()" 
-                        class="flex items-center gap-2 px-6 py-3 bg-green-600 active:bg-green-700 text-white font-medium rounded-2xl shadow-lg shadow-green-500/25 transition-all active:scale-95 touch-manipulation mx-auto">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                    </svg>
-                    <span>Back to QR Codes</span>
-                </button>
-            </div>
+    @if (isLoading) {
+        <div class="flex flex-col items-center justify-center mt-20 text-gray-400 animate-pulse">
+            <svg class="w-10 h-10 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <p>Loading secure documents...</p>
         </div>
-
-        <!-- QR Code Details -->
-        <div *ngIf="qrCode" class="flex flex-col h-full">
-            <!-- Header -->
-            <header class="mb-4 sm:mb-6 flex-shrink-0 pt-8 sm:pt-12">
-                <!-- Top Navigation -->
-                <div class="flex items-center gap-4 mb-6">
-                    <button (click)="goBack()"
-                        class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-lg flex items-center justify-center text-slate-600 active:text-green-600 transition-all active:scale-95 touch-manipulation">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                        </svg>
-                    </button>
-                    <div class="flex-1">
-                        <h2 class="text-slate-500 text-xs sm:text-sm uppercase tracking-wider font-bold mb-2">
-                            QR Code Details
-                        </h2>
-                        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 name-heartbeat">
-                            {{qrCode.name}}
-                        </h1>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-slate-500 font-medium text-sm capitalize">{{qrCode.type}}</span>
-                            <span *ngIf="!qrCode.isActive" class="px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded-lg">
-                                Inactive
-                            </span>
-                            <span *ngIf="qrCode.isActive" class="px-2 py-1 bg-green-100 text-green-600 text-xs font-medium rounded-lg">
-                                Active
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <!-- Share Button -->
-                    <button (click)="toggleShareMenu()"
-                        class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-lg flex items-center justify-center text-slate-600 active:text-green-600 transition-all active:scale-95 touch-manipulation">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                        </svg>
-                    </button>
-                </div>
-            </header>
-
-            <!-- QR Code Display -->
-            <div class="flex-1 flex flex-col items-center justify-center mb-6">
-                <!-- QR Code Container -->
-                <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/60 mb-6">
-                    <!-- Mock QR Code - In real app, this would be generated -->
-                    <div class="w-48 h-48 sm:w-56 sm:h-56 bg-white rounded-2xl border-4 border-slate-100 flex items-center justify-center relative overflow-hidden">
-                        <!-- QR Pattern Mock -->
-                        <div class="absolute inset-4 grid grid-cols-8 gap-1">
-                            <div *ngFor="let i of [].constructor(64)" 
-                                 [class]="(i % 3 === 0 || i % 5 === 0) ? 'bg-slate-900' : 'bg-transparent'"
-                                 class="aspect-square rounded-sm"></div>
-                        </div>
-                        
-                        <!-- Center Logo -->
-                        <div [class]="'w-12 h-12 rounded-xl flex items-center justify-center shadow-lg relative z-10 ' + getTypeColor(qrCode.type)">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getTypeIcon(qrCode.type)" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- QR Stats -->
-                <div class="bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60 w-full max-w-md">
-                    <div class="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                            <div class="text-2xl font-black text-green-600">{{qrCode.scanCount}}</div>
-                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Scans</div>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-black text-blue-600">{{formatDate(qrCode.createdAt)}}</div>
-                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Created</div>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-black" [class]="qrCode.isActive ? 'text-green-600' : 'text-red-600'">
-                                {{qrCode.isActive ? 'ON' : 'OFF'}}
-                            </div>
-                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</div>
-                        </div>
-                    </div>
-                </div>
+    } @else if (error) {
+        <div class="text-center mt-20 max-w-sm mx-auto">
+            <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
             </div>
-
-            <!-- Action Buttons -->
-            <div class="flex-shrink-0 pb-6">
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <button (click)="downloadQR()"
-                            class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 active:bg-blue-700 text-white font-medium rounded-2xl shadow-lg shadow-blue-500/25 transition-all active:scale-95 touch-manipulation">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span>Download</span>
-                    </button>
-                    
-                    <button (click)="editQR()"
-                            class="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 active:bg-purple-700 text-white font-medium rounded-2xl shadow-lg shadow-purple-500/25 transition-all active:scale-95 touch-manipulation">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        <span>Edit</span>
-                    </button>
-                </div>
-                
-                <div class="grid grid-cols-3 gap-3">
-                    <button (click)="toggleActive()"
-                            [class]="qrCode.isActive ? 'bg-red-600 active:bg-red-700 shadow-red-500/25' : 'bg-green-600 active:bg-green-700 shadow-green-500/25'"
-                            class="flex items-center justify-center gap-2 px-4 py-3 text-white font-medium rounded-2xl shadow-lg transition-all active:scale-95 touch-manipulation">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                  [attr.d]="qrCode.isActive ? 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728' : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'" />
-                        </svg>
-                        <span>{{qrCode.isActive ? 'Disable' : 'Enable'}}</span>
-                    </button>
-                    
-                    <button (click)="duplicateQR()"
-                            class="flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 active:bg-orange-700 text-white font-medium rounded-2xl shadow-lg shadow-orange-500/25 transition-all active:scale-95 touch-manipulation">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        <span>Copy</span>
-                    </button>
-                    
-                    <button (click)="deleteQR()"
-                            class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 active:bg-red-700 text-white font-medium rounded-2xl shadow-lg shadow-red-500/25 transition-all active:scale-95 touch-manipulation">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        <span>Delete</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Share Menu -->
-    <div *ngIf="showShareMenu" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-end">
-        <div class="w-full bg-white/95 backdrop-blur-xl rounded-t-3xl p-6 animate-fade-in">
-            <div class="w-12 h-1 bg-slate-300 rounded-full mx-auto mb-6"></div>
-            <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">Share QR Code</h3>
-            
-            <div class="grid grid-cols-4 gap-4 mb-6">
-                <button (click)="shareQR('copy')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-100 active:bg-slate-200 transition-colors">
-                    <div class="w-12 h-12 bg-slate-600 rounded-xl flex items-center justify-center text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <span class="text-xs font-medium text-slate-600">Copy</span>
-                </button>
-                
-                <button (click)="shareQR('email')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-blue-100 active:bg-blue-200 transition-colors">
-                    <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <span class="text-xs font-medium text-slate-600">Email</span>
-                </button>
-                
-                <button (click)="shareQR('message')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-green-100 active:bg-green-200 transition-colors">
-                    <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                    </div>
-                    <span class="text-xs font-medium text-slate-600">Message</span>
-                </button>
-                
-                <button (click)="shareQR('more')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-purple-100 active:bg-purple-200 transition-colors">
-                    <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                        </svg>
-                    </div>
-                    <span class="text-xs font-medium text-slate-600">More</span>
-                </button>
-            </div>
-            
-            <button (click)="toggleShareMenu()" 
-                    class="w-full py-3 bg-slate-100 active:bg-slate-200 text-slate-600 font-medium rounded-2xl transition-colors">
-                Cancel
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
+            <p class="text-gray-500 mb-6">{{ error }}</p>
+            <button (click)="goBack()" class="text-blue-600 font-medium hover:underline">
+                Go back home
             </button>
         </div>
-    </div>
+    } @else if (qrCode) {
+        
+        <!-- Header Card -->
+        <div class="w-full max-w-2xl bg-white rounded-3xl shadow-lg border border-gray-100 p-8 mb-6 text-center">
+            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ qrCode.name }}</h1>
+            <p class="text-gray-500 text-sm">Created on {{ formatDate(qrCode.createdAt) }}</p>
+            
+            <div class="mt-6 flex justify-center">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-100">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    Verified Secure
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents List -->
+        <div class="w-full max-w-2xl">
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">
+                Attached Documents ({{ linkedDocuments.length }})
+            </h2>
+
+            <div class="flex flex-col gap-3">
+                @for (doc of linkedDocuments; track doc.id) {
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <!-- Icon -->
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+                             [ngClass]="doc.type === 'PDF' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'">
+                            @if (doc.type === 'PDF') {
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            } @else {
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            }
+                        </div>
+                        
+                        <!-- Details -->
+                        <div class="min-w-0">
+                            <h3 class="font-semibold text-gray-900 truncate">{{ doc.name }}</h3>
+                            <p class="text-xs text-gray-500">{{ doc.type }} • {{ doc.formattedSize }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Action -->
+                    <button (click)="downloadDoc(doc)" 
+                            class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors group-hover:bg-blue-50 group-hover:text-blue-600"
+                            title="Download Document">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                    </button>
+                </div>
+                }
+                @empty {
+                <div class="text-center py-10 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
+                    <p>No documents found linked to this QR.</p>
+                </div>
+                }
+            </div>
+        </div>
+        
+    }
 </div>

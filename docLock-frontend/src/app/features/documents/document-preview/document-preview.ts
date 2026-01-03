@@ -5,11 +5,14 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentService, Document } from '../../../core/services/document';
 import { ToastService } from '../../../core/services/toast.service';
 import { BottomSheetComponent } from '../../../shared/components/bottom-sheet/bottom-sheet.component';
+import { ShareBottomSheetComponent } from '../../../shared/components/share-bottom-sheet/share-bottom-sheet';
+import { PeopleService } from '../../../core/people/people.service';
+import { AuthService } from '../../../core/auth/auth';
 
 @Component({
     selector: 'app-document-preview',
     standalone: true,
-    imports: [CommonModule, BottomSheetComponent],
+    imports: [CommonModule, BottomSheetComponent, ShareBottomSheetComponent],
     templateUrl: './document-preview.html',
     styleUrl: './document-preview.css'
 })
@@ -20,10 +23,16 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
     private toastService = inject(ToastService);
     private sanitizer = inject(DomSanitizer);
     private cdr = inject(ChangeDetectorRef);
+    private peopleService = inject(PeopleService);
+    private authService = inject(AuthService);
 
     documentId: string | null = null;
     document: Document | null = null;
     isLoading = true;
+
+    // Share Sheet State
+    showShareSheet = false;
+    itemToShare: { id: string, name: string, type: 'document' | 'card' } | null = null;
 
     // Preview State
     previewUrl: SafeResourceUrl | string | null = null;
@@ -49,6 +58,11 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.documentId = this.route.snapshot.paramMap.get('id');
+
+        const user = this.authService.user();
+        if (user) {
+            this.peopleService.subscribeToFriends(user.uid);
+        }
 
         // precise capture of query params
         this.route.queryParams.subscribe(params => {
@@ -206,24 +220,12 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
     async shareDocument() {
         if (!this.document) return;
 
-        const shareData = {
-            title: this.document.name,
-            text: `Sharing ${this.document.name}`,
-            url: this.document.webViewLink || window.location.href
+        this.itemToShare = {
+            id: this.document.id,
+            name: this.document.name,
+            type: 'document'
         };
-
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData);
-                this.toastService.showSuccess('Shared successfully');
-            } else {
-                // Fallback to clipboard
-                await navigator.clipboard.writeText(shareData.url);
-                this.toastService.showSuccess('Link copied to clipboard');
-            }
-        } catch (err) {
-            console.error('Error sharing:', err);
-        }
+        this.showShareSheet = true;
     }
 
     // Delete Logic (Bottom Sheet)
@@ -312,7 +314,10 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
     }
 
     onTouchMove(e: TouchEvent) {
-        // Prevent generic browser zooming/scrolling
+        // Allow native scrolling for unzoomed PDF
+        if (this.isPdf && !this.isZoomed) return;
+
+        // Prevent generic browser zooming/scrolling for Images or when Zoomed
         if (e.cancelable) e.preventDefault();
 
         if (e.touches.length === 1 && this.isDragging && this.isZoomed) {

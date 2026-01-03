@@ -123,12 +123,13 @@ export class LoginComponent implements OnInit, AfterViewInit {
                     this.router.navigate(['/signup'], navigationExtras);
                     this.toast.show('Please create an account to continue.', 'info');
                 }
-                this.authService.isLoading.set(false);
+                setTimeout(() => this.authService.isLoading.set(false), 0);
             },
             error: (err) => {
                 console.error('Check User Failed', err);
                 this.toast.showError('Connection failed. Please check your internet.');
-                this.authService.isLoading.set(false);
+                this.toast.showError('Connection failed. Please check your internet.');
+                setTimeout(() => this.authService.isLoading.set(false), 0);
             }
         });
     }
@@ -177,7 +178,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
                     console.error('Backend Login Failed', err);
                     const errorMessage = err?.error?.error || 'Login failed. Please try again.';
                     this.toast.showError(errorMessage);
-                    this.authService.isLoading.set(false); // Reset loading
+                    setTimeout(() => this.authService.isLoading.set(false), 0); // Reset loading
                     this.otpComponent.triggerError();
                 }
             });
@@ -185,7 +186,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
             console.error('OTP Verification Error', error);
             const errorMessage = error instanceof Error ? error.message : 'Invalid OTP. Please try again.';
             this.toast.showError(errorMessage);
-            this.authService.isLoading.set(false); // Reset loading
+            this.toast.showError(errorMessage);
+            setTimeout(() => this.authService.isLoading.set(false), 0); // Reset loading
+            this.otpComponent.triggerError();
             this.otpComponent.triggerError();
         }
     }

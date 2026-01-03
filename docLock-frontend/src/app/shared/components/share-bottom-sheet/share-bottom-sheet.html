@@ -1,0 +1,100 @@
+@if (isOpen) {
+<div class="fixed inset-0 z-[200] flex items-end justify-center" role="dialog">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm animate-fade-in" (click)="close()"></div>
+
+    <!-- Sheet -->
+    <div class="relative bg-white w-full max-w-lg mx-auto md:mb-4 md:rounded-[2.5rem] rounded-t-[2.5rem] p-6 pb-8 shadow-[0_-10px_60px_rgba(0,0,0,0.15)] animate-slide-in-up flex flex-col max-h-[80vh]"
+        (click)="$event.stopPropagation()">
+
+        <!-- Drag Handle -->
+        <div class="w-16 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 shrink-0 cursor-grab active:cursor-grabbing">
+        </div>
+
+        <!-- Header -->
+        <div class="text-center mb-6 shrink-0">
+            <h2 class="text-xl font-bold text-slate-800">Share with Friends</h2>
+            @if (itemToShare) {
+            <p class="text-slate-500 text-sm mt-1">Sharing "{{itemToShare.name}}"</p>
+            }
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-4 shrink-0 px-1">
+            <div class="relative">
+                <div class="absolute inset-0 bg-blue-500/5 rounded-xl"></div>
+                <input type="text" [(ngModel)]="searchQuery" placeholder="Search friends..."
+                    class="relative w-full pl-10 pr-4 py-3 bg-white/90 backdrop-blur-xl border-2 border-slate-100 focus:border-blue-500 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm font-medium text-sm">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Friends List -->
+        <div class="overflow-y-auto min-h-[200px] -mx-2 px-2">
+            @if (filteredFriends().length > 0) {
+            <div class="space-y-2">
+                @for (friend of filteredFriends(); track friend.uid; let i = $index) {
+                <button (click)="shareWith(friend)" [disabled]="sharingWithId()"
+                    class="w-full flex items-center gap-4 p-3 rounded-2xl transition-all text-left disabled:opacity-50">
+
+                    <!-- Avatar -->
+                    <div
+                        class="relative w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-sm transition-transform overflow-hidden shrink-0">
+                        @if (friend.profileImage) {
+                        <img [src]="friend.profileImage" alt="{{friend.name}}" class="w-full h-full object-cover">
+                        } @else {
+                        <div class="w-full h-full {{getAvatarGradient(i)}} flex items-center justify-center">
+                            {{friend.name.charAt(0).toUpperCase()}}
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Info -->
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-slate-800 truncate">{{friend.name}}</h3>
+                        <p class="text-xs text-slate-500 truncate">{{friend.email}}</p>
+                    </div>
+
+                    <!-- Action Icon -->
+                    <div
+                        class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 transition-colors shrink-0">
+                        @if (sharingWithId() === friend.uid) {
+                        <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        } @else {
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>
+                        }
+                    </div>
+                </button>
+                }
+            </div>
+            } @else {
+            <div class="flex flex-col items-center justify-center py-10 text-center">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-300 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-slate-800 font-bold mb-1">No friends found</h3>
+                <p class="text-slate-500 text-sm">Add friends from the "People" tab to share easily.</p>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+}

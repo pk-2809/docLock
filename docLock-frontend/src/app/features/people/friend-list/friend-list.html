@@ -20,15 +20,19 @@
                     <!-- Centered Title (responsive) -->
                     <div class="flex-1 text-center">
                         <h1 class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight mb-1">Trusted Circle</h1>
-                        <p class="text-xs sm:text-sm text-slate-600 font-medium">{{ friends().length }} secure connections</p>
+                        <p class="text-xs sm:text-sm text-slate-600 font-medium">{{ friends().length }} secure
+                            connections</p>
                     </div>
 
                     <!-- Add Friend Button (responsive) - Only show when friends exist -->
                     @if (friends().length > 0) {
-            <a routerLink="/add-friend"
-                class="absolute right-0 group relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#ec4899] active:bg-[#db2777] text-white rounded-xl sm:rounded-2xl shadow-lg shadow-[#ec4899]/25 transition-all active:scale-95 touch-manipulation overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-active:translate-x-full transition-transform duration-700"></div>
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6 group-active:rotate-180 transition-transform duration-500 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <a routerLink="/add-friend"
+                        class="absolute right-0 group relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#ec4899] active:bg-[#db2777] text-white rounded-xl sm:rounded-2xl shadow-lg shadow-[#ec4899]/25 transition-all active:scale-95 touch-manipulation overflow-hidden">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-active:translate-x-full transition-transform duration-700">
+                        </div>
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 group-active:rotate-180 transition-transform duration-500 relative z-10"
+                            fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                     </a>
@@ -37,14 +41,14 @@
 
                 <!-- Mobile-First Search Bar -->
                 @if (friends().length > 0) {
-        <div class="relative">
-            <div class="absolute inset-0 bg-[#ec4899]/5 rounded-xl sm:rounded-2xl"></div>
-            <input type="text" [(ngModel)]="searchQuery"
-                placeholder="Search your trusted circle..."
-                class="relative w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-white/90 backdrop-blur-xl border-2 border-white/60 rounded-xl sm:rounded-2xl text-slate-800 placeholder-slate-500 focus:outline-none focus:border-[#ec4899] focus:ring-4 focus:ring-[#ec4899]/10 transition-all shadow-lg font-medium text-sm sm:text-base">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-[#ec4899]/5 rounded-xl sm:rounded-2xl"></div>
+                    <input type="text" [(ngModel)]="searchQuery" placeholder="Search your trusted circle..."
+                        class="relative w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-white/90 backdrop-blur-xl border-2 border-white/60 rounded-xl sm:rounded-2xl text-slate-800 placeholder-slate-500 focus:outline-none focus:border-[#ec4899] focus:ring-4 focus:ring-[#ec4899]/10 transition-all shadow-lg font-medium text-sm sm:text-base">
                     <div class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-500">
                         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
                 </div>
@@ -56,45 +60,64 @@
             <div class="px-4 sm:px-6">
                 <div class="grid grid-cols-3 gap-2 sm:gap-3">
                     <!-- Documents Shared -->
-                    <div class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/60 shadow-lg active:shadow-xl transition-all active:scale-105 touch-manipulation">
-                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-indigo-600/5 rounded-xl sm:rounded-2xl opacity-0 group-active:opacity-100 transition-opacity"></div>
+                    <div
+                        class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/60 shadow-lg active:shadow-xl transition-all active:scale-105 touch-manipulation">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-indigo-600/5 rounded-xl sm:rounded-2xl opacity-0 group-active:opacity-100 transition-opacity">
+                        </div>
                         <div class="relative text-center">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/10">
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            <div
+                                class="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/10">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
-                            <p class="text-base sm:text-lg font-bold text-slate-900 mb-1">{{ getSharedDocsCount() }}</p>
+                            <p class="text-base sm:text-lg font-bold text-slate-900 mb-1">{{ sharedDocsCount() }}</p>
                             <p class="text-xs font-bold text-slate-600">Documents</p>
                             <p class="text-xs font-medium text-slate-500">Shared</p>
                         </div>
                     </div>
 
                     <!-- Cards Shared -->
-                    <div class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/60 shadow-lg active:shadow-xl transition-all active:scale-105 touch-manipulation">
-                        <div class="absolute inset-0 bg-[#ec4899]/5 rounded-xl sm:rounded-2xl opacity-0 group-active:opacity-100 transition-opacity"></div>
+                    <div
+                        class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/60 shadow-lg active:shadow-xl transition-all active:scale-105 touch-manipulation">
+                        <div
+                            class="absolute inset-0 bg-[#ec4899]/5 rounded-xl sm:rounded-2xl opacity-0 group-active:opacity-100 transition-opacity">
+                        </div>
                         <div class="relative text-center">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-[#ec4899]/10 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-[#ec4899]/10">
-                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#ec4899]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                            <div
+                                class="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-[#ec4899]/10 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-[#ec4899]/10">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#ec4899]" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                 </svg>
                             </div>
-                            <p class="text-base sm:text-lg font-bold text-slate-900 mb-1">{{ getSharedCardsCount() }}</p>
+                            <p class="text-base sm:text-lg font-bold text-slate-900 mb-1">{{ sharedCardsCount() }}</p>
                             <p class="text-xs font-bold text-slate-600">Cards</p>
                             <p class="text-xs font-medium text-slate-500">Shared</p>
                         </div>
                     </div>
 
                     <!-- Active Requests -->
-                    <div class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/60 shadow-lg active:shadow-xl transition-all active:scale-105 touch-manipulation">
-                        <div class="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-teal-600/5 rounded-xl sm:rounded-2xl opacity-0 group-active:opacity-100 transition-opacity"></div>
+                    <div
+                        class="group relative bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/60 shadow-lg active:shadow-xl transition-all active:scale-105 touch-manipulation">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-teal-600/5 rounded-xl sm:rounded-2xl opacity-0 group-active:opacity-100 transition-opacity">
+                        </div>
                         <div class="relative text-center">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/10">
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                            <div
+                                class="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/10">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                 </svg>
                             </div>
-                            <p class="text-base sm:text-lg font-bold text-slate-900 mb-1">{{ getActiveRequestsCount() }}</p>
+                            <p class="text-base sm:text-lg font-bold text-slate-900 mb-1">{{ activeRequestsCount() }}
+                            </p>
                             <p class="text-xs font-bold text-slate-600">Active</p>
                             <p class="text-xs font-medium text-slate-500">Requests</p>
                         </div>
@@ -106,138 +129,159 @@
 
         <!-- Scrollable Friends List -->
         <div class="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 sm:pb-28">
-        <!-- Loading State -->
-        @if (isLoading()) {
-        <div class="flex flex-col items-center justify-center py-20">
-            <div class="relative mb-6">
-                <div class="w-16 h-16 border-4 border-[#ec4899]/20 border-t-[#ec4899] rounded-full animate-spin"></div>
-                <div class="absolute inset-2 w-12 h-12 border-4 border-transparent border-r-[#ec4899]/60 rounded-full animate-spin animate-reverse"></div>
-            </div>
-            <div class="text-center">
-                <h3 class="text-lg font-bold text-slate-800 mb-2">Loading Your Circle</h3>
-                <p class="text-slate-600 font-medium">Connecting to your trusted network...</p>
-            </div>
-        </div>
-        }
-
-        <!-- Empty State -->
-        @if (!isLoading() && friends().length === 0) {
-        <div class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-            <div class="relative mb-8">
-                        <div class="w-32 h-32 rounded-3xl bg-[#ec4899]/10 shadow-xl flex items-center justify-center text-[#ec4899] relative overflow-hidden">
-                    <div class="absolute inset-0 bg-[#ec4899]/20 animate-pulse"></div>
-                    <svg class="w-16 h-16 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                    </svg>
-                </div>
-                <!-- Floating decorative elements -->
-                <div class="absolute -top-2 -right-2 w-6 h-6 bg-[#ec4899]/20 rounded-full animate-bounce delay-300"></div>
-                <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-[#ec4899]/20 rounded-full animate-bounce delay-700"></div>
-                <div class="absolute top-1/2 -left-4 w-3 h-3 bg-[#ec4899]/30 rounded-full animate-pulse"></div>
-            </div>
-            <div class="max-w-sm">
-                <h3 class="text-2xl font-bold text-slate-900 mb-3">Build Your Circle</h3>
-                <p class="text-slate-600 leading-relaxed mb-8 font-medium">
-                    Connect with trusted friends and family to securely share important documents and cards.
-                </p>
-                <a routerLink="/add-friend"
-                    class="group inline-flex items-center gap-3 bg-[#ec4899] hover:bg-[#db2777] text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-[#ec4899]/25 hover:shadow-[#ec4899]/40 transition-all hover:scale-105 active:scale-95 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                    <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    <span class="relative z-10">Add Your First Friend</span>
-                </a>
-            </div>
-        </div>
-        }
-
-        <!-- Friends List -->
-        <!-- Mobile-First Friends List -->
-        @if (!isLoading() && filteredFriends().length > 0) {
-        <div class="space-y-3 animate-fade-in">
-            @for (friend of filteredFriends(); track friend.uid; let i = $index) {
-            <div class="bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60 transition-all">
-
-                <!-- Mobile-friendly friend info layout -->
-                <div class="flex items-center gap-3 mb-3">
-                    <!-- Profile Avatar -->
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold overflow-hidden shrink-0 text-white shadow-md"
-                        [ngClass]="getAvatarGradient(i)">
-                        @if (friend.profileImage) {
-                        <img [src]="friend.profileImage" class="w-full h-full object-cover">
-                        }
-                        @if (!friend.profileImage) {
-                        <span class="text-lg">{{ friend.name.charAt(0) }}</span>
-                        }
+            <!-- Loading State -->
+            @if (isLoading()) {
+            <div class="flex flex-col items-center justify-center py-20">
+                <div class="relative mb-6">
+                    <div class="w-16 h-16 border-4 border-[#ec4899]/20 border-t-[#ec4899] rounded-full animate-spin">
                     </div>
-
-                    <!-- Friend Info -->
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1">
-                            <h4 class="font-bold text-base text-slate-900 truncate">{{ friend.name }}</h4>
-                            @if (friend.isVerified) {
-                            <div class="w-4 h-4 bg-[#ec4899] rounded-full flex items-center justify-center shadow-sm">
-                                <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-                            }
-                        </div>
-                        <div class="flex items-center gap-2 text-xs">
-                            <span class="text-slate-600 font-medium">Added {{ friend.addedAt | date:'MMM d, y' }}</span>
-                            @if (getSharedItemsCount(friend) > 0) {
-                            <span class="bg-[#ec4899]/10 text-[#ec4899] px-2 py-1 rounded-md font-bold text-xs">
-                                {{ getSharedItemsCount(friend) }} shared
-                            </span>
-                            }
-                        </div>
+                    <div
+                        class="absolute inset-2 w-12 h-12 border-4 border-transparent border-r-[#ec4899]/60 rounded-full animate-spin animate-reverse">
                     </div>
-
-                    <!-- Enhanced delete button with better visibility -->
-                    <button (click)="confirmDelete(friend)"
-                        class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-red-50 border-2 border-red-100 flex items-center justify-center text-red-600 active:bg-red-100 active:border-red-200 active:text-red-700 transition-all active:scale-95 touch-manipulation shadow-sm">
-                        <svg class="w-5 h-5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                    </button>
                 </div>
-
-                <!-- Mobile-first action buttons (always visible) -->
-                <div class="flex gap-2">
-                    <button (click)="quickRequestDocument(friend)"
-                        class="flex-1 flex items-center justify-center gap-2 bg-[#ec4899]/10 active:bg-[#ec4899]/20 text-[#ec4899] py-3 px-4 rounded-xl font-medium text-sm transition-colors touch-manipulation">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                        </svg>
-                        Request Doc
-                    </button>
-                    <button (click)="quickRequestCard(friend)"
-                        class="flex-1 flex items-center justify-center gap-2 bg-emerald-50 active:bg-emerald-100 text-emerald-700 py-3 px-4 rounded-xl font-medium text-sm transition-colors touch-manipulation">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6A2,2 0 0,0 20,4M20,18H4V6H20V18M6,9H18V11H6V9M6,13H16V15H6V13Z"/>
-                        </svg>
-                        Request Card
-                    </button>
+                <div class="text-center">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Loading Your Circle</h3>
+                    <p class="text-slate-600 font-medium">Connecting to your trusted network...</p>
                 </div>
             </div>
             }
-        </div>
-        }
 
-        <!-- No Search Results -->
-        @if (!isLoading() && friends().length > 0 && filteredFriends().length === 0) {
-        <div class="flex flex-col items-center justify-center py-20 text-center">
-            <div class="w-20 h-20 rounded-2xl bg-[#ec4899]/10 flex items-center justify-center text-[#ec4899] mb-4 shadow-lg">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
+            <!-- Empty State -->
+            @if (!isLoading() && friends().length === 0) {
+            <div class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+                <div class="relative mb-8">
+                    <div
+                        class="w-32 h-32 rounded-3xl bg-[#ec4899]/10 shadow-xl flex items-center justify-center text-[#ec4899] relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[#ec4899]/20 animate-pulse"></div>
+                        <svg class="w-16 h-16 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                        </svg>
+                    </div>
+                    <!-- Floating decorative elements -->
+                    <div class="absolute -top-2 -right-2 w-6 h-6 bg-[#ec4899]/20 rounded-full animate-bounce delay-300">
+                    </div>
+                    <div
+                        class="absolute -bottom-2 -left-2 w-4 h-4 bg-[#ec4899]/20 rounded-full animate-bounce delay-700">
+                    </div>
+                    <div class="absolute top-1/2 -left-4 w-3 h-3 bg-[#ec4899]/30 rounded-full animate-pulse"></div>
+                </div>
+                <div class="max-w-sm">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-3">Build Your Circle</h3>
+                    <p class="text-slate-600 leading-relaxed mb-8 font-medium">
+                        Connect with trusted friends and family to securely share important documents and cards.
+                    </p>
+                    <a routerLink="/add-friend"
+                        class="group inline-flex items-center gap-3 bg-[#ec4899] hover:bg-[#db2777] text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-[#ec4899]/25 hover:shadow-[#ec4899]/40 transition-all hover:scale-105 active:scale-95 relative overflow-hidden">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700">
+                        </div>
+                        <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500 relative z-10"
+                            fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        <span class="relative z-10">Add Your First Friend</span>
+                    </a>
+                </div>
             </div>
-            <h3 class="text-lg font-bold text-slate-900 mb-2">No matches found</h3>
-            <p class="text-slate-600 font-medium">Try adjusting your search terms</p>
-        </div>
-        }
+            }
+
+            <!-- Friends List -->
+            <!-- Mobile-First Friends List -->
+            @if (!isLoading() && filteredFriends().length > 0) {
+            <div class="space-y-3 animate-fade-in">
+                @for (friend of filteredFriends(); track friend.uid; let i = $index) {
+                <div
+                    class="bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60 transition-all">
+
+                    <!-- Mobile-friendly friend info layout -->
+                    <div class="flex items-center gap-3 mb-3">
+                        <!-- Profile Avatar -->
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold overflow-hidden shrink-0 text-white shadow-md"
+                            [ngClass]="getAvatarGradient(i)">
+                            @if (friend.profileImage) {
+                            <img [src]="friend.profileImage" class="w-full h-full object-cover">
+                            }
+                            @if (!friend.profileImage) {
+                            <span class="text-lg">{{ friend.name.charAt(0) }}</span>
+                            }
+                        </div>
+
+                        <!-- Friend Info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="font-bold text-base text-slate-900 truncate">{{ friend.name }}</h4>
+                                @if (friend.isVerified) {
+                                <div
+                                    class="w-4 h-4 bg-[#ec4899] rounded-full flex items-center justify-center shadow-sm">
+                                    <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                }
+                            </div>
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="text-slate-600 font-medium">Added {{ friend.addedAt | date:'MMM d, y'
+                                    }}</span>
+                                @if (getSharedItemsCount(friend) > 0) {
+                                <span class="bg-[#ec4899]/10 text-[#ec4899] px-2 py-1 rounded-md font-bold text-xs">
+                                    {{ getSharedItemsCount(friend) }} shared
+                                </span>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Enhanced delete button with better visibility -->
+                        <button (click)="confirmDelete(friend)"
+                            class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-red-50 border-2 border-red-100 flex items-center justify-center text-red-600 active:bg-red-100 active:border-red-200 active:text-red-700 transition-all active:scale-95 touch-manipulation shadow-sm">
+                            <svg class="w-5 h-5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Mobile-first action buttons (always visible) -->
+                    <div class="flex gap-2">
+                        <button (click)="quickRequestDocument(friend)"
+                            class="flex-1 flex items-center justify-center gap-2 bg-[#ec4899]/10 active:bg-[#ec4899]/20 text-[#ec4899] py-3 px-4 rounded-xl font-medium text-sm transition-colors touch-manipulation">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                            </svg>
+                            Request Doc
+                        </button>
+                        <button (click)="quickRequestCard(friend)"
+                            class="flex-1 flex items-center justify-center gap-2 bg-emerald-50 active:bg-emerald-100 text-emerald-700 py-3 px-4 rounded-xl font-medium text-sm transition-colors touch-manipulation">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M20,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6A2,2 0 0,0 20,4M20,18H4V6H20V18M6,9H18V11H6V9M6,13H16V15H6V13Z" />
+                            </svg>
+                            Request Card
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+
+            <!-- No Search Results -->
+            @if (!isLoading() && friends().length > 0 && filteredFriends().length === 0) {
+            <div class="flex flex-col items-center justify-center py-20 text-center">
+                <div
+                    class="w-20 h-20 rounded-2xl bg-[#ec4899]/10 flex items-center justify-center text-[#ec4899] mb-4 shadow-lg">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-2">No matches found</h3>
+                <p class="text-slate-600 font-medium">Try adjusting your search terms</p>
+            </div>
+            }
         </div>
     </div>
 
@@ -257,10 +301,13 @@
             <!-- Content -->
             <div class="p-6 pb-8">
                 <!-- Icon -->
-                <div class="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-red-100 to-red-200 rounded-3xl flex items-center justify-center">
-                    <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center">
+                <div
+                    class="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-red-100 to-red-200 rounded-3xl flex items-center justify-center">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     </div>
                 </div>
@@ -271,7 +318,8 @@
                 <!-- Message -->
                 <div class="text-center mb-8">
                     <p class="text-slate-600 font-medium mb-2">
-                        Are you sure you want to remove <span class="font-bold text-slate-900">{{ friendNameToDelete() }}</span> from your secure circle?
+                        Are you sure you want to remove <span class="font-bold text-slate-900">{{ friendNameToDelete()
+                            }}</span> from your secure circle?
                     </p>
                     <p class="text-slate-500 text-sm">
                         They will lose access to all shared documents immediately.
@@ -287,7 +335,8 @@
                         <span>Removing...</span>
                         } @else {
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                         <span>Yes, Remove</span>
                         }
@@ -323,17 +372,19 @@
                     <div class="w-10 h-10 bg-[#ec4899] rounded-2xl flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                [attr.d]="requestType() === 'document' ? 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' : 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'"/>
+                                [attr.d]="requestType() === 'document' ? 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' : 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'" />
                         </svg>
                     </div>
                 </div>
 
                 <!-- Title -->
-                <h3 class="text-2xl font-bold text-slate-900 mb-3 text-center">Request {{ requestType() | titlecase }}</h3>
+                <h3 class="text-2xl font-bold text-slate-900 mb-3 text-center">Request {{ requestType() | titlecase }}
+                </h3>
 
                 <!-- Subtitle -->
                 <p class="text-slate-600 font-medium mb-6 text-center">
-                    Send a secure request to <span class="font-bold text-slate-900">{{ getSelectedFriend()?.name }}</span>
+                    Send a secure request to <span class="font-bold text-slate-900">{{ getSelectedFriend()?.name
+                        }}</span>
                 </p>
 
                 <!-- Form -->
@@ -348,7 +399,7 @@
 
                 <!-- Action Buttons -->
                 <div class="space-y-3">
-                    <button (click)="sendRequestItem()" [disabled]="isRequesting()"
+                    <button (click)="sendRequestItem()" [disabled]="isRequesting() || !requestQuery().trim()"
                         class="w-full py-4 rounded-2xl bg-[#ec4899] disabled:bg-slate-300 disabled:text-slate-500 text-white font-bold shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 touch-manipulation">
                         @if (isRequesting()) {
                         <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

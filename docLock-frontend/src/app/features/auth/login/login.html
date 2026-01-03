@@ -1,4 +1,5 @@
-<div class="min-h-screen bg-white flex items-center justify-center p-6 relative overflow-hidden">
+<div
+    class="min-h-[calc(100vh-2rem)] bg-white rounded-3xl flex items-center justify-center p-6 relative overflow-hidden">
     <!-- Decorative Blob Elements -->
     <div
         class="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -translate-y-16 translate-x-16 opacity-60 blob-float-1">
@@ -78,7 +79,9 @@
         <div class="text-center mt-8">
             <p class="text-slate-500">
                 New to DocLock?
-                <a routerLink="/signup" class="text-[#6366f1] font-semibold hover:text-indigo-700 transition-colors">
+                <a routerLink="/signup" [class.pointer-events-none]="authService.isLoading()"
+                    [class.opacity-50]="authService.isLoading()"
+                    class="text-[#6366f1] font-semibold hover:text-indigo-700 transition-colors">
                     Create Account
                 </a>
             </p>

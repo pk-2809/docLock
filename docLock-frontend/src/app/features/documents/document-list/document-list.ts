@@ -5,19 +5,14 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth';
 import { NotificationService } from '../../../core/services/notification.service';
 import { DocumentService, Document, Folder } from '../../../core/services/document';
-import { ToastService } from '../../../core/services/toast.service'; // Import ToastService
-import { forkJoin, finalize, timeout } from 'rxjs'; // Import forkJoin, finalize, timeout
+import { ToastService } from '../../../core/services/toast.service';
+import { finalize } from 'rxjs';
 import { AppConfigService } from '../../../core/services/app-config.service';
-
-interface Card {
-    id: string;
-    name: string;
-    type: 'debit' | 'credit';
-    number: string;
-    expiryDate: string;
-    cvv?: string;
-    createdAt: Date;
-}
+import { ShareBottomSheetComponent } from '../../../shared/components/share-bottom-sheet/share-bottom-sheet';
+import { BottomSheetComponent } from '../../../shared/components/bottom-sheet/bottom-sheet.component';
+import { ConfirmationSheetComponent } from '../../../shared/components/confirmation-sheet/confirmation-sheet';
+import { PeopleService } from '../../../core/people/people.service';
+import { CardService, Card } from '../../../core/services/card';
 
 interface BreadcrumbItem {
     id: string;
@@ -28,43 +23,48 @@ interface BreadcrumbItem {
 @Component({
     selector: 'app-document-list',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, ShareBottomSheetComponent, BottomSheetComponent, ConfirmationSheetComponent],
     templateUrl: './document-list.html',
     styleUrl: './document-list.css'
 })
 export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('breadcrumbContainer') breadcrumbContainer!: ElementRef;
+
     private route = inject(ActivatedRoute);
-    // Services
     private documentService = inject(DocumentService);
     private toastService = inject(ToastService);
-    private appConfig = inject(AppConfigService);
+    public appConfig = inject(AppConfigService); // Changed to public to access in template
+    private cardService = inject(CardService);
     router = inject(Router);
     authService = inject(AuthService);
     notificationService = inject(NotificationService);
-    private configService = inject(AppConfigService); // Added configService injection
+    private peopleService = inject(PeopleService);
+    private cdr = inject(ChangeDetectorRef);
 
     // State
     isFetchingNotifications = false;
-    private cdr = inject(ChangeDetectorRef);
     viewMode: 'folders' | 'cards' | 'card-folder' | 'qrs' = 'folders';
     currentFolderId: string | null = null;
     currentCardFolder: 'debit' | 'credit' | null = null;
     searchQuery = '';
 
     // UI States
-    // UI States
-    isLoading = true;
+    isLoading = false; // Data is handled by real-time signals
     isUploading = false;
+    isDeleting = false;
 
     showCreateFolderModal = false;
     showUploadModal = false;
     showLocationDropdown = false;
+    showDeleteSheet = false;
+
+    itemToDelete: { type: 'document' | 'folder', data: any } | null = null;
+    deleteMessage = '';
     newFolderName = '';
     selectedLocationId: string | null = null;
     selectedFile: File | null = null;
     documentName = '';
-    showFabMenu = false; // FAB menu state
+    showFabMenu = false;
 
     // Document Actions Menu State
     activeDocumentMenu: string | null = null;
@@ -82,182 +82,30 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     newCardExpiry = '';
     newCardCvv = '';
     newCardType = 'Credit Card';
+    showCardCVV = new Set<string>();
+
+    // Share Sheet State
+    showShareSheet = false;
+    itemToShare: { id: string, name: string, type: 'document' | 'card' } | null = null;
 
     // Auto-detected folder properties
     public detectedIcon = 'folder';
-    public detectedColor = 'bg-slate-500';
+    public detectedColor = 'bg-blue-50';
 
-    // Start with empty folders - user creates everything
-    folders: Folder[] = [];
-
-    // Start with empty documents - user uploads everything
-    documents: Document[] = [];
-
-    // Start with empty cards - user adds everything
-    cards: Card[] = [];
-
-    // Dashboard Data
+    // Dashboard Data Constants
     readonly storageLimitBytes = 5 * 1024 * 1024 * 1024; // 5 GB
     readonly cardLimit = 50;
     readonly qrLimit = 20;
 
-    get dashboardStats() {
-        const totalSize = this.documents.reduce((acc, doc) => acc + (doc.size || 0), 0);
-        const storageUsedGB = totalSize / (1024 * 1024 * 1024);
-        const storagePercentage = Math.min((totalSize / this.storageLimitBytes) * 100, 100);
-
-        const cardsCount = this.cards.length;
-        const cardsPercentage = Math.min((cardsCount / this.cardLimit) * 100, 100);
-
-        // Placeholder for QRs as logic isn't fully implemented
-        const qrsCount = 5;
-        const qrsPercentage = Math.min((qrsCount / this.qrLimit) * 100, 100);
-
-        return {
-            storage: {
-                used: storageUsedGB.toFixed(2),
-                total: '5',
-                percentage: storagePercentage,
-                color: '#3b82f6' // Blue
-            },
-            cards: {
-                used: cardsCount,
-                total: this.cardLimit,
-                percentage: cardsPercentage,
-                color: '#ec4899' // Pink
-            },
-            qrs: {
-                used: qrsCount,
-                total: this.qrLimit,
-                percentage: qrsPercentage,
-                color: '#22c55e' // Green
-            }
-        };
-    }
-
     // Interactive chart state
     selectedChartStat: 'storage' | 'cards' | 'qrs' = 'storage';
 
-    // Helper to calculate SVG dash properties for circular progress
-    getCircleDashArray(percentage: number, radius: number): string {
-        const circumference = 2 * Math.PI * radius;
-        const dash = (percentage / 100) * circumference;
-        return `${dash} ${circumference}`;
-    }
-
-    // Get current chart display value based on selected stat
-    getCurrentChartValue(): number {
-        switch (this.selectedChartStat) {
-            case 'storage':
-                return this.dashboardStats.storage.percentage;
-            case 'cards':
-                return this.dashboardStats.cards.percentage;
-            case 'qrs':
-                return this.dashboardStats.qrs.percentage;
-            default:
-                return this.dashboardStats.storage.percentage;
-        }
-    }
-
-    // Get current chart label
-    getCurrentChartLabel(): string {
-        switch (this.selectedChartStat) {
-            case 'storage':
-                return 'Storage';
-            case 'cards':
-                return 'Cards';
-            case 'qrs':
-                return 'QRs';
-            default:
-                return 'Storage';
-        }
-    }
-
-    // Select chart stat for display
-    selectChartStat(stat: 'storage' | 'cards' | 'qrs') {
-        this.selectedChartStat = stat;
-    }
-
-    // Get details for selected chart stat
-    getSelectedStatDetails() {
-        switch (this.selectedChartStat) {
-            case 'storage':
-                return {
-                    used: this.dashboardStats.storage.used,
-                    total: this.dashboardStats.storage.total,
-                    unit: 'GB',
-                    label: 'Storage'
-                };
-            case 'cards':
-                return {
-                    used: this.dashboardStats.cards.used,
-                    total: this.dashboardStats.cards.total,
-                    unit: '',
-                    label: 'Cards'
-                };
-            case 'qrs':
-                return {
-                    used: this.dashboardStats.qrs.used,
-                    total: this.dashboardStats.qrs.total,
-                    unit: '',
-                    label: 'QRs'
-                };
-            default:
-                return {
-                    used: this.dashboardStats.storage.used,
-                    total: this.dashboardStats.storage.total,
-                    unit: 'GB',
-                    label: 'Storage'
-                };
-        }
-    }
-
-    recentActivities = [
-        {
-            id: 1,
-            title: 'Document uploaded',
-            description: 'passport_scan.pdf added to Identity folder',
-            time: '2 min ago',
-            iconBg: 'bg-blue-50',
-            iconColor: 'text-blue-600',
-            iconPath: 'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5',
-            statusColor: 'bg-green-500'
-        },
-        {
-            id: 2,
-            title: 'Card added',
-            description: 'New credit card saved securely',
-            time: '15 min ago',
-            iconBg: 'bg-pink-50',
-            iconColor: 'text-pink-600',
-            iconPath: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
-            statusColor: 'bg-blue-500'
-        },
-        {
-            id: 3,
-            title: 'File shared',
-            description: 'license.jpg shared with John Doe',
-            time: '1 hour ago',
-            iconBg: 'bg-emerald-50',
-            iconColor: 'text-emerald-600',
-            iconPath: 'M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z',
-            statusColor: 'bg-amber-500'
-        },
-        {
-            id: 4,
-            title: 'Folder created',
-            description: 'New folder "Medical Records" created',
-            time: '3 hours ago',
-            iconBg: 'bg-indigo-50',
-            iconColor: 'text-indigo-600',
-            iconPath: 'M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z',
-            statusColor: 'bg-slate-400'
-        }
-    ];
+    // Data Accessors (Signals)
+    get folders() { return this.documentService.folders(); }
+    get documents() { return this.documentService.documents(); }
+    get cards() { return this.cardService.cards(); }
 
     ngOnInit() {
-        this.loadData();
-
         // Check for query parameters to set initial view mode
         this.route.queryParams.subscribe(params => {
             if (params['view'] === 'cards') {
@@ -268,9 +116,6 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.openFolder(params['folderId']);
             }
         });
-
-        // Global Guard removed to prevent blocking valid interactions.
-        // We will handle specific input behavior in the template handlers.
     }
 
     ngAfterViewInit() {
@@ -290,60 +135,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         // Cleanup if any
     }
 
-    loadData() {
-        console.log('Starting loadData...');
-        this.isLoading = true;
-
-        forkJoin({
-            folders: this.documentService.getFolders(),
-            documents: this.documentService.getDocuments()
-        }).pipe(
-            timeout(10000), // Force timeout after 10 seconds
-            finalize(() => {
-                console.log('Finalize block executing. Setting isLoading = false');
-                this.isLoading = false;
-                this.cdr.detectChanges(); // Force UI update
-            })
-        ).subscribe({
-            next: (res) => {
-                console.log('Data received:', res);
-                try {
-                    // Process Folders
-                    if (res.folders && res.folders.folders) {
-                        this.folders = res.folders.folders.map(f => ({
-                            ...f,
-                            createdAt: new Date(f.createdAt) as any
-                        })) as any;
-                    } else {
-                        this.folders = [];
-                    }
-
-                    // Process Documents
-                    if (res.documents && res.documents.documents) {
-                        this.documents = res.documents.documents.map(d => ({
-                            ...d,
-                            type: d.mimeType ? d.mimeType.split('/').pop()?.toUpperCase() : 'DOC',
-                            size: d.size || 0,
-                            formattedSize: d.size ? `${(d.size / (1024 * 1024)).toFixed(2)} MB` : '0 MB',
-                            date: d.createdAt ? new Date(d.createdAt) : new Date(),
-                            icon: 'document',
-                            color: 'bg-blue-500',
-                            folderId: d.folderId || undefined
-                        }));
-                    } else {
-                        this.documents = [];
-                    }
-                } catch (e) {
-                    console.error('Error processing data:', e);
-                    this.toastService.showError('Error displaying data');
-                }
-            },
-            error: (err) => {
-                console.error('Error loading data', err);
-                this.toastService.showError('Failed to load data (Timeout or Error)');
-            }
-        });
-    }
+    // --- Computed Properties ---
 
     get currentFolder(): Folder | null {
         if (!this.currentFolderId) return null;
@@ -356,7 +148,6 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         ];
 
         if (this.currentFolderId) {
-            // Handle Shared folder (virtual folder)
             if (this.currentFolderId === 'shared-folder') {
                 items.push({
                     id: 'shared-folder',
@@ -364,7 +155,6 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                     path: 'shared-folder'
                 });
             } else {
-                // Build complete path by traversing up the folder hierarchy
                 const pathFolders: Folder[] = [];
                 let currentId: string | null = this.currentFolderId;
 
@@ -378,7 +168,6 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                     }
                 }
 
-                // Add all folders in the path to breadcrumbs
                 pathFolders.forEach(folder => {
                     items.push({
                         id: folder.id,
@@ -388,20 +177,15 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                 });
             }
         }
-
         return items;
     }
 
     get currentFolders(): Folder[] {
         let regularFolders = this.folders.filter(f => f.parentId === this.currentFolderId);
 
-        // Add "Shared" folder at the top only if:
-        // 1. We're at root level (currentFolderId === null)
-        // 2. There are shared documents
+        // Add "Shared" folder at the top if at root and shared docs exist
         if (this.currentFolderId === null && this.hasSharedDocuments()) {
-            // Filter out any existing "Shared" folder from regular folders to avoid duplicates
             regularFolders = regularFolders.filter(f => f.name.toLowerCase() !== 'shared');
-
             const sharedFolder: Folder = {
                 id: 'shared-folder',
                 name: 'Shared',
@@ -411,103 +195,27 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                 itemCount: this.getSharedDocumentsCount(),
                 createdAt: new Date().toISOString()
             };
-            // Put Shared folder at the top, then regular folders
             return [sharedFolder, ...regularFolders];
         }
 
         return regularFolders;
     }
 
-    // Check if there are any shared documents
-    hasSharedDocuments(): boolean {
-        return this.documents.some(doc => this.isSharedDocument(doc));
-    }
-
-    // Check if a document is shared
-    isSharedDocument(doc: Document): boolean {
-        // Check if document is in a folder named "Shared"
-        if (doc.folderId) {
-            const folder = this.folders.find(f => f.id === doc.folderId);
-            if (folder && folder.name.toLowerCase() === 'shared') {
-                return true;
-            }
-        }
-        // Also check if document has sharedBy property (if the backend provides this)
-        // @ts-ignore - sharedBy might not be in the interface yet
-        const sharedBy = (doc as any).sharedBy;
-        return sharedBy !== undefined && sharedBy !== null && sharedBy !== '';
-    }
-
-    // Get count of shared documents
-    getSharedDocumentsCount(): number {
-        return this.documents.filter(doc => this.isSharedDocument(doc)).length;
-    }
-
-    // Check if current folder is "Shared"
     get isSharedFolder(): boolean {
         return this.currentFolderId === 'shared-folder' ||
             (this.currentFolderId !== null && this.folders.find(f => f.id === this.currentFolderId)?.name?.toLowerCase() === 'shared');
     }
 
-    // Get sharer name for a document (placeholder - connect to backend later)
-    getDocumentSharer(doc: Document): { name: string; initial: string } {
-        // TODO: Replace with actual sharedBy data from backend
-        // For now, using placeholder data
-        const sharers: { [key: string]: { name: string; initial: string } } = {
-            'doc1': { name: 'John Doe', initial: 'JD' },
-            'doc2': { name: 'Jane Smith', initial: 'JS' },
-        };
-        return sharers[doc.id] || { name: 'Unknown', initial: 'U' };
-    }
-
-    // Format file size properly (KB, MB, GB)
-    formatFileSize(bytes: number): string {
-        if (!bytes || bytes === 0) return '0 B';
-
-        const kb = 1024;
-        const mb = kb * 1024;
-        const gb = mb * 1024;
-
-        if (bytes < kb) {
-            return `${bytes} B`;
-        } else if (bytes < mb) {
-            return `${(bytes / kb).toFixed(1)} KB`;
-        } else if (bytes < gb) {
-            return `${(bytes / mb).toFixed(1)} MB`;
-        } else {
-            return `${(bytes / gb).toFixed(2)} GB`;
-        }
-    }
-
-    get totalStats() {
-        const totalDocs = this.documents.length;
-        const totalSize = this.documents.reduce((acc, doc) => {
-            return acc + (doc.size || 0);
-        }, 0);
-
-        // Convert to MB
-        const totalSizeMB = totalSize / (1024 * 1024);
-
-        return {
-            documents: totalDocs,
-            folders: this.folders.length,
-            size: `${totalSizeMB.toFixed(1)}MB`
-        };
-    }
-
     get availableLocations(): Folder[] {
-        // Return all folders that can be parent folders (excluding current folder if editing)
         return this.folders.filter(f => f.parentId === null);
     }
 
     get currentDocuments(): Document[] {
         let filtered: Document[];
 
-        // If we're in the "Shared" folder, show all shared documents
         if (this.currentFolderId === 'shared-folder') {
             filtered = this.documents.filter(doc => this.isSharedDocument(doc));
         } else {
-            // Regular folder filtering
             filtered = this.documents.filter(doc => doc.folderId === this.currentFolderId);
         }
 
@@ -520,9 +228,139 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         return filtered;
     }
 
+    get dashboardStats() {
+        const totalSize = this.documents.reduce((acc, doc) => acc + (doc.size || 0), 0);
+        const storageUsedGB = totalSize / (1024 * 1024 * 1024);
+        const storagePercentage = Math.min((totalSize / this.storageLimitBytes) * 100, 100);
+
+        const cardsCount = this.cards.length;
+        const cardsPercentage = Math.min((cardsCount / this.cardLimit) * 100, 100);
+
+        const qrsCount = 5; // Placeholder
+        const qrsPercentage = Math.min((qrsCount / this.qrLimit) * 100, 100);
+
+        return {
+            storage: {
+                used: storageUsedGB.toFixed(2),
+                total: '5',
+                percentage: storagePercentage,
+                color: '#3b82f6'
+            },
+            cards: {
+                used: cardsCount,
+                total: this.cardLimit,
+                percentage: cardsPercentage,
+                color: '#ec4899'
+            },
+            qrs: {
+                used: qrsCount,
+                total: this.qrLimit,
+                percentage: qrsPercentage,
+                color: '#22c55e'
+            }
+        };
+    }
+
+    get totalStats() {
+        const totalDocs = this.documents.length;
+        const totalSize = this.documents.reduce((acc, doc) => acc + (doc.size || 0), 0);
+        const totalSizeMB = totalSize / (1024 * 1024);
+
+        return {
+            documents: totalDocs,
+            folders: this.folders.length,
+            size: `${totalSizeMB.toFixed(1)}MB`
+        };
+    }
+
+    get firstName(): string {
+        const name = this.authService.user()?.name || 'User';
+        return name.split(' ')[0];
+    }
+
+    // --- Chart Helpers ---
+
+    getCircleDashArray(percentage: number, radius: number): string {
+        const circumference = 2 * Math.PI * radius;
+        const dash = (percentage / 100) * circumference;
+        return `${dash} ${circumference}`;
+    }
+
+    getCurrentChartValue(): number {
+        switch (this.selectedChartStat) {
+            case 'storage': return this.dashboardStats.storage.percentage;
+            case 'cards': return this.dashboardStats.cards.percentage;
+            case 'qrs': return this.dashboardStats.qrs.percentage;
+            default: return this.dashboardStats.storage.percentage;
+        }
+    }
+
+    getCurrentChartLabel(): string {
+        switch (this.selectedChartStat) {
+            case 'storage': return 'Storage';
+            case 'cards': return 'Cards';
+            case 'qrs': return 'QRs';
+            default: return 'Storage';
+        }
+    }
+
+    selectChartStat(stat: 'storage' | 'cards' | 'qrs') {
+        this.selectedChartStat = stat;
+    }
+
+    getSelectedStatDetails() {
+        switch (this.selectedChartStat) {
+            case 'storage': return { used: this.dashboardStats.storage.used, total: this.dashboardStats.storage.total, unit: 'GB', label: 'Storage' };
+            case 'cards': return { used: this.dashboardStats.cards.used, total: this.dashboardStats.cards.total, unit: '', label: 'Cards' };
+            case 'qrs': return { used: this.dashboardStats.qrs.used, total: this.dashboardStats.qrs.total, unit: '', label: 'QRs' };
+            default: return { used: this.dashboardStats.storage.used, total: this.dashboardStats.storage.total, unit: 'GB', label: 'Storage' };
+        }
+    }
+
+    // --- Shared Document Logic ---
+
+    hasSharedDocuments(): boolean {
+        return this.documents.some(doc => this.isSharedDocument(doc));
+    }
+
+    isSharedDocument(doc: Document): boolean {
+        if (doc.folderId) {
+            const folder = this.folders.find(f => f.id === doc.folderId);
+            if (folder && folder.name.toLowerCase() === 'shared') return true;
+        }
+        // @ts-ignore
+        const sharedBy = (doc as any).sharedBy;
+        return sharedBy !== undefined && sharedBy !== null && sharedBy !== '';
+    }
+
+    getSharedDocumentsCount(): number {
+        return this.documents.filter(doc => this.isSharedDocument(doc)).length;
+    }
+
+    getDocumentSharer(doc: Document): { name: string; initial: string } {
+        const sharers: { [key: string]: { name: string; initial: string } } = {
+            'doc1': { name: 'John Doe', initial: 'JD' },
+            'doc2': { name: 'Jane Smith', initial: 'JS' },
+        };
+        return sharers[doc.id] || { name: 'Unknown', initial: 'U' };
+    }
+
+    formatFileSize(bytes: number): string {
+        if (!bytes || bytes === 0) return '0 B';
+        const kb = 1024;
+        const mb = kb * 1024;
+        const gb = mb * 1024;
+        if (bytes < kb) return `${bytes} B`;
+        else if (bytes < mb) return `${(bytes / kb).toFixed(1)} KB`;
+        else if (bytes < gb) return `${(bytes / mb).toFixed(1)} MB`;
+        else return `${(bytes / gb).toFixed(2)} GB`;
+    }
+
     getTotalItemsCount(): number {
         return this.currentFolders.length + this.currentDocuments.length;
     }
+
+    // --- Navigation & UI ---
 
     toggleFabMenu() {
         this.showFabMenu = !this.showFabMenu;
@@ -534,23 +372,17 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
             this.currentFolderId = null;
         } else if (mode === 'cards') {
             this.currentCardFolder = null;
-        } else if (mode === 'qrs') {
-            // QR view logic
         }
     }
 
     openFolder(folderId: string) {
         this.currentFolderId = folderId;
-        this.viewMode = 'folders'; // Stay in folders view, just change current folder
-
-        // Auto-scroll breadcrumb after folder change
+        this.viewMode = 'folders';
         setTimeout(() => {
             if (this.breadcrumbContainer && this.breadcrumbs.length > 3) {
                 const container = this.breadcrumbContainer.nativeElement;
                 const breadcrumbPath = container.querySelector('.overflow-x-auto');
-                if (breadcrumbPath) {
-                    breadcrumbPath.scrollLeft = breadcrumbPath.scrollWidth;
-                }
+                if (breadcrumbPath) breadcrumbPath.scrollLeft = breadcrumbPath.scrollWidth;
             }
         }, 100);
     }
@@ -565,11 +397,9 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
 
     goBack() {
         if (this.currentFolderId) {
-            // Handle Shared folder (virtual folder - always go back to root)
             if (this.currentFolderId === 'shared-folder') {
                 this.currentFolderId = null;
             } else {
-                // If we're in a subfolder, go back to parent folder or root
                 const currentFolder = this.folders.find(f => f.id === this.currentFolderId);
                 if (currentFolder && currentFolder.parentId) {
                     this.currentFolderId = currentFolder.parentId;
@@ -578,7 +408,6 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
             }
         } else {
-            // If we're at root level, navigate back to dashboard
             this.router.navigate(['/dashboard']);
         }
     }
@@ -587,87 +416,48 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.searchQuery = event.target.value;
     }
 
-    // Intelligent folder icon and color detection
+    // --- Notification & Header ---
+
+    onNotificationClick() {
+        if (this.isFetchingNotifications) return;
+        this.isFetchingNotifications = true;
+        this.notificationService.fetchNotifications().subscribe({
+            next: () => {
+                this.isFetchingNotifications = false;
+                this.router.navigate(['/notifications']);
+            },
+            error: () => {
+                this.isFetchingNotifications = false;
+                this.router.navigate(['/notifications']);
+            }
+        });
+    }
+
+    openDocument(doc: Document) {
+        this.router.navigate(['/documents/preview', doc.id], {
+            queryParams: { folderId: this.currentFolderId }
+        });
+    }
+
+    // --- Folder Logic ---
+
     detectFolderProperties(folderName: string) {
         const name = folderName.toLowerCase().trim();
-
-        // Define keyword mappings for icons and colors
         const folderMappings = [
-            // Identity Documents
-            {
-                keywords: ['id', 'ids', 'identity', 'passport', 'license', 'driving', 'voter', 'aadhaar', 'aadhar', 'pan', 'identification'],
-                icon: 'identification',
-                color: 'bg-blue-500'
-            },
-            // Education
-            {
-                keywords: ['education', 'school', 'college', 'university', 'marksheet', 'certificate', 'degree', 'diploma', 'academic', 'transcript', 'result'],
-                icon: 'academic-cap',
-                color: 'bg-emerald-500'
-            },
-            // Medical/Health
-            {
-                keywords: ['medical', 'health', 'hospital', 'doctor', 'prescription', 'report', 'test', 'medicine', 'healthcare', 'clinic'],
-                icon: 'heart',
-                color: 'bg-red-500'
-            },
-            // Banking/Finance
-            {
-                keywords: ['bank', 'banking', 'finance', 'financial', 'statement', 'loan', 'credit', 'debit', 'account', 'money', 'payment'],
-                icon: 'building-library',
-                color: 'bg-violet-500'
-            },
-            // Insurance
-            {
-                keywords: ['insurance', 'policy', 'claim', 'coverage', 'premium', 'life insurance', 'health insurance', 'car insurance'],
-                icon: 'shield-check',
-                color: 'bg-amber-500'
-            },
-            // Legal
-            {
-                keywords: ['legal', 'law', 'court', 'agreement', 'contract', 'will', 'property', 'deed', 'lawyer', 'attorney'],
-                icon: 'scale',
-                color: 'bg-slate-500'
-            },
-            // Work/Professional
-            {
-                keywords: ['work', 'job', 'office', 'professional', 'career', 'employment', 'company', 'business', 'corporate'],
-                icon: 'briefcase',
-                color: 'bg-indigo-500'
-            },
-            // Personal
-            {
-                keywords: ['personal', 'private', 'family', 'home', 'household', 'personal documents'],
-                icon: 'user',
-                color: 'bg-pink-500'
-            },
-            // Travel
-            {
-                keywords: ['travel', 'trip', 'vacation', 'flight', 'hotel', 'booking', 'ticket', 'visa', 'tourism'],
-                icon: 'airplane',
-                color: 'bg-sky-500'
-            },
-            // Tax
-            {
-                keywords: ['tax', 'taxes', 'income tax', 'return', 'filing', 'itr', 'tds', 'gst'],
-                icon: 'calculator',
-                color: 'bg-orange-500'
-            },
-            // Property/Real Estate
-            {
-                keywords: ['property', 'real estate', 'house', 'home', 'apartment', 'rent', 'lease', 'mortgage'],
-                icon: 'home',
-                color: 'bg-green-500'
-            },
-            // Vehicle
-            {
-                keywords: ['vehicle', 'car', 'bike', 'motorcycle', 'auto', 'registration', 'rc', 'vehicle documents'],
-                icon: 'truck',
-                color: 'bg-gray-500'
-            }
+            { keywords: ['id', 'ids', 'identity', 'passport', 'license', 'driving', 'voter', 'aadhaar', 'aadhar', 'pan', 'identification'], icon: 'identification', color: 'bg-blue-50' },
+            { keywords: ['education', 'school', 'college', 'university', 'marksheet', 'certificate', 'degree', 'diploma', 'academic', 'transcript', 'result'], icon: 'academic-cap', color: 'bg-blue-50' },
+            { keywords: ['medical', 'health', 'hospital', 'doctor', 'prescription', 'report', 'test', 'medicine', 'healthcare', 'clinic'], icon: 'heart', color: 'bg-blue-50' },
+            { keywords: ['bank', 'banking', 'finance', 'financial', 'statement', 'loan', 'credit', 'debit', 'account', 'money', 'payment'], icon: 'building-library', color: 'bg-blue-50' },
+            { keywords: ['insurance', 'policy', 'claim', 'coverage', 'premium', 'life insurance', 'health insurance', 'car insurance'], icon: 'shield-check', color: 'bg-blue-50' },
+            { keywords: ['legal', 'law', 'court', 'agreement', 'contract', 'will', 'property', 'deed', 'lawyer', 'attorney'], icon: 'scale', color: 'bg-blue-50' },
+            { keywords: ['work', 'job', 'office', 'professional', 'career', 'employment', 'company', 'business', 'corporate'], icon: 'briefcase', color: 'bg-blue-50' },
+            { keywords: ['personal', 'private', 'family', 'home', 'household', 'personal documents'], icon: 'user', color: 'bg-blue-50' },
+            { keywords: ['travel', 'trip', 'vacation', 'flight', 'hotel', 'booking', 'ticket', 'visa', 'tourism'], icon: 'airplane', color: 'bg-blue-50' },
+            { keywords: ['tax', 'taxes', 'income tax', 'return', 'filing', 'itr', 'tds', 'gst'], icon: 'calculator', color: 'bg-blue-50' },
+            { keywords: ['property', 'real estate', 'house', 'home', 'apartment', 'rent', 'lease', 'mortgage'], icon: 'home', color: 'bg-blue-50' },
+            { keywords: ['vehicle', 'car', 'bike', 'motorcycle', 'auto', 'registration', 'rc', 'vehicle documents'], icon: 'truck', color: 'bg-blue-50' }
         ];
 
-        // Find matching category
         for (const mapping of folderMappings) {
             if (mapping.keywords.some(keyword => name.includes(keyword))) {
                 this.detectedIcon = mapping.icon;
@@ -675,32 +465,27 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
                 return;
             }
         }
-
-        // Default fallback
         this.detectedIcon = 'folder';
-        this.detectedColor = 'bg-slate-500';
+        this.detectedColor = 'bg-blue-50';
     }
 
-    // Called when user types in folder name input
     onFolderNameChange(): void {
         if (this.newFolderName.trim()) {
             this.detectFolderProperties(this.newFolderName);
         } else {
             this.detectedIcon = 'folder';
-            this.detectedColor = 'bg-slate-500';
+            this.detectedColor = 'bg-blue-50';
         }
     }
 
-    // Modal functions
     openCreateFolderModal() {
         this.showCreateFolderModal = true;
         this.newFolderName = '';
-        this.selectedLocationId = this.currentFolderId; // Default to current location
+        this.selectedLocationId = this.currentFolderId;
         this.showLocationDropdown = false;
-        this.showFabMenu = false; // Close FAB menu
-        // Reset detected properties
+        this.showFabMenu = false;
         this.detectedIcon = 'folder';
-        this.detectedColor = 'bg-slate-500';
+        this.detectedColor = 'bg-blue-50';
     }
 
     closeCreateFolderModal() {
@@ -708,9 +493,8 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.newFolderName = '';
         this.selectedLocationId = null;
         this.showLocationDropdown = false;
-        // Reset detected properties
         this.detectedIcon = 'folder';
-        this.detectedColor = 'bg-slate-500';
+        this.detectedColor = 'bg-blue-50';
     }
 
     toggleLocationDropdown() {
@@ -723,10 +507,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     getSelectedLocationPath(): string {
-        if (this.selectedLocationId === null) {
-            return 'My Documents (Root)';
-        }
-
+        if (this.selectedLocationId === null) return 'My Documents (Root)';
         const folder = this.folders.find(f => f.id === this.selectedLocationId);
         return folder ? folder.name : 'My Documents (Root)';
     }
@@ -734,14 +515,7 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     createFolder() {
         if (!this.newFolderName.trim()) return;
 
-        const config = this.configService.config();
-        // Check nesting limit. Breadcrumbs usually include Root + ancestors + current.
-        // If we are IN a folder, breadcrumbs has that folder.
-        // If we create a SUB-folder, the depth increases.
-        // Approx depth = breadcrumbs.length (Root is 1, subfolder is 2...).
-        // User config: maxFolderNestingAllowed (e.g. 5).
-
-        // This is a rough check. If breadcrumbs has 'Root', 'A', 'B' (length 3), creating 'C' makes depth 4.
+        const config = this.appConfig.config();
         const currentDepth = this.breadcrumbs.length;
 
         if (currentDepth >= config.maxFolderNestingAllowed) {
@@ -749,64 +523,37 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
         }
 
-        // OPTIMISTIC UPDATE
-        // 1. Create a temporary folder object
-        const tempId = 'temp-' + Date.now();
-        const tempFolder: any = {
-            id: tempId,
-            name: this.newFolderName.trim(),
-            icon: this.detectedIcon,
-            color: this.detectedColor,
-            parentId: this.selectedLocationId || this.currentFolderId,
-            itemCount: 0,
-            createdAt: new Date(),
-            isOptimistic: true
-        };
-
-        // 2. Add to array immediately
-        this.folders.push(tempFolder);
-
-        // Update parent folder count recursively
-        if (tempFolder.parentId) {
-            this.updateFolderCountsRecursively(tempFolder.parentId, 1);
-        }
+        const folderName = this.newFolderName.trim();
+        const detectedIcon = this.detectedIcon;
+        const detectedColor = this.detectedColor;
+        const targetFolderId = this.currentFolderId;
 
         this.closeCreateFolderModal();
-        this.toastService.showSuccess('Folder created!');
+        this.toastService.showSuccess('Creating folder...');
 
-        // 3. Perform actual API call
         this.documentService.createFolder(
-            tempFolder.name,
-            tempFolder.parentId,
-            tempFolder.icon,
-            tempFolder.color
+            folderName,
+            targetFolderId,
+            detectedIcon,
+            detectedColor
         ).subscribe({
-            next: (res) => {
-                // 4. On success, update the temporary object with real ID and data
-                Object.assign(tempFolder, {
-                    ...res.folder,
-                    createdAt: new Date(res.folder.createdAt),
-                    isOptimistic: false
-                });
+            next: () => {
+                // Real-time update will handle the list
             },
             error: (err) => {
                 console.error('Create folder failed', err);
                 this.toastService.showError('Failed to create folder');
-                // 5. On error, remove the optimistic folder
-                this.folders = this.folders.filter(f => f.id !== tempId);
-                // Revert count
-                if (tempFolder.parentId) {
-                    this.updateFolderCountsRecursively(tempFolder.parentId, -1);
-                }
             }
         });
     }
+
+    // --- Upload Logic ---
 
     openUploadModal() {
         this.showUploadModal = true;
         this.selectedFile = null;
         this.documentName = '';
-        this.showFabMenu = false; // Close FAB menu
+        this.showFabMenu = false;
     }
 
     closeUploadModal() {
@@ -826,62 +573,47 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     uploadDocument() {
         if (!this.selectedFile) return;
 
+        // Validating file before starting upload UI state
+        const storageUsed = this.authService.user()?.storageUsed || 0;
+        const validationError = this.documentService.validateFile(this.selectedFile, storageUsed);
+
+        if (validationError) {
+            this.toastService.showError(validationError);
+            return;
+        }
+
         this.isUploading = true;
         this.toastService.showSuccess(`Uploading ${this.selectedFile.name}...`);
-
-        // Pass currentFolderId (or null) as the target folder
         const targetFolderId = this.currentFolderId;
 
-        this.documentService.uploadDocument(this.selectedFile, 'Personal', targetFolderId, this.documentName)
+        this.documentService.uploadDocument(this.selectedFile, 'Personal', targetFolderId, this.documentName, this.authService.user()?.storageUsed || 0)
             .pipe(
                 finalize(() => {
-                    this.isUploading = false;
-                    this.cdr.detectChanges();
+                    setTimeout(() => {
+                        this.isUploading = false;
+                        // No need for detectChanges() as setTimeout is patched by Zone.js
+                    }, 0);
                 })
             )
             .subscribe({
-                next: (res) => {
-                    this.toastService.showSuccess('Upload complete');
-                    // Add new doc to list
-                    const d = res.document;
-                    const newDoc = {
-                        ...d,
-                        type: d.mimeType ? d.mimeType.split('/').pop()?.toUpperCase() : 'DOC',
-                        size: d.size || 0,
-                        formattedSize: d.size ? `${(d.size / (1024 * 1024)).toFixed(2)} MB` : '0 MB',
-                        date: d.createdAt ? new Date(d.createdAt) : new Date(),
-                        icon: 'document',
-                        color: 'bg-blue-500',
-                        folderId: targetFolderId || undefined
-                    };
-
-                    this.documents.push(newDoc);
-
-                    // Update folder count recursively
-                    if (targetFolderId) {
-                        this.updateFolderCountsRecursively(targetFolderId, 1);
-                    }
-
-                    this.closeUploadModal();
+                next: () => {
+                    // Wrap in setTimeout to avoid NG0100 just in case
+                    setTimeout(() => {
+                        this.toastService.showSuccess('Upload complete');
+                        this.closeUploadModal();
+                    }, 0);
                 },
                 error: (err) => {
                     console.error('Upload failed', err);
-                    this.toastService.showError('Failed to upload document');
+                    const errorMessage = err.message || (err.error && err.error.message) || 'Failed to upload document';
+                    // Error toast is safe to show immediately or in next tick
+                    setTimeout(() => {
+                        this.toastService.showError(errorMessage);
+                        this.selectedFile = null;
+                        this.documentName = '';
+                    }, 0);
                 }
             });
-    }
-
-    // Recursively update folder counts in the local state
-    updateFolderCountsRecursively(folderId: string, change: number) {
-        const folder = this.folders.find(f => f.id === folderId);
-        if (folder) {
-            folder.itemCount = (folder.itemCount || 0) + change;
-
-            // Recursively update parent
-            if (folder.parentId) {
-                this.updateFolderCountsRecursively(folder.parentId, change);
-            }
-        }
     }
 
     downloadDocument(doc: Document) {
@@ -904,10 +636,8 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     shareDocument(doc: Document) {
-        if (doc.webViewLink) {
-            navigator.clipboard.writeText(doc.webViewLink);
-            this.toastService.showSuccess('Link copied to clipboard');
-        }
+        this.itemToShare = { id: doc.id, name: doc.name, type: 'document' };
+        this.showShareSheet = true;
     }
 
     deleteDocument(doc: Document) {
@@ -917,66 +647,65 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
         }
 
-        // OPTIMISTIC DELETE
-        const docToDelete = doc;
-        const index = this.documents.findIndex(i => i.id === doc.id);
-
-        // Remove immediately
-        if (index > -1) {
-            this.documents.splice(index, 1);
-            if (doc.folderId) {
-                this.updateFolderCountsRecursively(doc.folderId, -1);
-            }
-        }
-        this.toastService.showSuccess('Document deleted');
-
-        this.documentService.deleteDocument(d.id, d.driveFileId, 0).subscribe({
+        this.isDeleting = true;
+        this.documentService.deleteDocument(d.id, d.driveFileId, d.size || 0).subscribe({
             next: () => {
-                // Success
+                this.toastService.showSuccess('Document deleted successfully');
+                this.closeDeleteSheet();
             },
-            error: (err) => {
+            error: () => {
                 this.toastService.showError('Failed to delete document');
-                // Revert
-                this.documents.splice(index, 0, docToDelete);
-                if (doc.folderId) {
-                    this.updateFolderCountsRecursively(doc.folderId, 1);
-                }
+                this.isDeleting = false;
+                this.closeDeleteSheet();
             }
         });
     }
 
     deleteFolder(folder: Folder) {
-        // OPTIMISTIC DELETE
-        const folderToDelete = folder;
-        const relatedDocs = this.documents.filter(doc => doc.folderId === folder.id);
-
-        // Remove immediately from UI
-        this.folders = this.folders.filter(f => f.id !== folder.id);
-        this.documents = this.documents.filter(doc => doc.folderId !== folder.id);
-
-        // Update parent count recursively
-        if (folder.parentId) {
-            this.updateFolderCountsRecursively(folder.parentId, -1);
-        }
-
-        this.toastService.showSuccess('Folder deleted');
-
+        this.isDeleting = true;
         this.documentService.deleteFolder(folder.id).subscribe({
             next: () => {
-                // Success
+                this.toastService.showSuccess('Folder deleted successfully');
+                this.closeDeleteSheet();
             },
-            error: (err) => {
+            error: () => {
                 this.toastService.showError('Failed to delete folder');
-                // Revert
-                this.folders.push(folderToDelete);
-                this.documents.push(...relatedDocs);
-                // Revert count
-                if (folder.parentId) {
-                    this.updateFolderCountsRecursively(folder.parentId, 1);
-                }
+                this.isDeleting = false;
+                this.closeDeleteSheet();
             }
         });
     }
+
+    closeDeleteSheet() {
+        this.showDeleteSheet = false;
+        this.itemToDelete = null;
+        this.isDeleting = false;
+        this.deleteMessage = '';
+    }
+
+    executeDelete() {
+        if (!this.itemToDelete) return;
+
+        if (this.itemToDelete.type === 'document') {
+            this.deleteDocument(this.itemToDelete.data);
+        } else if (this.itemToDelete.type === 'folder') {
+            this.deleteFolder(this.itemToDelete.data);
+        }
+    }
+
+    confirmDeleteFolder(folder: Folder) {
+        this.itemToDelete = { type: 'folder', data: folder };
+        this.deleteMessage = `Are you sure you want to delete "${folder.name}" and all its contents?`;
+        this.showDeleteSheet = true;
+    }
+
+    confirmDeleteDocument(doc: Document) {
+        this.itemToDelete = { type: 'document', data: doc };
+        this.deleteMessage = `Are you sure you want to delete "${doc.name}"?`;
+        this.showDeleteSheet = true;
+    }
+
+    // --- Icon Helpers ---
 
     getIconSvg(iconName: string): string {
         const icons: { [key: string]: string } = {
@@ -994,67 +723,30 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
             'truck': 'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m15.75 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125A1.125 1.125 0 0021 17.625v-3.375m-9-3.75h5.25m0 0V8.25a2.25 2.25 0 00-2.25-2.25H9a2.25 2.25 0 00-2.25 2.25v1.5m5.25-1.5a1.5 1.5 0 00-1.5-1.5H9.75a1.5 1.5 0 00-1.5 1.5v1.5M12 9.75v1.5m0-1.5h3.75m-3.75 0H8.25',
             'folder': 'M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z',
             'document': 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z',
-            'share': 'M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z'
+            'share': 'M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z',
+            'pdf': 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z',
+            'image': 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z'
         };
         return icons[iconName] || icons['folder'];
     }
 
-    // Get gradient classes for folder/document icons (matching friends page style)
-    // Get background classes for folder icons (Pastel style)
-    getFolderIconBackground(index: number): string {
-        const backgrounds = [
-            'bg-blue-50',
-            'bg-emerald-50',
-            'bg-purple-50',
-            'bg-amber-50',
-            'bg-pink-50',
-            'bg-cyan-50',
-            'bg-teal-50',
-            'bg-indigo-50'
-        ];
-        return backgrounds[index % backgrounds.length];
+    getFolderIconBackground(index: number): string { return 'bg-blue-50'; }
+    getFolderIconColor(index: number): string { return 'text-blue-600'; }
+
+    getDocumentIconGradient(doc: Document): string {
+        if (doc.icon === 'pdf') return 'bg-red-50';
+        if (doc.icon === 'image') return 'bg-emerald-50';
+        return 'bg-blue-50';
     }
 
-    // Get text color classes for folder icons
-    getFolderIconColor(index: number): string {
-        const colors = [
-            'text-blue-600',
-            'text-emerald-600',
-            'text-purple-600',
-            'text-amber-600',
-            'text-pink-600',
-            'text-cyan-600',
-            'text-teal-600',
-            'text-indigo-600'
-        ];
-        return colors[index % colors.length];
+    getDocumentIconColor(doc: Document): string {
+        if (doc.icon === 'pdf') return 'text-red-600';
+        if (doc.icon === 'image') return 'text-emerald-600';
+        return 'text-blue-600';
     }
 
-    getDocumentIconGradient(index: number): string {
-        const backgrounds = [
-            'bg-blue-50',
-            'bg-emerald-50',
-            'bg-purple-50',
-            'bg-amber-50',
-            'bg-pink-50',
-            'bg-cyan-50'
-        ];
-        return backgrounds[index % backgrounds.length];
-    }
+    // --- Card Methods ---
 
-    getDocumentIconColor(index: number): string {
-        const colors = [
-            'text-blue-600',
-            'text-emerald-600',
-            'text-purple-600',
-            'text-amber-600',
-            'text-pink-600',
-            'text-cyan-600'
-        ];
-        return colors[index % colors.length];
-    }
-
-    // Card Management Methods
     openCardFolder(type: 'debit' | 'credit') {
         this.currentCardFolder = type;
         this.viewMode = 'card-folder';
@@ -1065,20 +757,9 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.cards.filter(card => card.type === this.currentCardFolder);
     }
 
-    getTotalCardsCount(): number {
-        return this.cards.length;
-    }
-
-    getDebitCardsCount(): number {
-        return this.cards.filter(card => card.type === 'debit').length;
-    }
-
-    getCreditCardsCount(): number {
-        return this.cards.filter(card => card.type === 'credit').length;
-    }
-
-    // Enhanced card display methods
-    showCardCVV = new Set<string>();
+    getTotalCardsCount(): number { return this.cards.length; }
+    getDebitCardsCount(): number { return this.cards.filter(card => card.type === 'debit').length; }
+    getCreditCardsCount(): number { return this.cards.filter(card => card.type === 'credit').length; }
 
     getCardGradient(type: string): string {
         return type === 'credit'
@@ -1107,18 +788,10 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
-    editCard(card: Card): void {
-        this.editingCard = card;
-        this.newCardName = card.name;
-        this.newCardNumber = this.formatCardNumber(card.number);
-        this.newCardExpiry = card.expiryDate;
-        this.newCardCvv = card.cvv || '';
-        this.newCardType = card.type === 'credit' ? 'Credit Card' : 'Debit Card';
-        this.showAddCardBottomSheet = true;
-    }
+    // --- Card Edit/Add Logic ---
 
     openAddCardBottomSheet() {
-        this.editingCard = null; // Reset editing state
+        this.editingCard = null;
         this.showAddCardBottomSheet = true;
         this.newCardName = '';
         this.newCardNumber = '';
@@ -1134,6 +807,19 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.newCardNumber = '';
         this.newCardExpiry = '';
         this.newCardCvv = '';
+    }
+
+    openAddCardModal() { this.openAddCardBottomSheet(); }
+    closeAddCardModal() { this.closeAddCardBottomSheet(); }
+
+    editCard(card: Card): void {
+        this.editingCard = card;
+        this.newCardName = card.name;
+        this.newCardNumber = this.formatCardNumber(card.number);
+        this.newCardExpiry = card.expiryDate;
+        this.newCardCvv = card.cvv || '';
+        this.newCardType = card.type === 'credit' ? 'Credit Card' : 'Debit Card';
+        this.showAddCardBottomSheet = true;
     }
 
     formatCardNumberInput(event: any) {
@@ -1162,132 +848,101 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.newCardExpiry = value;
     }
 
-    openAddCardModal() {
-        this.openAddCardBottomSheet();
-    }
-
-    closeAddCardModal() {
-        this.closeAddCardBottomSheet();
-    }
-
     addCard() {
         if (!this.newCardName.trim() || !this.newCardNumber.trim()) return;
 
-        const config = this.configService.config();
+        const config = this.appConfig.config();
         const currentTypeCount = this.cards.filter(c => c.type === this.currentCardFolder).length;
         const limit = this.currentCardFolder === 'credit' ? config.maxCreditCardsLimit : config.maxDebitCardsLimit;
 
-        // Only check limit when adding new card (not editing)
         if (!this.editingCard && currentTypeCount >= limit) {
             this.toastService.showError(`${this.currentCardFolder} card limit reached. Max ${limit} allowed.`);
             return;
         }
 
+        this.toastService.showSuccess(this.editingCard ? 'Updating card...' : 'Adding card...');
+
         if (this.editingCard) {
-            // Update existing card
-            const cardIndex = this.cards.findIndex(c => c.id === this.editingCard!.id);
-            if (cardIndex > -1) {
-                this.cards[cardIndex] = {
-                    ...this.editingCard,
-                    name: this.newCardName.trim(),
-                    number: this.newCardNumber.trim().replace(/\s/g, ''),
-                    expiryDate: this.newCardExpiry,
-                    cvv: this.newCardCvv || undefined
-                };
-                this.toastService.showSuccess('Card updated successfully');
-            }
+            const updates: Partial<Card> = {
+                name: this.newCardName.trim(),
+                number: this.newCardNumber.trim().replace(/\s/g, ''),
+                expiryDate: this.newCardExpiry,
+                cvv: this.newCardCvv || ''
+            };
+
+            this.cardService.updateCard(this.editingCard.id, updates).subscribe({
+                next: () => {
+                    this.toastService.showSuccess('Card updated successfully');
+                    this.closeAddCardBottomSheet();
+                },
+                error: (err) => {
+                    console.error('Update card failed', err);
+                    this.toastService.showError('Failed to update card');
+                }
+            });
         } else {
-            // Add new card
-            const newCard: Card = {
-                id: Date.now().toString(),
+            const newCard: Partial<Card> = {
                 name: this.newCardName.trim(),
                 type: this.currentCardFolder || 'debit',
                 number: this.newCardNumber.trim().replace(/\s/g, ''),
                 expiryDate: this.newCardExpiry,
-                cvv: this.newCardCvv || undefined,
-                createdAt: new Date()
+                cvv: this.newCardCvv || '',
+                holderName: this.firstName // Default to user first name or similar, required by interface
             };
-            this.cards.push(newCard);
-            this.toastService.showSuccess('Card added successfully');
-        }
 
-        this.closeAddCardBottomSheet();
+            this.cardService.createCard(newCard).subscribe({
+                next: () => {
+                    this.toastService.showSuccess('Card added successfully');
+                    this.closeAddCardBottomSheet();
+                },
+                error: (err) => {
+                    console.error('Add card failed', err);
+                    this.toastService.showError('Failed to add card');
+                }
+            });
+        }
     }
 
     deleteCard(cardId: string) {
-        const index = this.cards.findIndex(c => c.id === cardId);
-        if (index > -1) {
-            this.cards.splice(index, 1);
-        }
-    }
-
-    // Enhanced delete methods for folders and documents
-    confirmDeleteFolder(folder: Folder) {
-        if (confirm(`Are you sure you want to delete "${folder.name}" and all its contents?`)) {
-            this.deleteFolder(folder);
-        }
-    }
-
-    confirmDeleteDocument(doc: Document) {
-        if (confirm(`Are you sure you want to delete "${doc.name}"?`)) {
-            this.deleteDocument(doc);
-        }
-    }
-
-    // Stop propagation of key events to prevent global shortcuts (like opening menus)
-    // when typing in inputs
-    onInputKeydown(event: KeyboardEvent) {
-        // Check for Ctrl+A or Cmd+A (Select All)
-        const isSelectAll = (event.ctrlKey || event.metaKey) && (event.key === 'a' || event.code === 'KeyA');
-
-        if (isSelectAll) {
-            // Prevent the default browser behavior (which might be opening a menu or bubbling)
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-
-            // Manually perform the "Select All" action
-            const target = event.target as HTMLInputElement;
-            if (target && typeof target.select === 'function') {
-                target.select();
+        this.toastService.showSuccess('Deleting card...');
+        this.cardService.deleteCard(cardId).subscribe({
+            next: () => {
+                this.toastService.showSuccess('Card deleted');
+            },
+            error: (err) => {
+                console.error('Delete card failed', err);
+                this.toastService.showError('Failed to delete card');
             }
-        } else {
-            // For other keys, just stop propagation to be safe, but allow default typing
-            event.stopPropagation();
-        }
+        });
     }
+
     confirmDeleteCard(card: Card) {
         if (confirm(`Are you sure you want to delete "${card.name}"?`)) {
             this.deleteCard(card.id);
         }
     }
 
-    // Document Actions Menu Methods
+    // --- Menu Logic ---
+
     toggleDocumentMenu(docId: string) {
         this.activeDocumentMenu = this.activeDocumentMenu === docId ? null : docId;
     }
 
-    closeDocumentMenu() {
+    closeDocumentMenu() { this.activeDocumentMenu = null; }
+
+    toggleFolderMenu(folderId: string) {
+        this.activeFolderMenu = this.activeFolderMenu === folderId ? null : folderId;
         this.activeDocumentMenu = null;
     }
 
-    // Folder Actions Menu Methods
-    toggleFolderMenu(folderId: string) {
-        this.activeFolderMenu = this.activeFolderMenu === folderId ? null : folderId;
-        this.activeDocumentMenu = null; // Close other menus
-    }
+    closeFolderMenu() { this.activeFolderMenu = null; }
 
-    closeFolderMenu() {
-        this.activeFolderMenu = null;
-    }
+    // --- Edit Folder ---
 
-    // Folder Editing Methods
     startEditFolder(folder: Folder) {
         this.editFolderId = folder.id;
         this.editFolderName = folder.name;
         this.closeFolderMenu();
-        // Focus input logic can be handled in template with autofocus or directive, 
-        // or a simple specific timeout here if needed, but standard input usually suffices.
     }
 
     cancelEditFolder() {
@@ -1302,84 +957,67 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         const newName = this.editFolderName.trim();
-        const originalName = folder.name;
-
-        // Optimistic Update
-        const targetFolder = this.folders.find(f => f.id === folder.id);
-        if (targetFolder) {
-            targetFolder.name = newName;
-            this.detectFolderProperties(newName); // Update icon/color? Maybe keep original? 
-            // Re-evaluating icon/color on rename is nice:
-            if (targetFolder.icon === 'folder') { // Only update if it was default
-                // Actually let's just update perfectly
-                // We need to run detection logic but it relies on 'this' state.
-                // Let's just update name for now.
-            }
-        }
         this.editFolderId = null;
         this.toastService.showSuccess('Folder renamed');
 
         this.documentService.updateFolder(folder.id, newName).subscribe({
-            next: () => {
-                // Success
-            },
-            error: (err) => {
-                this.toastService.showError('Failed to rename folder');
-                if (targetFolder) targetFolder.name = originalName; // Revert
-            }
+            next: () => { },
+            error: () => this.toastService.showError('Failed to rename folder')
         });
     }
 
-    // Close menus on click outside
+    // --- Click Outside ---
+
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: MouseEvent) {
         const target = event.target as HTMLElement;
-
-        // Check if click is inside a menu or a toggle button
         if (target.closest('button') && (target.closest('button')?.getAttribute('click-stop-propagation'))) {
             return;
         }
-
-        // We use stopPropagation in templates for toggles, so if it reaches here, it's outside.
-        // But HostListener catches everything bubbling up.
-        // We rely on the fact that existing toggles use $event.stopPropagation().
-        // So this triggers only if propagation wasn't stopped.
-        // Wait, if I put $event.stopPropagation() on the button, this HostListener (on document) WON'T receive it?
-        // NO, document listener receives it in Capture phase or Bubble phase? 
-        // Angular HostListener defaults to bubbling. If stopped below, it won't reach here?
-        // Correct. So simpler logic: Just close everything here.
-        // If a button was clicked and it stopped propagation, this won't fire.
-
         this.closeDocumentMenu();
         this.closeFolderMenu();
     }
 
-    // Dashboard / Header Logic
-    get firstName(): string {
-        const name = this.authService.user()?.name || 'User';
-        return name.split(' ')[0];
+    // --- File Selection for Upload UI (Icon) ---
+
+    getSelectedFileIcon(): string {
+        if (!this.selectedFile) return 'document';
+        const type = this.selectedFile.type;
+        const name = this.selectedFile.name.toLowerCase();
+
+        if (type.includes('pdf') || name.endsWith('.pdf')) return 'pdf';
+        if (type.includes('image') || name.match(/\.(jpg|jpeg|png|gif|webp)$/)) return 'image';
+        return 'document';
     }
 
-    onNotificationClick() {
-        if (this.isFetchingNotifications) return;
+    getSelectedFileIconGradient(): string {
+        const icon = this.getSelectedFileIcon();
+        if (icon === 'pdf') return 'bg-red-50';
+        if (icon === 'image') return 'bg-emerald-50';
+        return 'bg-blue-50';
+    }
 
-        this.isFetchingNotifications = true;
-        this.notificationService.fetchNotifications().subscribe({
-            next: () => {
-                this.isFetchingNotifications = false;
-                this.router.navigate(['/notifications']);
-            },
-            error: () => {
-                this.isFetchingNotifications = false;
-                this.router.navigate(['/notifications']);
+    getSelectedFileIconColor(): string {
+        const icon = this.getSelectedFileIcon();
+        if (icon === 'pdf') return 'text-red-600';
+        if (icon === 'image') return 'text-emerald-600';
+        return 'text-blue-600';
+    }
+
+    // --- Input Keydown ---
+
+    onInputKeydown(event: KeyboardEvent) {
+        const isSelectAll = (event.ctrlKey || event.metaKey) && (event.key === 'a' || event.code === 'KeyA');
+        if (isSelectAll) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            const target = event.target as HTMLInputElement;
+            if (target && typeof target.select === 'function') {
+                target.select();
             }
-        });
+        } else {
+            event.stopPropagation();
+        }
     }
-    openDocument(doc: Document) {
-        this.router.navigate(['/documents/preview', doc.id], {
-            queryParams: { folderId: this.currentFolderId }
-        });
-    }
-
-
 }

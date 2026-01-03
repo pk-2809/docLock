@@ -8,6 +8,7 @@ export interface AppConfig {
     maxStorageLimit: number;
     maxDebitCardsLimit: number;
     maxCreditCardsLimit: number;
+    maxQrLimit: number; // New Limit
     maxFolderNestingAllowed: number;
     sharedDocumentLifeInHrs: number;
     maxFriendsAddLimit: number;
@@ -21,6 +22,7 @@ const DEFAULT_CONFIG: AppConfig = {
     maxStorageLimit: 200 * 1024 * 1024,
     maxDebitCardsLimit: 5,
     maxCreditCardsLimit: 5,
+    maxQrLimit: 5,
     maxFolderNestingAllowed: 5,
     sharedDocumentLifeInHrs: 1,
     maxFriendsAddLimit: 10,

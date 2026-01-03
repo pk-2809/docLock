@@ -237,6 +237,13 @@ export const shareItem = async (req: AuthRequest, res: Response): Promise<void> 
             icon: 'share'
         });
 
+        // Notify Sender
+        await NotificationService.createNotification(currentUserId, {
+            title: 'Item Shared',
+            message: `You successfully shared "${itemName}" with ${friendCheck.data()?.name || 'friend'}.`,
+            icon: 'check-circle'
+        });
+
         res.status(200).json({ message: 'Item shared successfully' });
 
     } catch (error) {

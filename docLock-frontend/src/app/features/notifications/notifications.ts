@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
+import { NotificationMessagePipe } from '../../shared/pipes/notification-message.pipe';
 import { DocumentService, Document } from '../../core/services/document';
 import { CardService, Card } from '../../core/services/card';
 import { PeopleService } from '../../core/people/people.service';
@@ -12,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
     selector: 'app-notifications',
     standalone: true,
-    imports: [CommonModule, RouterLink, TimeAgoPipe, FormsModule],
+    imports: [CommonModule, RouterLink, FormsModule, TimeAgoPipe, NotificationMessagePipe],
     templateUrl: './notifications.html',
     styles: [`
         @keyframes slide-up {

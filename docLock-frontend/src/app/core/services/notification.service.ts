@@ -13,6 +13,8 @@ export interface Notification {
     createdAt: string;
     read: boolean;
     icon?: string;
+    metadata?: any;
+    [key: string]: any; // Allow loose access
 }
 
 @Injectable({

@@ -7,6 +7,8 @@ import { environment } from '../../../environments/environment';
 import { AppConfigService } from '../services/app-config.service';
 import { PeopleService } from '../people/people.service';
 import { NotificationService } from '../services/notification.service';
+import { DocumentService } from '../services/document';
+import { CardService } from '../services/card';
 
 export interface User {
   uid: string;
@@ -27,6 +29,8 @@ export class AuthService {
   private appConfigService = inject(AppConfigService);
   private peopleService = inject(PeopleService);
   private notificationService = inject(NotificationService);
+  private documentService = inject(DocumentService);
+  private cardService = inject(CardService);
 
   private auth = firebaseAuth;
   private confirmationResult: ConfirmationResult | undefined;
@@ -240,6 +244,9 @@ export class AuthService {
           // Start Real-time Listeners
           this.peopleService.subscribeToFriends(response.user.uid);
           this.notificationService.subscribeToNotifications(response.user.uid);
+          this.documentService.subscribeToDocuments(response.user.uid);
+          this.documentService.subscribeToFolders(response.user.uid);
+          this.cardService.subscribeToCards(response.user.uid);
         } else {
           this.user.set(null);
         }
@@ -263,6 +270,8 @@ export class AuthService {
         this.appConfigService.clearCache();
         this.peopleService.clearData(); // Clear friends list & unsubscribe
         this.notificationService.clearSubscription(); // Clear notifications & unsubscribe
+        this.documentService.cleanup();
+        this.cardService.cleanup();
       }),
       finalize(() => {
         setTimeout(() => this.isLoading.set(false), 0);

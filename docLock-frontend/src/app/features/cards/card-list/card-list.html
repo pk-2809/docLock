@@ -38,7 +38,7 @@
         <!-- Centered Title -->
         <div class="text-center">
           <h1 class="text-xl font-bold text-slate-800 tracking-tight">My Cards</h1>
-          <p class="text-xs sm:text-sm text-slate-600 font-medium">Total 4 cards</p>
+          <p class="text-xs sm:text-sm text-slate-600 font-medium">Total {{allCards.length}} cards</p>
         </div>
 
         <!-- Add Card Button -->
@@ -138,7 +138,7 @@
             [formatCardNumber]="formatCardNumber.bind(this)" [getMaskedCardNumber]="getMaskedCardNumber.bind(this)"
             (toggleVisibility)="toggleCardVisibility($event)"
             (copyToClipboard)="copyToClipboard($event.text, $event.label)" (editCard)="editCard($event)"
-            (deleteCard)="deleteCard($any($event))">
+            (deleteCard)="deleteCard($any($event))" (shareCard)="openShareSheet($any($event))">
           </app-card-carousel>
         </div>
       </div>
@@ -161,7 +161,7 @@
             [formatCardNumber]="formatCardNumber.bind(this)" [getMaskedCardNumber]="getMaskedCardNumber.bind(this)"
             (toggleVisibility)="toggleCardVisibility($event)"
             (copyToClipboard)="copyToClipboard($event.text, $event.label)" (editCard)="editCard($event)"
-            (deleteCard)="deleteCard($any($event))">
+            (deleteCard)="deleteCard($any($event))" (shareCard)="openShareSheet($any($event))">
           </app-card-carousel>
         </div>
       </div>
@@ -176,4 +176,8 @@
     (cancel)="closeDeleteSheet()">
   </app-confirmation-sheet>
   }
+
+  <!-- Share Bottom Sheet -->
+  <app-share-bottom-sheet [isOpen]="showShareSheet" [itemToShare]="shareItem" (closed)="closeShareSheet()">
+  </app-share-bottom-sheet>
 </div>

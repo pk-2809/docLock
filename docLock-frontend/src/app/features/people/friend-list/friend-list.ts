@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PeopleService, Friend } from '../../../core/people/people.service';
@@ -69,8 +69,8 @@ export class FriendListComponent implements OnInit {
     filteredFriends() {
         const query = this.searchQuery().toLowerCase().trim();
         if (!query) return this.friends();
-        
-        return this.friends().filter(friend => 
+
+        return this.friends().filter(friend =>
             friend.name.toLowerCase().includes(query) ||
             friend.email?.toLowerCase().includes(query)
         );
@@ -92,20 +92,10 @@ export class FriendListComponent implements OnInit {
     }
 
     // Stats methods
-    getSharedDocsCount(): number {
-        // Mock data - replace with actual implementation
-        return this.friends().reduce((count, friend) => count + (friend.sharedDocs || 0), 0);
-    }
-
-    getSharedCardsCount(): number {
-        // Mock data - replace with actual implementation
-        return this.friends().reduce((count, friend) => count + (friend.sharedCards || 0), 0);
-    }
-
-    getActiveRequestsCount(): number {
-        // Mock data - replace with actual implementation
-        return this.friends().reduce((count, friend) => count + (friend.activeRequests || 0), 0);
-    }
+    // Stats computed signals
+    sharedDocsCount = computed(() => this.friends().reduce((acc, curr) => acc + (curr.sharedDocs || 0), 0));
+    sharedCardsCount = computed(() => this.friends().reduce((acc, curr) => acc + (curr.sharedCards || 0), 0));
+    activeRequestsCount = computed(() => this.friends().reduce((acc, curr) => acc + (curr.activeRequests || 0), 0));
 
     getSharedItemsCount(friend: Friend): number {
         return (friend.sharedDocs || 0) + (friend.sharedCards || 0);

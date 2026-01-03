@@ -34,6 +34,7 @@ export class CardCarouselComponent implements OnInit {
     @Output() copyToClipboard = new EventEmitter<{ text: string, label: string }>();
     @Output() editCard = new EventEmitter<Card>();
     @Output() deleteCard = new EventEmitter<Card>();
+    @Output() shareCard = new EventEmitter<Card>();
 
     selectedCardIndex = 0;
     carouselId = '';
@@ -101,6 +102,10 @@ export class CardCarouselComponent implements OnInit {
 
     onDeleteCard(card: Card) {
         this.deleteCard.emit(card);
+    }
+
+    onShareCard(card: Card) {
+        this.shareCard.emit(card);
     }
 
     getCardTypeLabel(): string {

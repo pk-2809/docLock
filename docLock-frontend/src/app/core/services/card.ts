@@ -3,6 +3,9 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EncryptionService } from './encryption.service';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../auth/firebase';
+import { signal } from '@angular/core';
 
 export interface Card {
     id: string;
@@ -25,6 +28,48 @@ export class CardService {
     private http = inject(HttpClient);
     private encryptionService = inject(EncryptionService);
     private apiUrl = `${environment.apiUrl}/api/cards`;
+
+    cards = signal<Card[]>([]);
+    isLoading = signal<boolean>(false);
+    private unsubscribe: (() => void) | null = null;
+
+    subscribeToCards(uid: string) {
+        if (this.unsubscribe) {
+            this.unsubscribe();
+        }
+
+        this.isLoading.set(true);
+        const cardsRef = collection(db, 'users', uid, 'cards');
+
+        this.unsubscribe = onSnapshot(cardsRef, (snapshot) => {
+            const cardsList = snapshot.docs.map(doc => {
+                const data = doc.data() as any;
+                // Decrypt sensitive data
+                return {
+                    id: doc.id,
+                    ...data,
+                    number: this.encryptionService.decrypt(data.number),
+                    cvv: this.encryptionService.decrypt(data.cvv),
+                    // Ensure Date objects if needed, though they come as timestamps usually
+                    createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt || Date.now())
+                } as Card;
+            });
+
+            this.cards.set(cardsList);
+            this.isLoading.set(false);
+            console.log(`[CardService] Real-time cards updated: ${cardsList.length}`);
+        }, error => {
+            console.error('[CardService] Real-time error:', error);
+            this.isLoading.set(false);
+        });
+    }
+
+    cleanup() {
+        if (this.unsubscribe) {
+            this.unsubscribe();
+            this.unsubscribe = null;
+        }
+    }
 
     getCards(): Observable<{ status: string; cards: Card[] }> {
         return this.http.get<{ status: string; cards: Card[] }>(this.apiUrl, { withCredentials: true })

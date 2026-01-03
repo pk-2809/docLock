@@ -1,8 +1,8 @@
 <!-- Document Preview Container -->
-<div class="relative w-full h-full bg-black overflow-hidden select-none touch-action-none"
-    [class.cursor-zoom-in]="!isZoomed && isImage" [class.cursor-zoom-out]="isZoomed && isImage"
-    (touchstart)="onTouchStart($event)" (touchmove)="onTouchMove($event)" (touchend)="onTouchEnd($event)"
-    (mousedown)="onMouseDown($event)">
+<div class="relative w-full h-full bg-black select-none" [class.overflow-hidden]="!isPdf || isZoomed"
+    [class.touch-action-none]="!isPdf || isZoomed" [class.cursor-zoom-in]="!isZoomed && isImage"
+    [class.cursor-zoom-out]="isZoomed && isImage" (touchstart)="onTouchStart($event)" (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd($event)" (mousedown)="onMouseDown($event)">
 
     <!-- Loading State -->
     @if (isLoading) {
@@ -15,7 +15,7 @@
     }
 
     <!-- Content Area (Tap to toggle controls) -->
-    <div class="preview-container" (click)="toggleControls()">
+    <div class="preview-container" [class.pdf-scrollable]="isPdf && !isZoomed" (click)="toggleControls()">
 
         <!-- IMAGE PREVIEW with Gestures -->
         @if (isImage && previewUrl) {
@@ -26,7 +26,7 @@
 
         <!-- PDF / CANVAS PREVIEW -->
         @if (isPdf && pdfPages.length > 0) {
-        <div class="image-wrapper flex-col gap-4"
+        <div class="image-wrapper flex-col gap-4" [class.pdf-content]="isPdf"
             [style.transform]="'translate(' + panX + 'px, ' + panY + 'px) scale(' + scale + ')'">
             @for (page of pdfPages; track $index) {
             <img [src]="page.url" class="shadow-2xl bg-white w-full h-auto max-w-full" draggable="false">
@@ -79,14 +79,7 @@
                 </p>
             </div>
 
-            <!-- Info/Menu Button -->
-            <button
-                class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/30 active:scale-95 transition-all pointer-events-auto">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </button>
+
         </div>
 
         <!-- Footer Actions -->
@@ -163,3 +156,7 @@
             </div>
         </div>
     </app-bottom-sheet>
+
+    <!-- Share Sheet -->
+    <app-share-bottom-sheet [isOpen]="showShareSheet" [itemToShare]="itemToShare" (closed)="showShareSheet = false">
+    </app-share-bottom-sheet>

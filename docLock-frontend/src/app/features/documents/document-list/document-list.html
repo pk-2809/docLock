@@ -1,7 +1,7 @@
 <!-- Documents Page -->
 <div class="min-h-screen bg-slate-50 flex flex-col overflow-hidden relative">
     <!-- Blue top border line -->
-    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 z-50"></div>
+    <div class="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-blue-500 via-indigo-500 to-blue-500 z-50"></div>
 
     <!-- Loading Skeleton -->
     @if (isLoading) {
@@ -31,7 +31,7 @@
     <div class="px-4 sm:px-6 py-4 flex flex-col overflow-hidden relative z-10"
         style="height: calc(100vh - 5rem); max-height: calc(100vh - 5rem);">
         <!-- Enhanced Header -->
-        <header class="mb-4 flex-shrink-0 pt-8">
+        <header class="mb-4 shrink-0 pt-8">
             <!-- Top Navigation -->
             <div class="flex items-center justify-center mb-6 relative">
                 <!-- Centered Title -->
@@ -104,11 +104,11 @@
         </header>
 
         <!-- Content Grid with enhanced styling -->
-        <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto pb-4">
             @if (currentFolders.length > 0 || currentDocuments.length > 0) {
             <!-- Folders List -->
             @if (currentFolders.length > 0) {
-            <div class="space-y-3 mb-6">
+            <div class="space-y-3 mb-4">
                 <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider px-2 mb-3">Folders</h3>
                 @for (folder of currentFolders; track folder.id; let i = $index) {
                 <div class="group bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/60 active:shadow-xl active:border-blue-200/60 active:scale-[0.98] transition-all cursor-pointer relative touch-manipulation animate-fade-in"
@@ -123,7 +123,7 @@
                     <div class="flex items-center gap-4 relative z-10">
                         <!-- Enhanced Folder Icon with Pastel Background -->
                         <div
-                            class="w-14 h-14 {{folder.id === 'shared-folder' ? 'bg-indigo-50' : getFolderIconBackground(i)}} rounded-2xl flex items-center justify-center {{folder.id === 'shared-folder' ? 'text-indigo-600' : getFolderIconColor(i)}} group-active:scale-110 transition-transform duration-300">
+                            class="w-14 h-14 {{folder.id === 'shared-folder' ? 'bg-indigo-50' : (folder.color === 'bg-slate-500' ? 'bg-blue-50' : (folder.color || 'bg-blue-50'))}} rounded-2xl flex items-center justify-center {{folder.id === 'shared-folder' ? 'text-indigo-600' : 'text-blue-600'}} group-active:scale-110 transition-transform duration-300">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     [attr.d]="getIconSvg(folder.icon)" />
@@ -137,7 +137,7 @@
                             <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
                                 <input type="text" [(ngModel)]="editFolderName" (keydown.enter)="saveEditFolder(folder)"
                                     (keydown.escape)="cancelEditFolder()"
-                                    class="w-full bg-slate-50 border border-blue-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all"
+                                    class="w-full bg-slate-50 border border-blue-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all"
                                     autofocus>
                                 <button (click)="saveEditFolder(folder)"
                                     class="p-2 bg-blue-50 text-blue-600 rounded-xl active:bg-blue-100 active:scale-95 touch-manipulation transition-all">
@@ -225,11 +225,11 @@
                     <div class="flex items-center gap-4 relative z-10">
                         <!-- Enhanced Document Icon with Pastel Background -->
                         <div
-                            class="w-14 h-14 {{getDocumentIconGradient(i)}} rounded-2xl flex items-center justify-center group-active:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 {{getDocumentIconColor(i)}}" fill="none" stroke="currentColor"
+                            class="w-14 h-14 {{getDocumentIconGradient(doc)}} rounded-2xl flex items-center justify-center group-active:scale-110 transition-transform duration-300">
+                            <svg class="w-7 h-7 {{getDocumentIconColor(doc)}}" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                    [attr.d]="getIconSvg(doc.icon || 'document')" />
                             </svg>
                         </div>
 
@@ -361,7 +361,7 @@
 
     <!-- Enhanced Floating Action Button -->
     @if (viewMode === 'folders' && (currentFolders.length > 0 || currentDocuments.length > 0)) {
-    <div class="fixed bottom-[3.5rem] right-1/2 transform translate-x-1/2 z-30">
+    <div class="fixed bottom-14 right-1/2 transform translate-x-1/2 z-30">
         <div class="relative">
             <!-- Main FAB -->
             <button (click)="toggleFabMenu()"
@@ -399,11 +399,10 @@
     </div>
     }
 
-    <!-- Enhanced Create Folder Modal -->
-    @if (showCreateFolderModal) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl border border-slate-200">
-            <!-- Compact Header -->
+    <!-- Create Folder Bottom Sheet -->
+    <app-bottom-sheet [isOpen]="showCreateFolderModal" (closed)="closeCreateFolderModal()">
+        <div class="flex flex-col w-full">
+            <!-- Header -->
             <div class="text-center mb-6">
                 <div class="w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -411,109 +410,52 @@
                             d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z" />
                     </svg>
                 </div>
-                <h2 class="text-lg font-bold text-slate-800">New Folder</h2>
+                <h2 class="text-2xl font-bold text-slate-800">New Folder</h2>
             </div>
 
-            <!-- Compact Form -->
+            <!-- Form -->
             <div class="space-y-4">
                 <input type="text" [(ngModel)]="newFolderName" (input)="onFolderNameChange()" placeholder="Folder name"
-                    class="w-full bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all">
+                    class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-lg shadow-sm">
 
-                <!-- Compact Location Selector -->
-                <div class="relative">
-                    <button (click)="toggleLocationDropdown()"
-                        class="w-full bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-left text-slate-800 focus:outline-none focus:border-blue-400 focus:bg-white transition-all flex items-center justify-between text-sm touch-manipulation">
-                        <span class="truncate">{{getSelectedLocationPath()}}</span>
-                        <svg class="w-4 h-4 text-blue-400 transition-transform flex-shrink-0 ml-2"
-                            [class.rotate-180]="showLocationDropdown" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                        </svg>
-                    </button>
 
-                    @if (showLocationDropdown) {
-                    <div
-                        class="absolute top-full left-0 right-0 mt-1 bg-white border border-blue-200 rounded-xl shadow-lg z-10 max-h-40 overflow-y-auto">
-                        <!-- Root option -->
-                        <button (click)="selectLocation(null)"
-                            class="w-full px-4 py-3 text-left active:bg-blue-50 transition-colors flex items-center gap-3 text-sm touch-manipulation"
-                            [class.bg-blue-100]="selectedLocationId === null"
-                            [class.text-blue-700]="selectedLocationId === null">
-                            <svg class="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25H11.69z" />
-                            </svg>
-                            <span class="truncate">My Documents (Root)</span>
-                            @if (selectedLocationId === null) {
-                            <svg class="w-3 h-3 text-blue-600 ml-auto flex-shrink-0" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
-                            }
-                        </button>
 
-                        <!-- Existing folders -->
-                        @for (folder of availableLocations; track folder.id) {
-                        <button (click)="selectLocation(folder.id)"
-                            class="w-full px-4 py-3 text-left active:bg-blue-50 transition-colors flex items-center gap-3 text-sm touch-manipulation"
-                            [class.bg-blue-100]="selectedLocationId === folder.id"
-                            [class.text-blue-700]="selectedLocationId === folder.id">
-                            <svg class="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    [attr.d]="getIconSvg(folder.icon)" />
-                            </svg>
-                            <span class="truncate">{{folder.name}}</span>
-                            @if (selectedLocationId === folder.id) {
-                            <svg class="w-3 h-3 text-blue-600 ml-auto flex-shrink-0" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
-                            }
-                        </button>
-                        }
-                    </div>
-                    }
-                </div>
-
-                <!-- Compact Icon Preview -->
+                <!-- Icon Preview -->
                 @if (newFolderName.trim()) {
-                <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
-                    <div class="w-8 h-8 {{detectedColor}} rounded-lg flex items-center justify-center text-white">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div
+                        class="w-10 h-10 {{detectedColor}} rounded-xl flex items-center justify-center text-blue-600 shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 [attr.d]="getIconSvg(detectedIcon)" />
                         </svg>
                     </div>
-                    <span class="text-sm text-slate-600 font-medium">Auto-detected</span>
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase tracking-wider font-bold mb-0.5">Auto-detected</p>
+                        <p class="text-slate-900 font-bold capitalize">{{detectedIcon.replace('-', ' ')}}</p>
+                    </div>
                 </div>
                 }
 
-                <!-- Compact Buttons -->
-                <div class="flex gap-3 pt-2">
+                <!-- Buttons -->
+                <div class="flex gap-3 pt-4">
                     <button (click)="closeCreateFolderModal()"
-                        class="flex-1 px-4 py-2.5 bg-slate-100 active:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors text-sm touch-manipulation">
+                        class="flex-1 px-6 py-4 bg-slate-100 active:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-colors">
                         Cancel
                     </button>
                     <button (click)="createFolder()" [disabled]="!newFolderName.trim()"
-                        class="flex-1 px-4 py-2.5 bg-blue-600 active:bg-blue-700 text-white font-medium rounded-xl transition-all disabled:opacity-50 text-sm touch-manipulation">
-                        Create
+                        class="flex-1 px-6 py-4 bg-blue-600 active:bg-blue-700 text-white font-bold rounded-2xl transition-all disabled:opacity-50 shadow-lg shadow-blue-200">
+                        Create Folder
                     </button>
                 </div>
             </div>
         </div>
-    </div>
-    }
+    </app-bottom-sheet>
 
-    <!-- Enhanced Upload Document Modal -->
-    @if (showUploadModal) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl border border-slate-200">
-            <!-- Compact Header -->
+    <!-- Upload Document Bottom Sheet -->
+    <app-bottom-sheet [isOpen]="showUploadModal" (closed)="closeUploadModal()">
+        <div class="flex flex-col w-full">
+            <!-- Header -->
             <div class="text-center mb-6">
                 <div class="w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -521,60 +463,86 @@
                             d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                     </svg>
                 </div>
-                <h2 class="text-lg font-bold text-slate-800">Upload File</h2>
+                <h2 class="text-2xl font-bold text-slate-800">Upload File</h2>
             </div>
 
-            <!-- Compact Upload Area -->
+            <!-- Upload Area -->
             <div class="space-y-4">
-                <div class="border-2 border-dashed border-blue-200 rounded-xl p-6 text-center bg-blue-50">
+                <div [class.opacity-50]="isUploading" [class.pointer-events-none]="isUploading"
+                    class="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center bg-slate-50 transition-colors hover:border-blue-400 hover:bg-blue-50/50">
                     <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png"
-                        class="hidden">
-                    <button (click)="fileInput.click()" class="w-full touch-manipulation">
-                        <svg class="w-8 h-8 mx-auto mb-2 text-blue-600" fill="none" stroke="currentColor"
+                        class="hidden" [disabled]="isUploading">
+                    <button (click)="fileInput.click()" class="w-full touch-manipulation" [disabled]="isUploading">
+                        <svg class="w-10 h-10 mx-auto mb-3 text-blue-500" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                         </svg>
-                        <p class="text-slate-700 font-medium text-sm">Tap to upload</p>
-                        <p class="text-blue-500 text-xs">PDF, JPG, PNG</p>
+                        <p class="text-slate-900 font-bold mb-1">Tap to select file</p>
+                        <p class="text-slate-400 text-sm">
+                            PDF (Max {{ (appConfig.config().maxPdfSizeAllowed / (1024 * 1024)).toFixed(0) }}MB),
+                            Images (Max {{ (appConfig.config().maxImgSizeAllowed / (1024 * 1024)).toFixed(0) }}MB)
+                        </p>
                     </button>
                 </div>
 
                 @if (selectedFile) {
-                <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm animate-fade-in">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 {{getSelectedFileIconGradient()}} rounded-xl flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 {{getSelectedFileIconColor()}}" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    [attr.d]="getIconSvg(getSelectedFileIcon())" />
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-slate-800 font-medium text-sm truncate">{{selectedFile.name}}</p>
-                            <p class="text-blue-600 text-xs">{{(selectedFile.size / (1024 * 1024)).toFixed(1)}} MB</p>
+                            <p class="text-slate-900 font-bold text-sm truncate">{{selectedFile.name}}</p>
+                            <p class="text-slate-500 text-xs mt-0.5">{{(selectedFile.size / (1024 * 1024)).toFixed(1)}}
+                                MB</p>
                         </div>
+                        <button (click)="selectedFile = null; documentName = ''" [disabled]="isUploading"
+                            class="p-2 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 }
 
                 <input type="text" [(ngModel)]="documentName" placeholder="Document name (optional)"
-                    class="w-full bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all text-sm">
+                    [disabled]="isUploading"
+                    class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-lg disabled:opacity-50 disabled:bg-slate-50 shadow-sm">
 
-                <!-- Compact Buttons -->
-                <div class="flex gap-3 pt-2">
-                    <button (click)="closeUploadModal()"
-                        class="flex-1 px-4 py-2.5 bg-slate-100 active:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors text-sm touch-manipulation">
+                <!-- Buttons -->
+                <div class="flex gap-3 pt-4">
+                    <button (click)="closeUploadModal()" [disabled]="isUploading"
+                        class="flex-1 px-6 py-4 bg-slate-100 active:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         Cancel
                     </button>
-                    <button (click)="uploadDocument()" [disabled]="!selectedFile"
-                        class="flex-1 px-4 py-2.5 bg-blue-600 active:bg-blue-700 text-white font-medium rounded-xl transition-all disabled:opacity-50 text-sm touch-manipulation">
-                        Upload
+                    <button (click)="uploadDocument()" [disabled]="!selectedFile || isUploading"
+                        class="flex-1 px-6 py-4 bg-blue-600 active:bg-blue-700 text-white font-bold rounded-2xl transition-all disabled:opacity-50 shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
+                        @if (isUploading) {
+                        <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Uploading...</span>
+                        } @else {
+                        <span>Upload File</span>
+                        }
                     </button>
                 </div>
             </div>
         </div>
-    </div>
-    }
+    </app-bottom-sheet>
 
     }
+    <app-share-bottom-sheet [isOpen]="showShareSheet" [itemToShare]="itemToShare" (closed)="showShareSheet = false">
+    </app-share-bottom-sheet>
+
+    <app-confirmation-sheet *ngIf="showDeleteSheet" title="Delete Item?" [message]="deleteMessage"
+        confirmText="Yes, Delete" cancelText="Cancel" type="danger" [isLoading]="isDeleting" (confirm)="executeDelete()"
+        (cancel)="closeDeleteSheet()">
+    </app-confirmation-sheet>
 </div>

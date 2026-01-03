@@ -7,11 +7,12 @@ import { Card, CardService } from '../../../core/services/card';
 import { ToastService } from '../../../core/services/toast.service';
 
 import { ConfirmationSheetComponent } from '../../../shared/components/confirmation-sheet/confirmation-sheet';
+import { ShareBottomSheetComponent } from '../../../shared/components/share-bottom-sheet/share-bottom-sheet';
 
 @Component({
     selector: 'app-card-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, CardCarouselComponent, ConfirmationSheetComponent],
+    imports: [CommonModule, FormsModule, CardCarouselComponent, ConfirmationSheetComponent, ShareBottomSheetComponent],
     templateUrl: './card-list.html',
     styleUrl: './card-list.css'
 })
@@ -30,11 +31,15 @@ export class CardListComponent implements OnInit {
     cardToDelete: Card | null = null;
     isDeleting = false;
 
+    // Share Sheet State
+    showShareSheet = false;
+    shareItem: { id: string, name: string, type: 'document' | 'card' } | null = null;
+
     // Track which cards show CVV (true) or card number (false)
     cardVisibilityState = new Map<string, 'number' | 'cvv'>();
 
-    // Sample cards data
-    allCards: Card[] = [];
+    // Sample cards data - Using Global Signal
+    get allCards() { return this.cardService.cards(); }
 
     get debitCards(): Card[] {
         return this.allCards.filter(card => card.type === 'debit');
@@ -82,25 +87,12 @@ export class CardListComponent implements OnInit {
     }
 
     private loadCards() {
-        this.isLoading = true;
-        this.cardService.getCards().subscribe({
-            next: (response) => {
-                this.allCards = response.cards.map(card => ({
-                    ...card,
-                    createdAt: new Date(card.createdAt) // Ensure date object
-                }));
-                // Initialize visibility state
-                this.allCards.forEach(card => {
-                    this.cardVisibilityState.set(card.id, 'number');
-                });
-                // Manually trigger change detection to update the view
-                this.isLoading = false;
-                this.cdr.detectChanges();
-            },
-            error: (err) => {
-                console.error('Failed to load cards:', err);
-                this.toastService.showError('Failed to load cards');
-                this.isLoading = false;
+        // No manual load needed - using global signal
+        this.isLoading = false;
+        // Ensure visibility state is initialized for new cards
+        this.allCards.forEach(card => {
+            if (!this.cardVisibilityState.has(card.id)) {
+                this.cardVisibilityState.set(card.id, 'number'); // Default to number masked
             }
         });
     }
@@ -121,7 +113,7 @@ export class CardListComponent implements OnInit {
         this.cardService.deleteCard(this.cardToDelete.id).subscribe({
             next: () => {
                 this.toastService.showSuccess('Card deleted successfully');
-                this.loadCards(); // Refresh list
+                // No need to reload, real-time update handles it
                 this.closeDeleteSheet();
             },
             error: (err) => {
@@ -137,6 +129,20 @@ export class CardListComponent implements OnInit {
         this.showDeleteSheet = false;
         this.cardToDelete = null;
         this.isDeleting = false;
+    }
+
+    openShareSheet(card: Card) {
+        this.shareItem = {
+            id: card.id,
+            name: card.name,
+            type: 'card'
+        };
+        this.showShareSheet = true;
+    }
+
+    closeShareSheet() {
+        this.showShareSheet = false;
+        this.shareItem = null;
     }
 
     editCard(card: Card) {

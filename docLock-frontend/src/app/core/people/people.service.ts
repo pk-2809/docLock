@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable, tap } from 'rxjs';
 import { AppConfigService } from '../services/app-config.service';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../auth/firebase';
 
 
@@ -39,7 +39,10 @@ export class PeopleService {
 
     private unsubscribeFriends: (() => void) | null = null;
 
+    private currentUserId: string | null = null;
+
     subscribeToFriends(uid: string) {
+        this.currentUserId = uid; // Capture ID for updates
         if (this.unsubscribeFriends) {
             this.unsubscribeFriends(); // Clear existing listener if any
         }
@@ -48,11 +51,15 @@ export class PeopleService {
         const friendsRef = collection(db, 'users', uid, 'friends');
 
         this.unsubscribeFriends = onSnapshot(friendsRef, (snapshot) => {
-            const friendsList = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as Friend));
+            const friendsList = snapshot.docs.map(doc => {
+                const data = doc.data();
+                // console.log('Raw Friend Data:', data); // Debugging field names
+                return { uid: doc.id, ...data } as Friend;
+            });
             this.friends.set(friendsList);
+            console.log(`[PeopleService] Real-time friends updated: ${friendsList.length}`);
             this.loaded.set(true);
             this.isLoading.set(false);
-            console.log(`[PeopleService] Real-time friends updated: ${friendsList.length}`);
         }, (error) => {
             console.error('[PeopleService] Real-time error:', error);
             this.isLoading.set(false);
@@ -93,6 +100,7 @@ export class PeopleService {
         this.friends.set([]);
         this.loaded.set(false);
         this.isLoading.set(false);
+        this.currentUserId = null;
     }
 
     deleteFriend(friendId: string): Observable<any> {
@@ -100,10 +108,41 @@ export class PeopleService {
     }
 
     shareItem(recipientUid: string, itemId: string, type: 'document' | 'card'): Observable<any> {
-        return this.http.post(`${this.apiUrl}/api/people/share`, { recipientUid, itemId, type }, { withCredentials: true });
+        return this.http.post(`${this.apiUrl}/api/people/share`, { recipientUid, itemId, type }, { withCredentials: true }).pipe(
+            tap(async () => {
+                // Persist Update to Firestore
+                if (this.currentUserId) {
+                    const friendDocRef = doc(db, 'users', this.currentUserId, 'friends', recipientUid);
+                    const fieldToUpdate = (type === 'document') ? 'sharedDocs' : 'sharedCards';
+                    try {
+                        await updateDoc(friendDocRef, {
+                            [fieldToUpdate]: increment(1)
+                        });
+                        console.log(`[PeopleService] Incrementing ${fieldToUpdate} for friend ${recipientUid}`);
+                    } catch (err) {
+                        console.error('[PeopleService] Failed to persist stats:', err);
+                    }
+                }
+            })
+        );
     }
 
     requestItem(recipientUid: string, itemType: 'document' | 'card', itemName: string): Observable<any> {
-        return this.http.post(`${this.apiUrl}/api/people/request`, { recipientUid, itemType, itemName }, { withCredentials: true });
+        return this.http.post(`${this.apiUrl}/api/people/request`, { recipientUid, itemType, itemName }, { withCredentials: true }).pipe(
+            tap(async () => {
+                // Persist Update to Firestore
+                if (this.currentUserId) {
+                    const friendDocRef = doc(db, 'users', this.currentUserId, 'friends', recipientUid);
+                    try {
+                        await updateDoc(friendDocRef, {
+                            activeRequests: increment(1)
+                        });
+                        console.log(`[PeopleService] Incrementing activeRequests for friend ${recipientUid}`);
+                    } catch (err) {
+                        console.error('[PeopleService] Failed to persist request stats:', err);
+                    }
+                }
+            })
+        );
     }
 }

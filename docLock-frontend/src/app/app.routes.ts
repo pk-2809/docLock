@@ -62,10 +62,7 @@ export const routes: Routes = [
                 path: 'qrs',
                 loadComponent: () => import('./features/qr/qr-list/qr-list').then(m => m.QrListComponent)
             },
-            {
-                path: 'qr/create',
-                loadComponent: () => import('./features/qr/qr-create/qr-create').then(m => m.QrCreateComponent)
-            },
+
             {
                 path: 'qr/view/:id',
                 loadComponent: () => import('./features/qr/qr-view/qr-view').then(m => m.QrViewComponent)

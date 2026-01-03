@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { DocumentService, Document } from '../../../core/services/document';
 import { AuthService } from '../../../core/auth/auth';
 import { ToastService } from '../../../core/services/toast.service';
+import { BottomSheetComponent } from '../../../shared/components/bottom-sheet/bottom-sheet.component';
 
 export interface QRCode {
     id: string;
@@ -18,7 +19,7 @@ export interface QRCode {
 @Component({
     selector: 'app-qr-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [CommonModule, FormsModule, RouterLink, BottomSheetComponent],
     templateUrl: './qr-list.html',
     styleUrl: './qr-list.css'
 })
@@ -37,6 +38,7 @@ export class QrListComponent implements OnInit {
     newQrName = '';
     selectedDocumentIds: Set<string> = new Set();
     isLoadingDocs = false;
+    editingQrId: string | null = null; // Track if we are editing
 
     // View State
     baseUrl = window.location.origin; // For generating the public link
@@ -71,8 +73,11 @@ export class QrListComponent implements OnInit {
 
     toggleCreateMode() {
         this.isCreating = !this.isCreating;
-        this.newQrName = '';
-        this.selectedDocumentIds.clear();
+        if (!this.isCreating) {
+            this.newQrName = '';
+            this.selectedDocumentIds.clear();
+            this.editingQrId = null;
+        }
     }
 
     toggleDocumentSelection(docId: string) {
@@ -94,18 +99,33 @@ export class QrListComponent implements OnInit {
             return;
         }
 
-        const newQR: QRCode = {
-            id: Math.random().toString(36).substring(2, 10),
-            name: this.newQrName,
-            createdAt: new Date(),
-            linkedDocumentIds: Array.from(this.selectedDocumentIds),
-            scanCount: 0
-        };
+        if (this.editingQrId) {
+            // Update existing QR
+            const index = this.qrCodes.findIndex(q => q.id === this.editingQrId);
+            if (index !== -1) {
+                this.qrCodes[index] = {
+                    ...this.qrCodes[index],
+                    linkedDocumentIds: Array.from(this.selectedDocumentIds)
+                };
+                this.saveQRsToStorage();
+                this.toggleCreateMode();
+                this.toastService.showSuccess('Secure QR updated successfully!');
+            }
+        } else {
+            // Create New QR
+            const newQR: QRCode = {
+                id: Math.random().toString(36).substring(2, 10),
+                name: this.newQrName,
+                createdAt: new Date(),
+                linkedDocumentIds: Array.from(this.selectedDocumentIds),
+                scanCount: 0
+            };
 
-        this.qrCodes.unshift(newQR);
-        this.saveQRsToStorage();
-        this.toggleCreateMode();
-        this.toastService.showSuccess('Secure QR created successfully!');
+            this.qrCodes.unshift(newQR);
+            this.saveQRsToStorage();
+            this.toggleCreateMode();
+            this.toastService.showSuccess('Secure QR created successfully!');
+        }
     }
 
     deleteQR(id: string, event: Event) {
@@ -121,8 +141,11 @@ export class QrListComponent implements OnInit {
     }
 
     viewQR(qr: QRCode) {
-        // Navigate to the view page
-        this.router.navigate(['/qr/view', qr.id]);
+        // Enable Edit Mode
+        this.editingQrId = qr.id;
+        this.newQrName = qr.name;
+        this.selectedDocumentIds = new Set(qr.linkedDocumentIds);
+        this.isCreating = true;
     }
 
     getPublicUrl(qr: QRCode): string {
@@ -139,23 +162,84 @@ export class QrListComponent implements OnInit {
         return doc ? doc.name : 'Unknown Document';
     }
 
-    // New: Helper for the colorful grid design
-    // Wallet Theme Gradients
-    getCardGradient(index: number): string {
-        const gradients = [
-            'bg-gradient-to-br from-blue-600 to-purple-700',      // Deep Blue/Purple
-            'bg-gradient-to-br from-emerald-500 to-teal-600',     // Green/Teal
-            'bg-gradient-to-br from-orange-500 to-pink-600',      // Sunset
-            'bg-gradient-to-br from-slate-700 to-slate-900',      // Dark Mode
-            'bg-gradient-to-br from-indigo-500 to-blue-600'       // Indigo
-        ];
-        return gradients[index % gradients.length];
-    }
-
-    // New: Helper to get QR Image URL
+    // Helper to get QR Image URL
     generateQRCode(data: string): string {
         const size = 150;
         const encodedData = encodeURIComponent(data);
         return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedData}&margin=0`;
+    }
+
+    async downloadQRCard(qr: QRCode, event: Event) {
+        event.stopPropagation();
+        const element = document.getElementById(`qr-card-${qr.id}`);
+        if (!element) return;
+
+        // SAFE FIX: Add export-mode class to simplify styles for capture
+        element.classList.add('export-mode');
+
+        // MANUAL STYLE INJECTION: Brute-force the export styles to ensure they apply
+        const badge = element.querySelector('.glass-badge') as HTMLElement;
+        const title = element.querySelector('h3') as HTMLElement;
+
+        const originalBadgeStyle = badge ? badge.style.cssText : '';
+        const originalTitleStyle = title ? title.style.cssText : '';
+
+        if (badge) {
+            badge.style.cssText = `
+                background-color: rgba(255, 255, 255, 0.25) !important;
+                border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 6px !important;
+                height: 26px !important;
+                padding: 0 12px !important;
+                border-radius: 999px !important;
+                width: fit-content !important;
+                white-space: nowrap !important;
+                -webkit-font-smoothing: antialiased !important;
+            `;
+        }
+
+        if (title) {
+            title.style.cssText += `
+                display: block !important;
+                overflow: visible !important;
+                -webkit-line-clamp: unset !important;
+                line-clamp: unset !important;
+                white-space: normal !important;
+                height: auto !important;
+                padding-bottom: 0.5rem !important;
+            `;
+        }
+
+        try {
+            // Dynamic import to avoid initial bundle bloat
+            const html2canvas = (await import('html2canvas')).default;
+
+            const canvas = await html2canvas(element, {
+                scale: 4, // Ultra-High resolution
+                backgroundColor: null, // Transparent background (will use container style)
+                useCORS: true, // For the QR image if cross-origin
+                logging: false,
+                allowTaint: true
+            });
+
+            const link = document.createElement('a');
+            link.download = `SecureQR-${qr.name.replace(/\s+/g, '_')}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            this.toastService.showSuccess('QR Card downloaded successfully!');
+        } catch (error: any) {
+            console.error('Download failed', error);
+            this.toastService.showError(`Download failed: ${error.message || 'Unknown error'}`);
+        } finally {
+            // SAFE FIX: Remove class and restore original styles
+            element.classList.remove('export-mode');
+            if (badge) badge.style.cssText = originalBadgeStyle;
+            if (title) title.style.cssText = originalTitleStyle; // Note: this might revert other dynamic styles if not careful, but usually clean
+        }
     }
 }

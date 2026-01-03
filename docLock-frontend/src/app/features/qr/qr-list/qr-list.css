@@ -1,18 +1,39 @@
 /* Animations matching Card List theme */
 
 @keyframes float-slow {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
 }
 
 @keyframes float-reverse {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(15px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(15px);
+    }
 }
 
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .animate-float-slow {
@@ -31,10 +52,90 @@
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
     background-color: rgba(203, 213, 225, 0.5);
     border-radius: 4px;
+}
+
+/* 
+   Safe Export Mode (GPT Fix)
+   Removes complex CSS properties that cause html2canvas to fail (oklab, filters, etc.)
+   during the screenshot process.
+*/
+:host ::ng-deep .export-mode * {
+    /* background-image: none !important; REMOVED to allow gradients */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    mix-blend-mode: normal !important;
+    filter: none !important;
+    box-shadow: none !important;
+    /* Optional: Remove heavy shadows for cleaner export */
+}
+
+/* Ensure the card container keeps its base color */
+:host ::ng-deep .export-mode {
+    background-color: #F16D34 !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* HIDE Action Bar during export */
+:host ::ng-deep .export-mode .action-bar {
+    display: none !important;
+}
+
+/* 
+   GLASS BADGE STYLING 
+   Moved from inline to class to ensure cleaner overrides 
+*/
+.glass-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(255, 255, 255, 0.15);
+    width: fit-content;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix "Files" badge in export mode (since blur is removed) */
+:host ::ng-deep .export-mode .glass-badge {
+    /* Simulating glass with milky semi-transparent white */
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+
+    /* Strict Layout Enforcement */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    height: 34px !important;
+    /* Fixed height for icon/text centering */
+    padding: 0 14px !important;
+    border-radius: 999px !important;
+    width: fit-content !important;
+    white-space: nowrap !important;
+    -webkit-font-smoothing: antialiased !important;
+}
+
+/* Fix Text Clipping in Export: Remove line-clamp to ensure full render */
+:host ::ng-deep .export-mode h3 {
+    display: block !important;
+    overflow: visible !important;
+    -webkit-line-clamp: unset !important;
+    line-clamp: unset !important;
+    white-space: normal !important;
+    height: auto !important;
+    padding-bottom: 0.5rem !important;
+    /* Ensure buffer */
 }

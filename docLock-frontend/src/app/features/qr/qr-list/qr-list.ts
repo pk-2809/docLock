@@ -40,6 +40,10 @@ export class QrListComponent implements OnInit {
     isLoadingDocs = false;
     editingQrId: string | null = null; // Track if we are editing
 
+    // Delete State
+    isDeleting = false;
+    qrToDeleteId: string | null = null;
+
     // View State
     baseUrl = window.location.origin; // For generating the public link
 
@@ -130,10 +134,22 @@ export class QrListComponent implements OnInit {
 
     deleteQR(id: string, event: Event) {
         event.stopPropagation(); // Prevent clicking the card
-        if (confirm('Are you sure you want to delete this QR?')) {
-            this.qrCodes = this.qrCodes.filter(q => q.id !== id);
+        this.qrToDeleteId = id;
+        this.isDeleting = true;
+    }
+
+    confirmDelete() {
+        if (this.qrToDeleteId) {
+            this.qrCodes = this.qrCodes.filter(q => q.id !== this.qrToDeleteId);
             this.saveQRsToStorage();
+            this.toastService.showSuccess('Secure QR deleted successfully');
+            this.cancelDelete();
         }
+    }
+
+    cancelDelete() {
+        this.isDeleting = false;
+        this.qrToDeleteId = null;
     }
 
     saveQRsToStorage() {
@@ -179,9 +195,15 @@ export class QrListComponent implements OnInit {
 
         // MANUAL STYLE INJECTION: Brute-force the export styles to ensure they apply
         const badge = element.querySelector('.glass-badge') as HTMLElement;
+        const elements = badge?.querySelectorAll('.export-text') as NodeListOf<HTMLElement> | null;
+        elements?.forEach(el => el.classList.add('export-fix'));
+        const metaDate = element.querySelector('.meta-date') as HTMLElement;
+        const elements1 = metaDate?.querySelectorAll('.export-text') as NodeListOf<HTMLElement> | null;
+        elements1?.forEach(el => el.classList.add('export-fix'));
         const title = element.querySelector('h3') as HTMLElement;
 
         const originalBadgeStyle = badge ? badge.style.cssText : '';
+        const originalMetaDateStyle = metaDate ? metaDate.style.cssText : '';
         const originalTitleStyle = title ? title.style.cssText : '';
 
         if (badge) {
@@ -192,14 +214,37 @@ export class QrListComponent implements OnInit {
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                gap: 6px !important;
-                height: 26px !important;
-                padding: 0 12px !important;
+                align-self: flex-start !important; /* Prevent stretching in flex-col */
+                gap: 8px !important;
+                height: 34px !important;
+                padding: 0 14px !important;
                 border-radius: 999px !important;
                 width: fit-content !important;
                 white-space: nowrap !important;
                 -webkit-font-smoothing: antialiased !important;
             `;
+            // Fix icon inside badge
+            const badgeIcon = badge.querySelector('svg') as unknown as HTMLElement;
+            if (badgeIcon) {
+                badgeIcon.style.cssText = 'width: 0.875rem !important; height: 0.875rem !important; flex-shrink: 0 !important;';
+            }
+        }
+
+        if (metaDate) {
+            metaDate.style.cssText = `
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                color: rgba(255, 255, 255, 0.9) !important;
+                margin-left: 0.1rem !important;
+                width: fit-content !important;
+                white-space: nowrap !important;
+            `;
+            // Fix icon inside meta-date
+            const dateIcon = metaDate.querySelector('svg') as unknown as HTMLElement;
+            if (dateIcon) {
+                dateIcon.style.cssText = 'width: 0.875rem !important; height: 0.875rem !important; flex-shrink: 0 !important; opacity: 0.9 !important;';
+            }
         }
 
         if (title) {
@@ -238,7 +283,16 @@ export class QrListComponent implements OnInit {
         } finally {
             // SAFE FIX: Remove class and restore original styles
             element.classList.remove('export-mode');
-            if (badge) badge.style.cssText = originalBadgeStyle;
+            if (badge) {
+                badge.style.cssText = originalBadgeStyle;
+                const elements = badge?.querySelectorAll('.export-text') as NodeListOf<HTMLElement> | null;
+                elements?.forEach(el => el.classList.remove('export-fix'));
+            }
+            if (metaDate) {
+                metaDate.style.cssText = originalMetaDateStyle;
+                const elements = metaDate?.querySelectorAll('.export-text') as NodeListOf<HTMLElement> | null;
+                elements?.forEach(el => el.classList.remove('export-fix'));
+            }
             if (title) title.style.cssText = originalTitleStyle; // Note: this might revert other dynamic styles if not careful, but usually clean
         }
     }

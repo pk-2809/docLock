@@ -84,7 +84,10 @@
 }
 
 /* HIDE Action Bar during export */
-:host ::ng-deep .export-mode .action-bar {
+/* HIDE Action Bar during export */
+:host ::ng-deep .export-mode .action-bar,
+:host ::ng-deep .export-mode .download-btn,
+:host ::ng-deep .export-mode .delete-btn {
     display: none !important;
 }
 
@@ -138,4 +141,8 @@
     height: auto !important;
     padding-bottom: 0.5rem !important;
     /* Ensure buffer */
+}
+
+.export-fix {
+    margin-bottom: 0.75rem !important;
 }

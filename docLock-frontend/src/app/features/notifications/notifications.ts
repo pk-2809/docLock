@@ -8,6 +8,7 @@ import { DocumentService, Document } from '../../core/services/document';
 import { CardService, Card } from '../../core/services/card';
 import { PeopleService } from '../../core/people/people.service';
 import { ToastService } from '../../core/services/toast.service';
+import { InputSanitizerService } from '../../core/services/input-sanitizer.service';
 import { FormsModule } from '@angular/forms';
 import { BottomSheetComponent } from '../../shared/components/bottom-sheet/bottom-sheet.component';
 
@@ -56,6 +57,7 @@ export class NotificationsComponent {
     cardService = inject(CardService);
     peopleService = inject(PeopleService);
     toastService = inject(ToastService);
+    inputSanitizer = inject(InputSanitizerService);
 
     notifications = this.notificationService.notifications;
 
@@ -170,8 +172,10 @@ export class NotificationsComponent {
 
     onSearchInput(event: Event) {
         const input = event.target as HTMLInputElement;
-        const sanitized = input.value.replace(/[^a-zA-Z _]/g, '');
-        input.value = sanitized;
+        const sanitized = this.inputSanitizer.sanitize(input.value);
+        if (input.value !== sanitized) {
+            input.value = sanitized;
+        }
         this.searchQuery.set(sanitized);
     }
 

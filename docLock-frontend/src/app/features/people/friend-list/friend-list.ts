@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PeopleService, Friend } from '../../../core/people/people.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { InputSanitizerService } from '../../../core/services/input-sanitizer.service';
 import { FormsModule } from '@angular/forms';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
@@ -29,6 +30,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 export class FriendListComponent implements OnInit {
     peopleService = inject(PeopleService);
     toastService = inject(ToastService);
+    inputSanitizer = inject(InputSanitizerService);
     friends = this.peopleService.friends;
     isLoading = signal(true);
 
@@ -37,8 +39,10 @@ export class FriendListComponent implements OnInit {
 
     onSearchInput(event: Event) {
         const input = event.target as HTMLInputElement;
-        const sanitized = input.value.replace(/[^a-zA-Z _]/g, '');
-        input.value = sanitized;
+        const sanitized = this.inputSanitizer.sanitize(input.value);
+        if (input.value !== sanitized) {
+            input.value = sanitized;
+        }
         this.searchQuery.set(sanitized);
     }
 

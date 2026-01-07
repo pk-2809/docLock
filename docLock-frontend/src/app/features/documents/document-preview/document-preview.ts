@@ -69,8 +69,20 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
             this.returnFolderId = params['folderId'] || null;
         });
 
+        // Check for preloaded data from navigation state
+        const state = history.state;
+
         if (this.documentId) {
-            this.loadDocument(this.documentId);
+            if (state && state['preloadedUrl'] && state['document']) {
+                // Use preloaded data for instant rendering
+                this.isLoading = false; // No loading needed - content is ready!
+                this.document = state['document'];
+                this.determineFileType();
+                this.loadPreloadedContent(state['preloadedUrl']);
+            } else {
+                // Fallback: Load normally
+                this.loadDocument(this.documentId);
+            }
         } else {
             this.goBack();
         }
@@ -98,6 +110,21 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
                 this.goBack();
             }
         });
+    }
+
+    async loadPreloadedContent(url: string) {
+        console.log('Using preloaded content:', url);
+        this.blobUrl = url;
+
+        if (this.isPdf) {
+            // PDF.js can load directly from URL
+            await this.renderPdf(url);
+        } else {
+            // Images and others can be displayed directly
+            this.previewUrl = url;
+        }
+        this.isLoading = false;
+        this.cdr.detectChanges();
     }
 
     determineFileType() {
@@ -141,6 +168,11 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
                     this.toastService.showError('Could not load document content');
                     this.isLoading = false;
                     this.cdr.detectChanges();
+
+                    // Navigate back after a brief delay to show error message
+                    setTimeout(() => {
+                        this.goBack();
+                    }, 2000);
                 },
                 complete: () => {
                     this.isLoading = false;

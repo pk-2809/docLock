@@ -288,12 +288,13 @@
 
     <!-- Delete Friend Bottom Sheet -->
     @if (showConfirmation()) {
-    <div class="fixed inset-0 z-50 flex items-end backdrop-blur-lg">
+    <div class="fixed inset-0 z-50 flex items-end justify-center backdrop-blur-lg sm:p-4">
         <!-- Backdrop -->
         <div class="absolute inset-0 bg-black/50 transition-opacity" (click)="closeConfirmation()"></div>
 
         <!-- Bottom Sheet -->
-        <div class="bg-white rounded-t-3xl w-full shadow-2xl overflow-hidden relative animate-slide-up">
+        <div
+            class="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md shadow-2xl overflow-hidden relative animate-slide-up">
             <!-- Handle -->
             <div class="flex justify-center pt-4 pb-2">
                 <div class="w-12 h-1.5 bg-slate-300 rounded-full"></div>
@@ -355,12 +356,13 @@
 
     <!-- Request Document/Card Bottom Sheet -->
     @if (showRequestSheet()) {
-    <div class="fixed inset-0 z-50 flex items-end backdrop-blur-lg">
+    <div class="fixed inset-0 z-50 flex items-end justify-center backdrop-blur-lg sm:p-4">
         <!-- Backdrop -->
         <div class="absolute inset-0 bg-black/50 transition-opacity" (click)="closeRequestSheet()"></div>
 
         <!-- Bottom Sheet -->
-        <div class="bg-white rounded-t-3xl w-full shadow-2xl overflow-hidden relative animate-slide-up">
+        <div
+            class="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md shadow-2xl overflow-hidden relative animate-slide-up">
             <!-- Handle -->
             <div class="flex justify-center pt-4 pb-2">
                 <div class="w-12 h-1.5 bg-slate-300 rounded-full"></div>

@@ -23,7 +23,8 @@
         <div class="mb-4 shrink-0 px-1">
             <div class="relative">
                 <div class="absolute inset-0 bg-blue-500/5 rounded-xl"></div>
-                <input type="text" [(ngModel)]="searchQuery" placeholder="Search friends..."
+                <input type="text" [ngModel]="searchQuery()" (input)="onSearchInput($event)"
+                    placeholder="Search friends..."
                     class="relative w-full pl-10 pr-4 py-3 bg-white/90 backdrop-blur-xl border-2 border-slate-100 focus:border-blue-500 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm font-medium text-sm">
                 <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

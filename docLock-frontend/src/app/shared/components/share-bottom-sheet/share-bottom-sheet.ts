@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PeopleService, Friend } from '../../../core/people/people.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { InputSanitizerService } from '../../../core/services/input-sanitizer.service';
 
 @Component({
     selector: 'app-share-bottom-sheet',
@@ -31,6 +32,7 @@ export class ShareBottomSheetComponent {
 
     peopleService = inject(PeopleService);
     toastService = inject(ToastService);
+    inputSanitizer = inject(InputSanitizerService);
 
     searchQuery = signal('');
     sharingWithId = signal<string | null>(null);
@@ -42,6 +44,15 @@ export class ShareBottomSheetComponent {
         if (!query) return this.friends();
         return this.friends().filter(f => f.name.toLowerCase().includes(query) || f.email?.toLowerCase().includes(query));
     });
+
+    onSearchInput(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const sanitized = this.inputSanitizer.sanitize(input.value);
+        if (input.value !== sanitized) {
+            input.value = sanitized;
+        }
+        this.searchQuery.set(sanitized);
+    }
 
     close() {
         this.isOpen = false;

@@ -146,7 +146,6 @@ export class LoginComponent implements OnInit, AfterViewInit {
             error: (err) => {
                 console.error('Check User Failed', err);
                 this.toast.showError('Connection failed. Please check your internet.');
-                this.toast.showError('Connection failed. Please check your internet.');
                 setTimeout(() => this.authService.isLoading.set(false), 0);
             }
         });
@@ -204,9 +203,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
             console.error('OTP Verification Error', error);
             const errorMessage = error instanceof Error ? error.message : 'Invalid OTP. Please try again.';
             this.toast.showError(errorMessage);
-            this.toast.showError(errorMessage);
             setTimeout(() => this.authService.isLoading.set(false), 0); // Reset loading
-            this.otpComponent.triggerError();
             this.otpComponent.triggerError();
         }
     }

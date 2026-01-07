@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/components/toast/toast.component';
+import { UpdateService } from './core/services/update.service';
 
 @Component({
   selector: 'app-root',
@@ -8,8 +9,13 @@ import { ToastComponent } from './shared/components/toast/toast.component';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
   title = 'docLock';
+  private updateService = inject(UpdateService);
+
+  ngOnInit() {
+    this.updateService.init();
+  }
 
   ngAfterViewInit() {
     // Artificial delay to show off the fancy animation, or just remove when ready

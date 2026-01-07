@@ -1,23 +1,19 @@
-/* App Wrapper - Constrains app to max 500px width and centers it */
+/* App Wrapper */
 .app-wrapper {
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
     background: #f8fafc;
 }
 
 .auth-layout {
     width: 100%;
-    /* max-width: 500px; */
-    margin: 0 auto;
-    position: relative;
-}
-
-@media (max-width: 500px) {
-    .auth-layout {
-        max-width: 100%;
-    }
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes fadeIn {

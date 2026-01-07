@@ -179,11 +179,16 @@ export class SignupComponent implements OnInit, AfterViewInit {
                     this.showOtp.set(false);
                     this.toast.showSuccess('Account created successfully!');
 
-                    // Fetch notifications then navigate
-                    this.notificationService.fetchNotifications().subscribe({
-                        next: () => this.router.navigate(['/dashboard']),
-                        error: () => this.router.navigate(['/dashboard'])
-                    });
+                    // Navigate immediately, don't wait for notifications
+                    console.log('[Signup] Navigating to dashboard');
+                    this.router.navigate(['/dashboard']).then(
+                        () => {
+                            console.log('[Signup] Navigation successful');
+                            // Fetch notifications after navigation
+                            this.notificationService.fetchNotifications().subscribe();
+                        },
+                        (err) => console.error('[Signup] Navigation failed:', err)
+                    );
                 },
                 error: (err) => {
                     console.error('Signup Failed', err);

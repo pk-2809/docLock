@@ -72,8 +72,14 @@ export class AppConfigService {
                     this.saveToCache(fullConfig); // Encrypt and Save
                     console.log('✅ App Config Loaded (Network)');
                 }
-            } catch (error) {
-                console.error('❌ Failed to load App Config, using defaults:', error);
+            } catch (error: any) {
+                // 401 is expected when user is not logged in - don't spam console
+                if (error?.status !== 401) {
+                    console.error('❌ Failed to load App Config, using defaults:', error);
+                }
+                // Always fall back to defaults
+                this.config.set(DEFAULT_CONFIG);
+                this.isLoaded.set(true);
             } finally {
                 this.loadingPromise = null;
             }

@@ -204,8 +204,10 @@ export class AuthService {
         return throwError(() => err);
       }),
       switchMap(user => {
-        // Load config after login
-        return this.appConfigService.loadConfig().then(() => user!);
+        // Wait a bit for session cookie to be properly set, then load config
+        return new Promise(resolve => setTimeout(resolve, 300)).then(() => {
+          return this.appConfigService.loadConfig().then(() => user!);
+        });
       })
     );
   }
@@ -226,8 +228,10 @@ export class AuthService {
         return throwError(() => err);
       }),
       switchMap(user => {
-        // Load config after signup
-        return this.appConfigService.loadConfig().then(() => user!);
+        // Wait a bit for session cookie to be properly set, then load config
+        return new Promise(resolve => setTimeout(resolve, 300)).then(() => {
+          return this.appConfigService.loadConfig().then(() => user!);
+        });
       })
     );
   }
@@ -240,9 +244,7 @@ export class AuthService {
       tap(response => {
         if (response.isLoggedIn && response.user) {
           this.user.set(response.user);
-          // Load config if session is active
-          this.appConfigService.loadConfig();
-          // Start Real-time Listeners
+          // Start Real-time Listeners (Config will be loaded separately by caller)
           this.peopleService.subscribeToFriends(response.user.uid);
           this.notificationService.subscribeToNotifications(response.user.uid);
           this.documentService.subscribeToDocuments(response.user.uid);

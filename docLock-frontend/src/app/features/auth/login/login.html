@@ -94,8 +94,9 @@
                 </div>
             </div>
         </div>
-
-        <app-otp [isOpen]="showOtp()" [email]="loginModel().mobile" [isLoading]="authService.isLoading()"
-            (close)="onOtpClose()" (verify)="onOtpVerify($event)" (resend)="onGetOtp()">
-        </app-otp>
     </div>
+
+    <!-- OTP Component (Outside card to prevent clipping) -->
+    <app-otp [isOpen]="showOtp()" [email]="loginModel().mobile" [isLoading]="authService.isLoading()"
+        (close)="onOtpClose()" (verify)="onOtpVerify($event)" (resend)="onGetOtp()">
+    </app-otp>

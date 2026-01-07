@@ -87,6 +87,7 @@
             class="overlay-footer absolute bottom-0 left-0 right-0 p-6 flex items-center justify-around pointer-events-none">
 
             <!-- Share -->
+            @if (!document?.sharedBy) {
             <button (click)="shareDocument()" class="flex flex-col items-center gap-1 group pointer-events-auto">
                 <div
                     class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white group-active:bg-white/20 transition-all">
@@ -97,6 +98,7 @@
                 </div>
                 <span class="text-[10px] uppercase font-bold text-white/80 tracking-wider">Share</span>
             </button>
+            }
 
             <!-- Download -->
             <button (click)="downloadFile()" class="flex flex-col items-center gap-1 group pointer-events-auto">

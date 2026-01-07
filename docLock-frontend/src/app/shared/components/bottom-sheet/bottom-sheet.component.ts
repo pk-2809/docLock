@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -40,9 +40,23 @@ import { CommonModule } from '@angular/common';
     }
   `]
 })
-export class BottomSheetComponent {
+export class BottomSheetComponent implements OnChanges, OnDestroy {
   @Input() isOpen = false;
   @Output() closed = new EventEmitter<void>();
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isOpen']) {
+      if (this.isOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+  }
+
+  ngOnDestroy() {
+    document.body.style.overflow = '';
+  }
 
   close() {
     this.closed.emit();

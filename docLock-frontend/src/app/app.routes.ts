@@ -8,6 +8,10 @@ export const routes: Routes = [
         pathMatch: 'full'
     },
     {
+        path: 'access/:id',
+        loadComponent: () => import('./features/public-access/public-access').then(m => m.PublicAccessComponent)
+    },
+    {
         path: '',
         loadComponent: () => import('./layouts/auth-layout/auth-layout').then(m => m.AuthLayoutComponent),
         children: [

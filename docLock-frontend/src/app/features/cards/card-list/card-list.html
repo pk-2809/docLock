@@ -169,13 +169,9 @@
   </div>
 
   <!-- Delete Confirmation Sheet -->
-  @if (showDeleteSheet) {
-  <app-confirmation-sheet title="Delete Card?"
-    [message]="'Are you sure you want to delete your ' + (cardToDelete?.bankName || '') + ' ' + (cardToDelete?.type === 'credit' ? 'Credit' : 'Debit') + ' Card ending in ' + (cardToDelete?.number?.slice(-4)) + '?'"
-    confirmText="Yes, Delete" cancelText="Cancel" type="danger" [isLoading]="isDeleting" (confirm)="confirmDeleteCard()"
-    (cancel)="closeDeleteSheet()">
-  </app-confirmation-sheet>
-  }
+  <app-dynamic-sheet [isOpen]="showDeleteSheet" [config]="deleteCardConfig" (confirmed)="confirmDeleteCard()"
+    (closed)="closeDeleteSheet()">
+  </app-dynamic-sheet>
 
   <!-- Share Bottom Sheet -->
   <app-share-bottom-sheet [isOpen]="showShareSheet" [itemToShare]="shareItem" (closed)="closeShareSheet()">

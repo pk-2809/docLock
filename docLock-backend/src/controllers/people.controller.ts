@@ -1,9 +1,10 @@
 import { Response } from 'express';
-import { db } from '../config/firebase'; // Assuming db is exported from here
-import { AuthRequest } from '../middleware/auth'; // Assuming AuthRequest exists
+import { db } from '../config/firebase';
+import { AuthRequest } from '../middleware/auth';
 import { z, ZodError } from 'zod';
 import { NotificationService } from '../services/notification.service';
 import { FirebaseService } from '../services/firebase.service';
+import * as admin from 'firebase-admin';
 
 const addFriendSchema = z.object({
     targetUserId: z.string().min(1)
@@ -24,23 +25,16 @@ export const addFriend = async (req: AuthRequest, res: Response): Promise<void> 
             return;
         }
 
-        // 1. Verify Target User Exists
         const targetUserDoc = await db.collection('users').doc(targetUserId).get();
-        console.log(targetUserDoc);
         if (!targetUserDoc.exists) {
             res.status(404).json({ error: 'User not found' });
             return;
         }
 
         const targetUserData = targetUserDoc.data();
-
-        // 2. Mutual Friendship (Batch Write)
-        console.log(`[AddFriend] Initiating mutual add: ${currentUserId} <-> ${targetUserId}`);
         const batch = db.batch();
 
-        // A -> B
         const senderRef = db.collection('users').doc(currentUserId).collection('friends').doc(targetUserId);
-        console.log(`[AddFriend] 1. Adding to Sender: users/${currentUserId}/friends/${targetUserId}`);
         batch.set(senderRef, {
             uid: targetUserId,
             name: targetUserData?.name || 'Unknown',
@@ -48,12 +42,10 @@ export const addFriend = async (req: AuthRequest, res: Response): Promise<void> 
             addedAt: new Date().toISOString()
         });
 
-        // B -> A (Reverse)
-        const senderDoc = await db.collection('users').doc(currentUserId).get(); // Get sender details first
+        const senderDoc = await db.collection('users').doc(currentUserId).get();
         const senderData = senderDoc.data();
 
         const receiverRef = db.collection('users').doc(targetUserId).collection('friends').doc(currentUserId);
-        console.log(`[AddFriend] 2. Adding to Receiver: users/${targetUserId}/friends/${currentUserId}`);
         batch.set(receiverRef, {
             uid: currentUserId,
             name: senderData?.name || 'Unknown',
@@ -62,17 +54,13 @@ export const addFriend = async (req: AuthRequest, res: Response): Promise<void> 
         });
 
         await batch.commit();
-        console.log(`[AddFriend] Batch Committed.`);
-        console.log(`[AddFriend] Mutual friendship executed successfully.`);
 
-        // Trigger Notification to Target
-        await NotificationService.createNotification(targetUserId, { // Fixed: Send to Target, not current
+        await NotificationService.createNotification(targetUserId, {
             title: 'New Connection',
             message: `${senderData?.name || 'Someone'} added you to their secure circle.`,
             icon: 'user'
         });
 
-        // Notify Sender (User A)
         await NotificationService.createNotification(currentUserId, {
             title: 'Friend Added',
             message: `You have successfully added ${targetUserData?.name || 'User'} to your secure circle.`,
@@ -107,7 +95,6 @@ export const getPublicProfile = async (req: AuthRequest, res: Response): Promise
         }
 
         const userDoc = await db.collection('users').doc(userId).get();
-        console.log(userDoc);
         if (!userDoc.exists) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -155,7 +142,6 @@ export const deleteFriend = async (req: AuthRequest, res: Response): Promise<voi
             return;
         }
 
-        // Fetch details before deletion to get names
         const [currentUserDoc, friendUserDoc] = await Promise.all([
             db.collection('users').doc(currentUserId).get(),
             db.collection('users').doc(friendId).get()
@@ -166,24 +152,20 @@ export const deleteFriend = async (req: AuthRequest, res: Response): Promise<voi
 
         const batch = db.batch();
 
-        // 1. Remove from Current User's List
         const currentUserRef = db.collection('users').doc(currentUserId).collection('friends').doc(friendId);
         batch.delete(currentUserRef);
 
-        // 2. Remove from Friend's List
         const friendUserRef = db.collection('users').doc(friendId).collection('friends').doc(currentUserId);
         batch.delete(friendUserRef);
 
         await batch.commit();
 
-        // Notify Deleter (User A)
         await NotificationService.createNotification(currentUserId, {
             title: 'Connection Severed',
             message: `You have removed ${friendName} from your secure circle.`,
             icon: 'trash'
         });
 
-        // Notify Deleted (User B)
         await NotificationService.createNotification(friendId, {
             title: 'Connection Lost',
             message: `${currentUserName} has removed you from their friend list.`,
@@ -197,17 +179,18 @@ export const deleteFriend = async (req: AuthRequest, res: Response): Promise<voi
     }
 };
 
+
+
 const shareItemSchema = z.object({
     recipientUid: z.string().min(1),
     itemId: z.string().min(1),
-    type: z.enum(['document', 'card'])
+    type: z.enum(['document', 'card']),
+    requestId: z.string().optional()
 });
-
-
 
 export const shareItem = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { recipientUid, itemId, type } = shareItemSchema.parse(req.body);
+        const { recipientUid, itemId, type, requestId } = shareItemSchema.parse(req.body);
         const currentUserId = req.user?.uid;
 
         if (!currentUserId) {
@@ -215,10 +198,8 @@ export const shareItem = async (req: AuthRequest, res: Response): Promise<void> 
             return;
         }
 
-        // Verify recipient exists first? (FirebaseService handles some checks, but good to check friendship?)
-        // Assuming you can only share with friends.
-        // Check friendship:
-        const friendCheck = await db.collection('users').doc(currentUserId).collection('friends').doc(recipientUid).get();
+        const friendRef = db.collection('users').doc(currentUserId).collection('friends').doc(recipientUid);
+        const friendCheck = await friendRef.get();
         if (!friendCheck.exists) {
             res.status(403).json({ error: 'You can only share with friends' });
             return;
@@ -226,23 +207,34 @@ export const shareItem = async (req: AuthRequest, res: Response): Promise<void> 
 
         const itemName = await FirebaseService.shareItem(currentUserId, recipientUid, itemId, type);
 
-        // Get Sender Name
         const senderDoc = await db.collection('users').doc(currentUserId).get();
         const senderName = senderDoc.data()?.name || 'A friend';
 
-        // Notify Recipient
         await NotificationService.createNotification(recipientUid, {
             title: 'New Shared Item',
             message: `${senderName} shared "${itemName}" (${type}) with you. Check your Shared folder.`,
             icon: 'share'
         });
 
-        // Notify Sender
         await NotificationService.createNotification(currentUserId, {
             title: 'Item Shared',
             message: `You successfully shared "${itemName}" with ${friendCheck.data()?.name || 'friend'}.`,
             icon: 'check-circle'
         });
+
+        if (requestId) {
+            const notificationRef = db.collection('users').doc(currentUserId).collection('notifications').doc(requestId);
+            await notificationRef.update({
+                'metadata.status': 'fulfilled',
+                read: true,
+                icon: 'check-circle'
+            }).catch(err => console.warn('Failed to update notification status:', err));
+
+            const requesterFriendRef = db.collection('users').doc(recipientUid).collection('friends').doc(currentUserId);
+            await requesterFriendRef.update({
+                activeRequests: admin.firestore.FieldValue.increment(-1)
+            }).catch(err => console.warn('Failed to decrement active requests:', err));
+        }
 
         res.status(200).json({ message: 'Item shared successfully' });
 
@@ -271,23 +263,15 @@ export const requestItem = async (req: AuthRequest, res: Response): Promise<void
             return;
         }
 
-        console.log(`[RequestItem] User ${currentUserId} requesting ${itemType} "${itemName}" from ${recipientUid}`);
-
-        // Check friendship
         const friendCheck = await db.collection('users').doc(currentUserId).collection('friends').doc(recipientUid).get();
         if (!friendCheck.exists) {
-            console.warn(`[RequestItem] Failed: Not friends (User: ${currentUserId}, Target: ${recipientUid})`);
             res.status(403).json({ error: 'You can only request items from friends' });
             return;
         }
 
-        // Get Requester Name (for notification)
         const requesterDoc = await db.collection('users').doc(currentUserId).get();
         const requesterName = requesterDoc.data()?.name || 'A friend';
 
-        console.log(`[RequestItem] Sending notification to ${recipientUid} from ${requesterName}`);
-
-        // 1. Notify Recipient (Actionable)
         await NotificationService.createNotification(recipientUid, {
             title: 'New Request',
             message: `${requesterName} is requesting "${itemName}" (${itemType}). Tap to respond.`,
@@ -302,14 +286,18 @@ export const requestItem = async (req: AuthRequest, res: Response): Promise<void
             }
         });
 
-        // 2. Notify Sender (Confirmation/Log)
         await NotificationService.createNotification(currentUserId, {
             title: 'Request Sent',
             message: `You requested "${itemName}" (${itemType}) from ${friendCheck.data()?.name || 'friend'}.`,
             icon: 'check-circle'
         });
 
-        console.log(`[RequestItem] Notifications sent successfully`);
+        // Increment Active Requests count for the recipient (seeing the requester)
+        const recipientFriendRef = db.collection('users').doc(recipientUid).collection('friends').doc(currentUserId);
+        await recipientFriendRef.update({
+            activeRequests: admin.firestore.FieldValue.increment(1)
+        }).catch(err => console.warn('Failed to update active requests count:', err));
+
         res.status(200).json({ message: 'Request sent successfully' });
 
     } catch (error) {

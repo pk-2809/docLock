@@ -11,6 +11,7 @@ import notificationRoutes from './routes/notification.routes';
 import documentRoutes from './routes/document.routes';
 import cardRoutes from './routes/card.routes';
 import configRoutes from './routes/config.routes';
+import qrRoutes from './routes/qr.routes';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -30,7 +31,10 @@ app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-const frontendUrls = process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : ['http://localhost:4200'];
+const frontendUrls = process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : [];
+if (frontendUrls.length === 0) {
+    console.warn('Warning: FRONTEND_URLS not set in environment variables');
+}
 
 app.use(cors({
     origin: frontendUrls,
@@ -53,6 +57,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/cards', cardRoutes);
 app.use('/api/config', configRoutes);
+app.use('/qrs', qrRoutes);
 
 // Health Check
 app.get('/health', (_req: Request, res: Response) => {
@@ -71,8 +76,7 @@ app.get('/health/firestore', async (_req: Request, res: Response): Promise<void>
         if (!isFirebaseInitialized) {
             res.status(503).json({
                 status: 'unavailable',
-                message: 'Firebase not initialized. Running in mock mode.',
-                firestore: 'not_configured'
+                message: 'Firebase not initialized.'
             });
             return;
         }
@@ -95,7 +99,7 @@ app.get('/health/firestore', async (_req: Request, res: Response): Promise<void>
                     firestore: 'not_found',
                     message: 'Firestore database not found. Please create it in Firebase Console.',
                     instructions: 'See FIRESTORE_SETUP.md for setup instructions',
-                    consoleUrl: 'https://console.firebase.google.com/project/doclock-96a20/firestore'
+                    consoleUrl: `https://console.firebase.google.com/project/${process.env.FIREBASE_PROJECT_ID}/firestore`
                 });
                 return;
             }

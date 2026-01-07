@@ -5,14 +5,14 @@ import { Router } from '@angular/router';
 import { CardCarouselComponent } from '../card-carousel/card-carousel';
 import { Card, CardService } from '../../../core/services/card';
 import { ToastService } from '../../../core/services/toast.service';
-
-import { ConfirmationSheetComponent } from '../../../shared/components/confirmation-sheet/confirmation-sheet';
+import { DynamicSheetComponent } from '../../../shared/components/dynamic-sheet/dynamic-sheet';
+import { SheetConfig } from '../../../shared/models/ui.models';
 import { ShareBottomSheetComponent } from '../../../shared/components/share-bottom-sheet/share-bottom-sheet';
 
 @Component({
     selector: 'app-card-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, CardCarouselComponent, ConfirmationSheetComponent, ShareBottomSheetComponent],
+    imports: [CommonModule, FormsModule, CardCarouselComponent, DynamicSheetComponent, ShareBottomSheetComponent],
     templateUrl: './card-list.html',
     styleUrl: './card-list.css'
 })
@@ -123,6 +123,19 @@ export class CardListComponent implements OnInit {
                 this.closeDeleteSheet();
             }
         });
+    }
+
+    get deleteCardConfig(): SheetConfig {
+        if (!this.cardToDelete) return {};
+        return {
+            title: 'Delete Card?',
+            message: `Are you sure you want to delete your ${this.cardToDelete.bankName || ''} ${this.cardToDelete.type === 'credit' ? 'Credit' : 'Debit'} Card ending in ${this.cardToDelete.number?.slice(-4)}?`,
+            variant: 'danger',
+            buttons: [
+                { label: 'Yes, Delete', action: 'confirm', variant: 'danger', loading: this.isDeleting },
+                { label: 'Cancel', action: 'cancel' }
+            ]
+        };
     }
 
     closeDeleteSheet() {

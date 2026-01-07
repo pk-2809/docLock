@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { Readable } from 'stream';
 import { FirebaseService } from '../services/firebase.service';
-import { GoogleDriveService } from '../services/google-drive.service';
+import { StorageService } from '../services/storage.service';
 import { CustomError, asyncHandler } from '../middleware/errorHandler';
+import { v4 as uuidv4 } from 'uuid';
 
 export class DocumentController {
 
@@ -18,18 +18,15 @@ export class DocumentController {
         if (!file) throw new CustomError('No file provided', 400);
 
         try {
-            // 1. Upload to Google Drive
-            // Folder structure: User creates folders? For now, flat or root.
-            // We can prefix the name or use folders later.
-            const stream = new Readable();
-            stream.push(file.buffer);
-            stream.push(null);
+            // 1. Upload to Firebase Storage
+            // Path: users/{uid}/{uuid}_{filename}
+            const docId = uuidv4();
+            const storagePath = `users/${uid}/${docId}_${file.originalname}`;
 
-            const uploadResult = await GoogleDriveService.uploadFile(
-                stream,
-                file.originalname,
-                file.mimetype,
-                { encrypt: true, makePublic: false }
+            await StorageService.uploadFile(
+                file.buffer,
+                storagePath,
+                file.mimetype
             );
 
             // 2. Save Metadata to Firestore
@@ -37,10 +34,7 @@ export class DocumentController {
                 name: req.body.name || file.originalname,
                 mimeType: file.mimetype,
                 size: file.size,
-                driveFileId: uploadResult.fileId,
-                iv: uploadResult.iv, // Store IV for decryption
-                // webViewLink: uploadResult.webViewLink, // Not useful for encrypted files
-                // webContentLink: uploadResult.webContentLink, // Not useful for encrypted files
+                storagePath: storagePath,
                 category: req.body.category || 'Uncategorized',
                 folderId: req.body.folderId || null
             };
@@ -64,34 +58,21 @@ export class DocumentController {
 
         const { id } = req.params;
 
-        // 1. Get Document Metadata (Efficiently)
+        // 1. Get Document Metadata
         const doc = await FirebaseService.getDocument(decodedClaims.uid, id);
-
         if (!doc) throw new CustomError('Document not found', 404);
-        if (!doc.driveFileId || !doc.iv) throw new CustomError('Invalid document record', 500);
+
+        if (!doc.storagePath) {
+            throw new CustomError('Document file not available', 404);
+        }
 
         try {
-            // 2. Stream decrypted file
-            const stream = await GoogleDriveService.getFileStream(doc.driveFileId, doc.iv);
+            // 2. Generate Signed URL for direct download
+            const signedUrl = await StorageService.getSignedUrl(doc.storagePath);
 
-            res.setHeader('Content-Type', doc.mimeType);
-            if (doc.mimeType === 'application/pdf' || doc.mimeType.startsWith('image/')) {
-                // Inline for previewable types
-                res.setHeader('Content-Disposition', `inline; filename="${doc.name}"`);
-            } else {
-                res.setHeader('Content-Disposition', `attachment; filename="${doc.name}"`);
-            }
+            // Return URL instead of streaming
+            res.json({ status: 'success', downloadUrl: signedUrl });
 
-            stream.on('error', (err) => {
-                console.error('Stream Error during download:', err);
-                if (!res.headersSent) {
-                    res.status(500).json({ error: 'Streaming failed' });
-                } else {
-                    res.end();
-                }
-            });
-
-            stream.pipe(res);
         } catch (error) {
             console.error('Download setup error:', error);
             throw new CustomError('Failed to download document', 500);
@@ -142,23 +123,20 @@ export class DocumentController {
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
         if (!decodedClaims) throw new CustomError('Unauthorized', 401);
 
-        const { id } = req.params; // Document ID (Firestore ID)
-        const { driveFileId, size } = req.body; // Pass these to avoid extra lookup if possible, or lookup first
+        const { id } = req.params;
 
-        if (!driveFileId) {
-            // Need to lookup if not provided, for now assume provided by frontend or we do a lookup
-            // Let's rely on frontend sending it or we implement lookup if missing.
-            // MVP: Require it for simplicity or do a quick get
-        }
+        // Fetch to get storage path
+        const doc = await FirebaseService.getDocument(decodedClaims.uid, id);
+        if (!doc) throw new CustomError('Document not found', 404);
 
         try {
-            // 1. Delete from Drive
-            if (driveFileId) {
-                await GoogleDriveService.deleteFile(driveFileId);
+            // 1. Delete from Storage (if exists)
+            if (doc.storagePath) {
+                await StorageService.deleteFile(doc.storagePath);
             }
 
             // 2. Delete from Firestore
-            await FirebaseService.deleteDocument(decodedClaims.uid, id, size || 0);
+            await FirebaseService.deleteDocument(decodedClaims.uid, id, doc.size || 0, doc.folderId || null);
 
             res.json({ status: 'success', message: 'Document deleted' });
 
@@ -167,6 +145,7 @@ export class DocumentController {
             throw new CustomError('Failed to delete document', 500);
         }
     });
+
     static createFolder = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const sessionCookie = req.cookies.session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);

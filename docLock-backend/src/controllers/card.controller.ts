@@ -35,7 +35,8 @@ export class CardController {
         // HMAC Integrity Check
         // Using strict hardcoded key for this MVP as requested "application level", syncing with frontend
         // In prod, use process.env.ENCRYPTION_KEY
-        const SECRET_KEY = process.env.ENCRYPTION_KEY || 'doclock-super-secret-key-v1';
+        const SECRET_KEY = process.env.ENCRYPTION_KEY;
+        if (!SECRET_KEY) throw new CustomError('Configuration Error: ENCRYPTION_KEY not set', 500);
 
         const verifyHmac = (value: string, hmac: string) => {
             const calculated = crypto.createHmac('sha256', SECRET_KEY).update(value).digest('hex');
@@ -85,7 +86,8 @@ export class CardController {
         const updates = req.body;
 
         // HMAC Keys
-        const SECRET_KEY = process.env.ENCRYPTION_KEY || 'doclock-super-secret-key-v1';
+        const SECRET_KEY = process.env.ENCRYPTION_KEY;
+        if (!SECRET_KEY) throw new CustomError('Configuration Error: ENCRYPTION_KEY not set', 500);
 
         const verifyHmac = (value: string, hmac: string) => {
             const calculated = crypto.createHmac('sha256', SECRET_KEY).update(value).digest('hex');

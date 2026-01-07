@@ -2,13 +2,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
-
-import { ConfirmationSheetComponent } from '../../shared/components/confirmation-sheet/confirmation-sheet';
+import { DynamicSheetComponent } from '../../shared/components/dynamic-sheet/dynamic-sheet';
+import { SheetConfig } from '../../shared/models/ui.models';
 
 @Component({
     selector: 'app-main-layout',
     standalone: true,
-    imports: [CommonModule, RouterOutlet, RouterLink, ConfirmationSheetComponent],
+    imports: [CommonModule, RouterOutlet, RouterLink, DynamicSheetComponent],
     templateUrl: './main-layout.html',
     styleUrl: './main-layout.css'
 })
@@ -48,6 +48,18 @@ export class MainLayoutComponent {
     }
 
     showLogoutPopup = this.authService.showLogoutPopup;
+
+    get logoutConfig(): SheetConfig {
+        return {
+            title: 'Logout?',
+            message: 'Are you sure you want to sign out of DocLock?',
+            variant: 'danger',
+            buttons: [
+                { label: 'Logout', action: 'confirm', variant: 'danger' },
+                { label: 'Cancel', action: 'cancel' }
+            ]
+        };
+    }
 
     logout() {
         this.authService.logout().subscribe({

@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, of, finalize, map, switchMap, throwError } from 'rxjs';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, Auth } from 'firebase/auth';
 import { firebaseAuth } from './firebase';
-import { environment } from '../../../environments/environment';
 import { AppConfigService } from '../services/app-config.service';
+import { AppSettingsService } from '../services/app-settings.service';
 import { PeopleService } from '../people/people.service';
 import { NotificationService } from '../services/notification.service';
 import { DocumentService } from '../services/document';
@@ -31,10 +31,11 @@ export class AuthService {
   private notificationService = inject(NotificationService);
   private documentService = inject(DocumentService);
   private cardService = inject(CardService);
+  private appSettings = inject(AppSettingsService);
 
   private auth = firebaseAuth;
   private confirmationResult: ConfirmationResult | undefined;
-  private apiUrl = `${environment.apiUrl}/api/auth`;
+  private apiUrl = `${this.appSettings.apiUrl}/api/auth`;
 
   // Reactive State
   readonly user = signal<User | null>(null);

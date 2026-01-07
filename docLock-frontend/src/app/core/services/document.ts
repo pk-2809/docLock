@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 
 import { AppConfigService } from '../services/app-config.service';
+import { AppSettingsService } from '../services/app-settings.service';
 import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../auth/firebase';
 import { signal } from '@angular/core';
@@ -19,6 +19,7 @@ export interface Document {
     category?: string;
     folderId?: string;
     createdAt?: string;
+    sharedBy?: string;
     // UI states
     isDeleting?: boolean;
     // UI Helpers (Mapped)
@@ -46,7 +47,8 @@ export class DocumentService {
     private http = inject(HttpClient);
 
     private configService = inject(AppConfigService);
-    private apiUrl = `${environment.apiUrl}/api/documents`;
+    private appSettings = inject(AppSettingsService);
+    private apiUrl = `${this.appSettings.apiUrl}/api/documents`;
 
     // Real-time signals
     documents = signal<Document[]>([]);
@@ -209,10 +211,9 @@ export class DocumentService {
         return null;
     }
 
-    downloadDocument(id: string, name: string): Observable<Blob> {
-        return this.http.get(`${this.apiUrl}/${id}/download`, {
-            withCredentials: true,
-            responseType: 'blob'
+    downloadDocument(id: string, name: string): Observable<{ status: string, downloadUrl: string }> {
+        return this.http.get<{ status: string, downloadUrl: string }>(`${this.apiUrl}/${id}/download`, {
+            withCredentials: true
         });
     }
 

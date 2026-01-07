@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { AppSettingsService } from '../services/app-settings.service';
 import { EncryptionService } from './encryption.service';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../auth/firebase';
@@ -27,7 +27,8 @@ export interface Card {
 export class CardService {
     private http = inject(HttpClient);
     private encryptionService = inject(EncryptionService);
-    private apiUrl = `${environment.apiUrl}/api/cards`;
+    private appSettings = inject(AppSettingsService);
+    private apiUrl = `${this.appSettings.apiUrl}/api/cards`;
 
     cards = signal<Card[]>([]);
     isLoading = signal<boolean>(false);

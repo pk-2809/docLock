@@ -1,63 +1,61 @@
 <div class="app-wrapper">
     <div class="layout-container min-h-screen bg-slate-50">
 
-    <!-- Main Content Area -->
-    <main class="relative">
-        <router-outlet></router-outlet>
-    </main>
+        <!-- Main Content Area -->
+        <main class="relative">
+            <router-outlet></router-outlet>
+        </main>
 
-    <!-- Capsule Bottom Navigation -->
-    <div class="fixed bottom-3 left-4 right-4 z-40 flex justify-center">
-        <div
-            class="bg-white rounded-[2rem] p-1 shadow-[0_10px_40px_rgba(0,0,0,0.1)] flex items-center justify-between gap-1 w-full max-w-sm border border-slate-100 relative">
+        <!-- Capsule Bottom Navigation -->
+        <div class="fixed bottom-3 left-4 right-4 z-40 flex justify-center">
+            <div
+                class="bg-white rounded-[2rem] p-1 shadow-[0_10px_40px_rgba(0,0,0,0.1)] flex items-center justify-between gap-1 w-full max-w-sm border border-slate-100 relative">
 
-            <!-- Home -->
-            <a routerLink="/dashboard" (click)="setActive('home')"
-                class="h-12 px-4 rounded-[1.5rem] flex items-center gap-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden"
-                [ngClass]="activeTab === 'home' ? 'bg-[#6366f1] text-white shadow-lg shadow-indigo-500/20 flex-[2] justify-center' : 'text-slate-400 hover:text-slate-600 flex-1 justify-center'">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                </svg>
-                @if (activeTab === 'home') {
-                <span class="font-bold text-xs whitespace-nowrap animate-slide-in-right">Home</span>
-                }
-            </a>
+                <!-- Home -->
+                <a routerLink="/dashboard" (click)="setActive('home')"
+                    class="h-12 px-4 rounded-[1.5rem] flex items-center gap-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden"
+                    [ngClass]="activeTab === 'home' ? 'bg-[#6366f1] text-white shadow-lg shadow-indigo-500/20 flex-[2] justify-center' : 'text-slate-400 hover:text-slate-600 flex-1 justify-center'">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    @if (activeTab === 'home') {
+                    <span class="font-bold text-xs whitespace-nowrap animate-slide-in-right">Home</span>
+                    }
+                </a>
 
 
-            <!-- Friends -->
-            <a routerLink="/friends" (click)="setActive('friends')"
-                class="h-12 px-4 rounded-[1.5rem] flex items-center gap-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden"
-                [ngClass]="activeTab === 'friends' ? 'bg-[#ec4899] text-white shadow-lg shadow-pink-500/20 flex-[2] justify-center' : 'text-slate-400 hover:text-slate-600 flex-1 justify-center'">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                </svg>
-                @if (activeTab === 'friends') {
-                <span class="font-bold text-xs whitespace-nowrap animate-slide-in-right">Friends</span>
-                }
-            </a>
+                <!-- Friends -->
+                <a routerLink="/friends" (click)="setActive('friends')"
+                    class="h-12 px-4 rounded-[1.5rem] flex items-center gap-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden"
+                    [ngClass]="activeTab === 'friends' ? 'bg-[#ec4899] text-white shadow-lg shadow-pink-500/20 flex-[2] justify-center' : 'text-slate-400 hover:text-slate-600 flex-1 justify-center'">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                    </svg>
+                    @if (activeTab === 'friends') {
+                    <span class="font-bold text-xs whitespace-nowrap animate-slide-in-right">Friends</span>
+                    }
+                </a>
 
-            <!-- Profile -->
-            <a routerLink="/profile" (click)="setActive('profile')"
-                class="h-12 px-4 rounded-[1.5rem] flex items-center gap-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden"
-                [ngClass]="activeTab === 'profile' ? 'bg-[#2EC4B6] text-white shadow-lg shadow-teal-500/20 flex-[2] justify-center' : 'text-slate-400 hover:text-slate-600 flex-1 justify-center'">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                @if (activeTab === 'profile') {
-                <span class="font-bold text-xs whitespace-nowrap animate-slide-in-right">Profile</span>
-                }
-            </a>
+                <!-- Profile -->
+                <a routerLink="/profile" (click)="setActive('profile')"
+                    class="h-12 px-4 rounded-[1.5rem] flex items-center gap-2 transition-all duration-500 ease-out cursor-pointer overflow-hidden"
+                    [ngClass]="activeTab === 'profile' ? 'bg-[#2EC4B6] text-white shadow-lg shadow-teal-500/20 flex-[2] justify-center' : 'text-slate-400 hover:text-slate-600 flex-1 justify-center'">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    @if (activeTab === 'profile') {
+                    <span class="font-bold text-xs whitespace-nowrap animate-slide-in-right">Profile</span>
+                    }
+                </a>
 
+            </div>
         </div>
-    </div>
-    <!-- Logout Confirmation Modal (Global) -->
-    @if (showLogoutPopup()) {
-    <app-confirmation-sheet title="Logout?" message="Are you sure you want to sign out of DocLock?" confirmText="Logout"
-        cancelText="Cancel" type="danger" (confirm)="logout()" (cancel)="cancelLogout()">
-    </app-confirmation-sheet>
-    }
+        <!-- Logout Confirmation Modal (Global) -->
+        <app-dynamic-sheet [isOpen]="showLogoutPopup()" [config]="logoutConfig" (confirmed)="logout()"
+            (closed)="cancelLogout()">
+        </app-dynamic-sheet>
     </div>
 </div>

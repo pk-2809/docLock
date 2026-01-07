@@ -93,14 +93,17 @@ export class AddCardComponent implements OnInit {
                     this.toastService.showError('Card not found');
                     this.router.navigate(['/cards']);
                 }
-                this.isLoading = false;
-                this.cdr.detectChanges(); // Force update to fix edit state lag
+                setTimeout(() => {
+                    this.isLoading = false;
+                });
             },
             error: (err) => {
                 console.error('Failed to load card:', err);
                 this.toastService.showError('Failed to load card details');
                 this.router.navigate(['/cards']);
-                this.isLoading = false;
+                setTimeout(() => {
+                    this.isLoading = false;
+                });
             }
         });
     }
@@ -146,13 +149,19 @@ export class AddCardComponent implements OnInit {
 
     formatInputCardNumber(event: Event) {
         const input = event.target as HTMLInputElement;
-        let value = input.value.replace(/\s/g, '');
+        // Remove non-digits
+        let value = input.value.replace(/\D/g, '');
 
         // Auto-detect network
         this.detectCardNetwork(value);
 
-        value = value.replace(/(.{4})/g, '$1 ').trim();
+        // Format with spaces every 4 digits
+        if (value.length > 0) {
+            value = value.match(/.{1,4}/g)?.join(' ') || value;
+        }
+
         this.newCard.number = value;
+        input.value = value;
     }
 
     formatInputName(event: Event) {
@@ -245,7 +254,9 @@ export class AddCardComponent implements OnInit {
                 error: (err) => {
                     console.error('Failed to update card:', err);
                     this.toastService.showError(err.error?.message || 'Failed to update card');
-                    this.isLoading = false;
+                    setTimeout(() => {
+                        this.isLoading = false;
+                    });
                 }
             });
         } else {
@@ -258,7 +269,9 @@ export class AddCardComponent implements OnInit {
                 error: (err) => {
                     console.error('Failed to add card:', err);
                     this.toastService.showError(err.error?.message || 'Failed to add card');
-                    this.isLoading = false;
+                    setTimeout(() => {
+                        this.isLoading = false;
+                    });
                 }
             });
         }

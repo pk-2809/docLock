@@ -1,7 +1,7 @@
+
 export const environment = {
   production: true,
-  // apiUrl: 'http://localhost:3000',
-  apiUrl: 'https://us-central1-doclock-96a20.cloudfunctions.net/api',
+  apiUrl: 'https://api-to72oyfxda-uc.a.run.app',
   firebaseConfig: {
     apiKey: "AIzaSyDbXNt4Ok-bj1X39omcn9fjRcN5hTilfR8",
     authDomain: "doclock-96a20.firebaseapp.com",
@@ -11,5 +11,5 @@ export const environment = {
     appId: "1:620656800474:web:30774da91e601c72e9ebe3",
     measurementId: "G-PZP2JYR0DQ"
   },
-  encryptionKey: 'doclock-super-secret-key-v1'
+  encryptionKey: 'ci3ctef6417lgl4462aac9cg2povf2r2'
 };

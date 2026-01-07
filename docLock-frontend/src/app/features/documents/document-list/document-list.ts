@@ -10,7 +10,8 @@ import { finalize } from 'rxjs';
 import { AppConfigService } from '../../../core/services/app-config.service';
 import { ShareBottomSheetComponent } from '../../../shared/components/share-bottom-sheet/share-bottom-sheet';
 import { BottomSheetComponent } from '../../../shared/components/bottom-sheet/bottom-sheet.component';
-import { ConfirmationSheetComponent } from '../../../shared/components/confirmation-sheet/confirmation-sheet';
+import { DynamicSheetComponent } from '../../../shared/components/dynamic-sheet/dynamic-sheet';
+import { SheetConfig } from '../../../shared/models/ui.models';
 import { PeopleService } from '../../../core/people/people.service';
 import { CardService, Card } from '../../../core/services/card';
 
@@ -23,7 +24,7 @@ interface BreadcrumbItem {
 @Component({
     selector: 'app-document-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, ShareBottomSheetComponent, BottomSheetComponent, ConfirmationSheetComponent],
+    imports: [CommonModule, FormsModule, ShareBottomSheetComponent, BottomSheetComponent, DynamicSheetComponent],
     templateUrl: './document-list.html',
     styleUrl: './document-list.css'
 })
@@ -413,7 +414,10 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     onSearch(event: any) {
-        this.searchQuery = event.target.value;
+        const input = event.target as HTMLInputElement;
+        const sanitized = input.value.replace(/[^a-zA-Z _]/g, '');
+        input.value = sanitized;
+        this.searchQuery = sanitized;
     }
 
     // --- Notification & Header ---
@@ -619,14 +623,15 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     downloadDocument(doc: Document) {
         this.toastService.showSuccess(`Downloading ${doc.name}...`);
         this.documentService.downloadDocument(doc.id, doc.name).subscribe({
-            next: (blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
+            next: (res) => {
                 const link = document.createElement('a');
-                link.href = url;
+                link.href = res.downloadUrl;
                 link.download = doc.name;
+                link.target = '_blank';
+                document.body.appendChild(link);
                 link.click();
-                window.URL.revokeObjectURL(url);
-                this.toastService.showSuccess('Download complete');
+                document.body.removeChild(link);
+                this.toastService.showSuccess('Download started');
             },
             error: (err: any) => {
                 console.error('Download failed', err);

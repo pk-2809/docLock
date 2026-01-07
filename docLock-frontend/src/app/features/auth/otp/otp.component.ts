@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
     standalone: true,
     imports: [CommonModule, FormsModule],
     templateUrl: './otp.component.html',
-    styleUrls: ['./otp.component.css']
+    styleUrl: './otp.component.css'
 })
 export class OtpComponent implements OnChanges {
     @Input() isOpen = false;
@@ -102,10 +102,11 @@ export class OtpComponent implements OnChanges {
         if (!value) return;
 
         // Handle Paste or Single Char
-        const chars = value.split('');
+        // Filter for Numbers Only
+        const numericChars = value.replace(/[^0-9]/g, '').split('');
 
         let currentIndex = index;
-        for (const char of chars) {
+        for (const char of numericChars) {
             if (currentIndex < 6) {
                 this.otp[currentIndex] = char;
                 currentIndex++;
@@ -114,6 +115,21 @@ export class OtpComponent implements OnChanges {
 
         // Check if complete
         if (this.otp.every(digit => digit !== '')) {
+            const code = this.otp.join('');
+
+            // Check for All Zeroes
+            if (code === '000000') {
+                this.isError = true;
+                // Optional: Show toast or feedback? For now, red border is triggered by isError
+                // We keep the values so user can edit, or better to focus first one?
+                // Let's clear and focus first as it's invalid
+                setTimeout(() => {
+                    this.otp = ['', '', '', '', '', ''];
+                    this.focusInput(0);
+                }, 300); // Small delay to let user see
+                return;
+            }
+
             this.otpInputs.get(5)?.nativeElement.blur(); // Remove focus
             this.onVerify();
             return;
@@ -130,6 +146,20 @@ export class OtpComponent implements OnChanges {
     // Handle KeyDown Event (Navigation & Backspace)
     onKeyDown(index: number, event: KeyboardEvent) {
         if (this.isLoading) return;
+
+        // Block non-numeric keys
+        const validKeys = [
+            'Backspace', 'Tab', 'End', 'Home', 'ArrowLeft', 'ArrowRight', 'Delete', 'Enter', 'Escape'
+        ];
+        // Allow numeric keys (0-9), standard nav keys, and Ctrl/Cmd combinations
+        if (
+            !/^[0-9]$/.test(event.key) &&
+            !validKeys.includes(event.key) &&
+            !(event.ctrlKey || event.metaKey)
+        ) {
+            event.preventDefault();
+            return;
+        }
 
         const input = event.target as HTMLInputElement;
 

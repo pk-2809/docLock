@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -6,15 +6,7 @@ import { DocumentService, Document } from '../../../core/services/document';
 import { AuthService } from '../../../core/auth/auth';
 import { ToastService } from '../../../core/services/toast.service';
 import { BottomSheetComponent } from '../../../shared/components/bottom-sheet/bottom-sheet.component';
-
-export interface QRCode {
-    id: string;
-    name: string;
-    createdAt: Date;
-    linkedDocumentIds: string[]; // The key feature: List of linked doc IDs
-    scanCount: number;
-    // UI Helpers added dynamically or implied
-}
+import { QrService, QRCode } from '../../../core/services/qr';
 
 @Component({
     selector: 'app-qr-list',
@@ -25,63 +17,86 @@ export interface QRCode {
 })
 export class QrListComponent implements OnInit {
     private router = inject(Router);
+    private qrService = inject(QrService);
     private documentService = inject(DocumentService);
     private authService = inject(AuthService);
     private toastService = inject(ToastService);
+    private cdr = inject(ChangeDetectorRef);
 
     // Data
     documents: Document[] = [];
-    qrCodes: QRCode[] = []; // Local "database" of QRs
+    qrCodes: QRCode[] = [];
 
     // Creation Form State
     isCreating = false;
     newQrName = '';
     selectedDocumentIds: Set<string> = new Set();
     isLoadingDocs = false;
-    editingQrId: string | null = null; // Track if we are editing
+    editingQrId: string | null = null;
 
     // Delete State
     isDeleting = false;
     qrToDeleteId: string | null = null;
+    isProcessing = false;
 
     // View State
-    baseUrl = window.location.origin; // For generating the public link
+    baseUrl = window.location.origin;
+    downloadingQrId: string | null = null;
 
     ngOnInit() {
         this.loadDocuments();
-        this.loadSavedQRs();
+        this.loadQrs();
     }
 
     loadDocuments() {
         this.isLoadingDocs = true;
-        // In a real app, we might need to subscribe, but fetching once for list is okay
         this.documentService.getDocuments().subscribe({
             next: (res) => {
                 this.documents = res.documents;
-                this.isLoadingDocs = false;
+                // Defer update to fix NG0100
+                setTimeout(() => {
+                    this.isLoadingDocs = false;
+                }, 0);
             },
             error: (err) => {
                 console.error('Failed to load documents', err);
-                this.isLoadingDocs = false;
+                setTimeout(() => {
+                    this.isLoadingDocs = false;
+                }, 0);
             }
         });
     }
 
-    loadSavedQRs() {
-        // Mock: Load from local storage to persist across reloads for demo
-        const saved = localStorage.getItem('my_mock_qrs');
-        if (saved) {
-            this.qrCodes = JSON.parse(saved);
-        }
+    loadQrs() {
+        this.qrService.getQRs().subscribe({
+            next: (res: any) => {
+                this.qrCodes = res.qrs;
+                this.cdr.detectChanges();
+            },
+            error: (err) => {
+                console.error('Failed to load QRs', err);
+                this.toastService.showError('Failed to load existing QRs');
+            }
+        });
     }
 
     toggleCreateMode() {
-        this.isCreating = !this.isCreating;
-        if (!this.isCreating) {
+        if (this.isCreating) {
+            this.closeModal();
+        } else {
+            // Opening for Creation -> Reset State
             this.newQrName = '';
             this.selectedDocumentIds.clear();
             this.editingQrId = null;
+            this.isCreating = true;
         }
+    }
+
+    closeModal() {
+        this.isCreating = false;
+        this.newQrName = '';
+        this.selectedDocumentIds.clear();
+        this.editingQrId = null;
     }
 
     toggleDocumentSelection(docId: string) {
@@ -103,47 +118,70 @@ export class QrListComponent implements OnInit {
             return;
         }
 
-        if (this.editingQrId) {
-            // Update existing QR
-            const index = this.qrCodes.findIndex(q => q.id === this.editingQrId);
-            if (index !== -1) {
-                this.qrCodes[index] = {
-                    ...this.qrCodes[index],
-                    linkedDocumentIds: Array.from(this.selectedDocumentIds)
-                };
-                this.saveQRsToStorage();
-                this.toggleCreateMode();
-                this.toastService.showSuccess('Secure QR updated successfully!');
-            }
-        } else {
-            // Create New QR
-            const newQR: QRCode = {
-                id: Math.random().toString(36).substring(2, 10),
-                name: this.newQrName,
-                createdAt: new Date(),
-                linkedDocumentIds: Array.from(this.selectedDocumentIds),
-                scanCount: 0
-            };
+        const data = {
+            name: this.newQrName,
+            mpin: '1234',
+            linkedDocumentIds: Array.from(this.selectedDocumentIds)
+        };
 
-            this.qrCodes.unshift(newQR);
-            this.saveQRsToStorage();
-            this.toggleCreateMode();
-            this.toastService.showSuccess('Secure QR created successfully!');
+        this.isProcessing = true;
+
+        if (this.editingQrId) {
+            this.qrService.updateQR(this.editingQrId, { name: this.newQrName, linkedDocumentIds: Array.from(this.selectedDocumentIds) }).subscribe({
+                next: (res: any) => {
+                    const index = this.qrCodes.findIndex(q => q.id === this.editingQrId);
+                    if (index !== -1) {
+                        this.qrCodes[index] = res.qr;
+                    }
+                    this.closeModal();
+                    this.toastService.showSuccess('Secure QR updated successfully!');
+                    this.isProcessing = false;
+                    this.cdr.detectChanges();
+                },
+                error: () => {
+                    this.toastService.showError('Failed to update QR');
+                    this.isProcessing = false;
+                }
+            });
+        } else {
+            this.qrService.createQR(data).subscribe({
+                next: (res: any) => {
+                    this.qrCodes.unshift(res.qr);
+                    this.closeModal();
+                    this.toastService.showSuccess('Secure QR created! Default MPIN: 1234');
+                    this.isProcessing = false;
+                    this.cdr.detectChanges();
+                },
+                error: () => {
+                    this.toastService.showError('Failed to create QR');
+                    this.isProcessing = false;
+                }
+            });
         }
     }
 
     deleteQR(id: string, event: Event) {
-        event.stopPropagation(); // Prevent clicking the card
+        event.stopPropagation();
         this.qrToDeleteId = id;
         this.isDeleting = true;
     }
 
     confirmDelete() {
         if (this.qrToDeleteId) {
-            this.qrCodes = this.qrCodes.filter(q => q.id !== this.qrToDeleteId);
-            this.saveQRsToStorage();
-            this.toastService.showSuccess('Secure QR deleted successfully');
-            this.cancelDelete();
+            this.isProcessing = true;
+            this.qrService.deleteQR(this.qrToDeleteId).subscribe({
+                next: () => {
+                    this.qrCodes = this.qrCodes.filter(q => q.id !== this.qrToDeleteId);
+                    this.toastService.showSuccess('Secure QR deleted successfully');
+                    this.cancelDelete();
+                    this.isProcessing = false;
+                },
+                error: (err) => {
+                    this.toastService.showError('Failed to delete QR');
+                    this.cancelDelete();
+                    this.isProcessing = false;
+                }
+            });
         }
     }
 
@@ -152,12 +190,7 @@ export class QrListComponent implements OnInit {
         this.qrToDeleteId = null;
     }
 
-    saveQRsToStorage() {
-        localStorage.setItem('my_mock_qrs', JSON.stringify(this.qrCodes));
-    }
-
     viewQR(qr: QRCode) {
-        // Enable Edit Mode
         this.editingQrId = qr.id;
         this.newQrName = qr.name;
         this.selectedDocumentIds = new Set(qr.linkedDocumentIds);
@@ -165,7 +198,7 @@ export class QrListComponent implements OnInit {
     }
 
     getPublicUrl(qr: QRCode): string {
-        return `${this.baseUrl}/qr/view/${qr.id}`;
+        return `${this.baseUrl}/access/${qr.id}`;
     }
 
     // UI Helpers
@@ -187,13 +220,16 @@ export class QrListComponent implements OnInit {
 
     async downloadQRCard(qr: QRCode, event: Event) {
         event.stopPropagation();
-        const element = document.getElementById(`qr-card-${qr.id}`);
-        if (!element) return;
+        this.downloadingQrId = qr.id; // Start loading
 
-        // SAFE FIX: Add export-mode class to simplify styles for capture
+        const element = document.getElementById(`qr-card-${qr.id}`);
+        if (!element) {
+            this.downloadingQrId = null;
+            return;
+        }
+
         element.classList.add('export-mode');
 
-        // MANUAL STYLE INJECTION: Brute-force the export styles to ensure they apply
         const badge = element.querySelector('.glass-badge') as HTMLElement;
         const elements = badge?.querySelectorAll('.export-text') as NodeListOf<HTMLElement> | null;
         elements?.forEach(el => el.classList.add('export-fix'));
@@ -223,7 +259,6 @@ export class QrListComponent implements OnInit {
                 white-space: nowrap !important;
                 -webkit-font-smoothing: antialiased !important;
             `;
-            // Fix icon inside badge
             const badgeIcon = badge.querySelector('svg') as unknown as HTMLElement;
             if (badgeIcon) {
                 badgeIcon.style.cssText = 'width: 0.875rem !important; height: 0.875rem !important; flex-shrink: 0 !important;';
@@ -240,7 +275,6 @@ export class QrListComponent implements OnInit {
                 width: fit-content !important;
                 white-space: nowrap !important;
             `;
-            // Fix icon inside meta-date
             const dateIcon = metaDate.querySelector('svg') as unknown as HTMLElement;
             if (dateIcon) {
                 dateIcon.style.cssText = 'width: 0.875rem !important; height: 0.875rem !important; flex-shrink: 0 !important; opacity: 0.9 !important;';
@@ -260,13 +294,12 @@ export class QrListComponent implements OnInit {
         }
 
         try {
-            // Dynamic import to avoid initial bundle bloat
             const html2canvas = (await import('html2canvas')).default;
 
             const canvas = await html2canvas(element, {
-                scale: 4, // Ultra-High resolution
-                backgroundColor: null, // Transparent background (will use container style)
-                useCORS: true, // For the QR image if cross-origin
+                scale: 4,
+                backgroundColor: null,
+                useCORS: true,
                 logging: false,
                 allowTaint: true
             });
@@ -281,7 +314,7 @@ export class QrListComponent implements OnInit {
             console.error('Download failed', error);
             this.toastService.showError(`Download failed: ${error.message || 'Unknown error'}`);
         } finally {
-            // SAFE FIX: Remove class and restore original styles
+            this.downloadingQrId = null; // Stop loading
             element.classList.remove('export-mode');
             if (badge) {
                 badge.style.cssText = originalBadgeStyle;
@@ -293,7 +326,7 @@ export class QrListComponent implements OnInit {
                 const elements = metaDate?.querySelectorAll('.export-text') as NodeListOf<HTMLElement> | null;
                 elements?.forEach(el => el.classList.remove('export-fix'));
             }
-            if (title) title.style.cssText = originalTitleStyle; // Note: this might revert other dynamic styles if not careful, but usually clean
+            if (title) title.style.cssText = originalTitleStyle;
         }
     }
 }

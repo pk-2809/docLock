@@ -6,13 +6,14 @@ import { AuthService } from '../../core/auth/auth';
 import { ToastService } from '../../core/services/toast.service';
 import { AppConfigService } from '../../core/services/app-config.service';
 
-import { ConfirmationSheetComponent } from '../../shared/components/confirmation-sheet/confirmation-sheet';
+import { DynamicSheetComponent } from '../../shared/components/dynamic-sheet/dynamic-sheet';
+import { SheetConfig } from '../../shared/models/ui.models';
 import { MpinSetupComponent } from '../auth/mpin-setup/mpin-setup';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, RouterLink, MpinSetupComponent, ConfirmationSheetComponent, FormsModule],
+    imports: [CommonModule, RouterLink, MpinSetupComponent, DynamicSheetComponent, FormsModule],
     templateUrl: './profile.html',
     styleUrl: './profile.css'
 })
@@ -195,9 +196,11 @@ export class ProfileComponent {
             },
             error: (err) => {
                 console.error('Failed to delete account', err);
-                this.isDeleting = false;
-                this.showDeleteSheet = false;
-                this.toastService.showError('Failed to delete account');
+                setTimeout(() => {
+                    this.isDeleting = false;
+                    this.showDeleteSheet = false;
+                    this.toastService.showError('Failed to delete account');
+                }, 0);
             }
         });
     }

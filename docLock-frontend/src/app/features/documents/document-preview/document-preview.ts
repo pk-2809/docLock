@@ -121,16 +121,17 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
         console.log('Fetching content for:', id);
         this.documentService.downloadDocument(id, this.document?.name || 'file')
             .subscribe({
-                next: async (blob) => {
-                    console.log('Content downloaded. Blob size:', blob.size, 'Type:', blob.type);
-                    this.blobUrl = URL.createObjectURL(blob);
+                next: async (res) => {
+                    console.log('Content URL received:', res.downloadUrl);
+                    // Store URL for download
+                    this.blobUrl = res.downloadUrl; // Reusing variable name for now, though it's a signed URL
 
                     if (this.isPdf) {
-                        await this.renderPdf(this.blobUrl);
-                    } else if (this.isImage) {
-                        this.previewUrl = this.blobUrl;
+                        // PDF.js can load directly from URL
+                        await this.renderPdf(res.downloadUrl);
                     } else {
-                        this.previewUrl = this.blobUrl; // Generic fallback
+                        // Images and others can be displayed directly
+                        this.previewUrl = res.downloadUrl;
                     }
                     this.isLoading = false;
                     this.cdr.detectChanges();
@@ -210,6 +211,7 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
         const link = document.createElement('a');
         link.href = this.blobUrl;
         link.download = this.document.name;
+        link.target = '_blank'; // Important for Signed URLs
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -73,13 +73,14 @@ export class QrViewComponent implements OnInit {
 
     downloadDoc(doc: Document) {
         // Implement download logic or link
-        this.documentService.downloadDocument(doc.id, doc.name).subscribe(blob => {
-            const url = window.URL.createObjectURL(blob);
+        this.documentService.downloadDocument(doc.id, doc.name).subscribe(res => {
             const link = document.createElement('a');
-            link.href = url;
+            link.href = res.downloadUrl;
             link.download = doc.name;
+            link.target = '_blank';
+            document.body.appendChild(link);
             link.click();
-            window.URL.revokeObjectURL(url);
+            document.body.removeChild(link);
         });
     }
 

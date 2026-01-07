@@ -25,7 +25,8 @@ try {
 
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-        projectId: serviceAccount.project_id
+        projectId: serviceAccount.project_id,
+        storageBucket: `${serviceAccount.project_id}.firebasestorage.app`
     });
 
     db = admin.firestore();
@@ -34,7 +35,7 @@ try {
 
     isFirebaseInitialized = true;
 } catch (error) {
-    console.warn('Firebase initialization failed - using mock mode');
+    console.error('Firebase initialization failed');
     isFirebaseInitialized = false;
 }
 

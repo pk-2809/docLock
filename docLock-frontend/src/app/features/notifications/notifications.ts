@@ -9,11 +9,12 @@ import { CardService, Card } from '../../core/services/card';
 import { PeopleService } from '../../core/people/people.service';
 import { ToastService } from '../../core/services/toast.service';
 import { FormsModule } from '@angular/forms';
+import { BottomSheetComponent } from '../../shared/components/bottom-sheet/bottom-sheet.component';
 
 @Component({
     selector: 'app-notifications',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule, TimeAgoPipe, NotificationMessagePipe],
+    imports: [CommonModule, RouterLink, FormsModule, TimeAgoPipe, NotificationMessagePipe, BottomSheetComponent],
     templateUrl: './notifications.html',
     styles: [`
         @keyframes slide-up {
@@ -26,8 +27,26 @@ import { FormsModule } from '@angular/forms';
                 transform: translateY(0);
             }
         }
+
         .animate-slide-up {
             animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 3s infinite ease-in-out;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
         }
     `]
 })
@@ -40,16 +59,17 @@ export class NotificationsComponent {
 
     notifications = this.notificationService.notifications;
 
-    // Confirmation State
+
     showClearConfirmation = false;
 
-    // Loading States
+
     isMarkingRead = false;
     isClearing = false;
 
-    // Fulfillment State
+
     showFulfillSheet = signal(false);
     requestData = signal<any>(null);
+    currentNotificationId = signal<string | null>(null);
     availableDocuments = signal<Document[]>([]);
     availableCards = signal<Card[]>([]);
     searchQuery = signal('');
@@ -89,13 +109,19 @@ export class NotificationsComponent {
         this.showClearConfirmation = false;
     }
 
-    // Notification Interaction
+
     onNotificationClick(notification: any) {
         if (!notification.metadata || notification.metadata.type !== 'request') return;
 
+
+        if (notification.metadata.status === 'fulfilled') {
+            return;
+        }
+
+        this.currentNotificationId.set(notification.id);
         this.requestData.set(notification.metadata);
         this.loadItems(notification.metadata.itemType);
-        this.searchQuery.set(''); // Empty search by default
+        this.searchQuery.set('');
         this.showFulfillSheet.set(true);
     }
 
@@ -107,8 +133,7 @@ export class NotificationsComponent {
                     this.availableDocuments.set(res.documents || []);
                     this.isLoadingItems.set(false);
                 },
-                error: (err) => {
-                    console.error('Failed to load docs', err);
+                error: () => {
                     this.isLoadingItems.set(false);
                 }
             });
@@ -118,43 +143,69 @@ export class NotificationsComponent {
                     this.availableCards.set(res.cards || []);
                     this.isLoadingItems.set(false);
                 },
-                error: (err) => {
-                    console.error('Failed to load cards', err);
+                error: () => {
                     this.isLoadingItems.set(false);
                 }
             });
         }
     }
 
-    getFilteredItems() {
-        const query = this.searchQuery().toLowerCase();
+    getEligibleItems() {
         const type = this.requestData()?.itemType;
-
         if (type === 'document') {
-            return this.availableDocuments().filter(doc => doc.name.toLowerCase().includes(query));
+            return this.availableDocuments().filter(doc => !doc.sharedBy);
         } else {
-            return this.availableCards().filter(card => card.name.toLowerCase().includes(query));
+            return this.availableCards().filter(card => !card.sharedBy);
         }
     }
 
+    getFilteredItems() {
+        const query = this.searchQuery().toLowerCase();
+        const items = this.getEligibleItems();
+
+        if (!query) return items;
+
+        return items.filter(item => item.name.toLowerCase().includes(query));
+    }
+
+    onSearchInput(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const sanitized = input.value.replace(/[^a-zA-Z _]/g, '');
+        input.value = sanitized;
+        this.searchQuery.set(sanitized);
+    }
+
     selectItem(id: string) {
-        this.selectedItemId.set(id);
+        if (this.selectedItemId() === id) {
+            this.selectedItemId.set(null);
+        } else {
+            this.selectedItemId.set(id);
+        }
     }
 
     sendItem() {
         const data = this.requestData();
         const itemId = this.selectedItemId();
-        if (!data || !itemId) return;
+        const notifId = this.currentNotificationId();
+
+        if (!data || !itemId || !notifId) return;
 
         this.isSending.set(true);
-        this.peopleService.shareItem(data.requesterId, itemId, data.itemType).subscribe({
+        this.peopleService.shareItem(data.requesterId, itemId, data.itemType, notifId).subscribe({
             next: () => {
                 this.toastService.showSuccess('Item sent successfully');
                 this.isSending.set(false);
+
+
+                this.notificationService.updateLocalNotification(notifId, {
+                    metadata: { ...data, status: 'fulfilled' },
+                    read: true,
+                    icon: 'check-circle'
+                });
+
                 this.closeFulfillSheet();
             },
-            error: (err) => {
-                console.error(err);
+            error: () => {
                 this.toastService.showError('Failed to send item');
                 this.isSending.set(false);
             }

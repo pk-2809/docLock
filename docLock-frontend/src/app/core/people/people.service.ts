@@ -107,8 +107,8 @@ export class PeopleService {
         return this.http.delete(`${this.apiUrl}/api/people/${friendId}`, { withCredentials: true });
     }
 
-    shareItem(recipientUid: string, itemId: string, type: 'document' | 'card'): Observable<any> {
-        return this.http.post(`${this.apiUrl}/api/people/share`, { recipientUid, itemId, type }, { withCredentials: true }).pipe(
+    shareItem(recipientUid: string, itemId: string, type: 'document' | 'card', requestId?: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/api/people/share`, { recipientUid, itemId, type, requestId }, { withCredentials: true }).pipe(
             tap(async () => {
                 // Persist Update to Firestore
                 if (this.currentUserId) {

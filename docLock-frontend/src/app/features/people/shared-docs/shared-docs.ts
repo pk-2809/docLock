@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 @Component({
     selector: 'app-shared-docs',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule],
     templateUrl: './shared-docs.html',
     styleUrl: './shared-docs.css'
 })

@@ -1,6 +1,10 @@
 import crypto from 'crypto';
 
-const SECRET_KEY = process.env.JWT_SECRET || 'dev-secret-key-change-in-prod';
+const SECRET_KEY = process.env.JWT_SECRET || '';
+const SALT = process.env.MPIN_SALT || 'doclock-salt-v1';
+
+if (!SECRET_KEY) console.error('CRITICAL: JWT_SECRET is not defined in environment variables.');
+
 
 interface SignedKeyPayload {
     [key: string]: unknown;
@@ -20,9 +24,7 @@ export class TokenService {
      * @returns Base64 encoded signed key
      */
     static generateSignedKey(data: Record<string, unknown>, expiresInMinutes: number = this.DEFAULT_EXPIRY_MINUTES): string {
-        if (!SECRET_KEY || SECRET_KEY === 'dev-secret-key-change-in-prod') {
-            console.warn('⚠️ Using default secret key. Change JWT_SECRET in production!');
-        }
+
 
         const payload: SignedKeyPayload = {
             ...data,
@@ -32,7 +34,7 @@ export class TokenService {
 
         const payloadStr = JSON.stringify(payload);
         const signature = crypto.createHmac('sha256', SECRET_KEY).update(payloadStr).digest('hex');
-        
+
         return Buffer.from(`${payloadStr}.${signature}`).toString('base64');
     }
 
@@ -57,14 +59,14 @@ export class TokenService {
 
             // Verify signature
             const expectedSignature = crypto.createHmac('sha256', SECRET_KEY).update(payloadStr).digest('hex');
-            
+
             // Use timing-safe comparison to prevent timing attacks
             if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
                 return null;
             }
 
             const data = JSON.parse(payloadStr) as SignedKeyPayload;
-            
+
             // Verify expiration
             const now = Date.now();
             const created = data.ts;
@@ -81,5 +83,15 @@ export class TokenService {
             console.error('Error verifying signed key:', error);
             return null;
         }
+
+    }
+
+    static hashMpin(mpin: string): string {
+        return crypto.pbkdf2Sync(mpin, SALT, 1000, 64, 'sha512').toString('hex');
+    }
+
+    static verifyMpin(inputMpin: string, storedHash: string): boolean {
+        const hash = this.hashMpin(inputMpin);
+        return hash === storedHash;
     }
 }

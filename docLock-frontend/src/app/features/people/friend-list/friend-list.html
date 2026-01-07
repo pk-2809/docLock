@@ -43,7 +43,8 @@
                 @if (friends().length > 0) {
                 <div class="relative">
                     <div class="absolute inset-0 bg-[#ec4899]/5 rounded-xl sm:rounded-2xl"></div>
-                    <input type="text" [(ngModel)]="searchQuery" placeholder="Search your trusted circle..."
+                    <input type="text" [ngModel]="searchQuery()" (input)="onSearchInput($event)"
+                        placeholder="Search your trusted circle..."
                         class="relative w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-white/90 backdrop-blur-xl border-2 border-white/60 rounded-xl sm:rounded-2xl text-slate-800 placeholder-slate-500 focus:outline-none focus:border-[#ec4899] focus:ring-4 focus:ring-[#ec4899]/10 transition-all shadow-lg font-medium text-sm sm:text-base">
                     <div class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-500">
                         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { AppSettingsService } from '../services/app-settings.service';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../auth/firebase';
 import { Observable } from 'rxjs';
@@ -22,7 +22,8 @@ export interface Notification {
 })
 export class NotificationService {
     private http = inject(HttpClient);
-    private apiUrl = `${environment.apiUrl}/api/notifications`;
+    private appSettings = inject(AppSettingsService);
+    private apiUrl = `${this.appSettings.apiUrl}/api/notifications`;
 
     // State
     notifications = signal<Notification[]>([]);
@@ -86,6 +87,12 @@ export class NotificationService {
                 const updated = this.notifications().map(n => ({ ...n, read: true }));
                 this.notifications.set(updated);
             })
+        );
+    }
+
+    updateLocalNotification(id: string, updates: Partial<Notification>) {
+        this.notifications.update(current =>
+            current.map(n => n.id === id ? { ...n, ...updates } : n)
         );
     }
 }

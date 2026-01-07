@@ -305,13 +305,16 @@
     </div>
 
     <!-- Delete Confirmation Sheet -->
-    @if (showDeleteSheet) {
-    <app-confirmation-sheet title="The Final Countdown"
-        message="Whoa there, partner! 🤠 <br><br> You are about to <b>permanently delete</b> your account. <br>All your documents, friends, and data will be wiped from the face of the earth. <br><br> This action is <b>irreversible</b> - like a bad haircut, but permanent."
-        confirmText="Yes, Delete Everything" cancelText="Wait, I changed my mind" type="danger" [isLoading]="isDeleting"
-        (confirm)="confirmDeleteAccount()" (cancel)="closeDeleteSheet()">
-    </app-confirmation-sheet>
-    }
+    <app-dynamic-sheet [isOpen]="showDeleteSheet" [config]="{
+            title: 'The Final Countdown',
+            message: 'Whoa there, partner! 🤠 <br><br> You are about to <b>permanently delete</b> your account. <br>All your documents, friends, and data will be wiped from the face of the earth. <br><br> This action is <b>irre versible</b> - like a bad haircut, but permanent.',
+            variant: 'danger',
+            buttons: [
+                { label: 'Yes, Delete Everything', action: 'confirm', variant: 'danger', loading: isDeleting },
+                { label: 'Wait, I changed my mind', action: 'cancel' }
+            ]
+        }" (confirmed)="confirmDeleteAccount()" (closed)="closeDeleteSheet()">
+    </app-dynamic-sheet>
 
     <!-- MPIN Setup Sheet -->
     @if (showMpinSheet) {

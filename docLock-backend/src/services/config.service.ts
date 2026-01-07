@@ -34,7 +34,6 @@ const DEFAULT_CONFIG: AppConfig = {
 export class ConfigService {
     static async getGlobalConfig(): Promise<AppConfig> {
         if (!isFirebaseInitialized) {
-            console.log('[Mock] Getting Global Config');
             return DEFAULT_CONFIG;
         }
 
@@ -43,7 +42,6 @@ export class ConfigService {
             const doc = await configRef.get();
 
             if (!doc.exists) {
-                console.log('⚡ Initializing Default Global Config in Firestore...');
                 await configRef.set(DEFAULT_CONFIG);
                 return DEFAULT_CONFIG;
             }

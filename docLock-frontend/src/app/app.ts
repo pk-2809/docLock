@@ -10,4 +10,16 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 })
 export class App {
   title = 'docLock';
+
+  ngAfterViewInit() {
+    // Artificial delay to show off the fancy animation, or just remove when ready
+    setTimeout(() => {
+      const splash = document.getElementById('splash-screen');
+      if (splash) {
+        splash.classList.add('hidden');
+        // Remove from DOM after fade out
+        setTimeout(() => splash.remove(), 800);
+      }
+    }, 2000); // 2 seconds minimum display time
+  }
 }

@@ -1,6 +1,6 @@
 import multer from 'multer';
 
-// Use memory storage to keep the file in buffer for direct stream upload to Drive
+// Use memory storage to keep the file in buffer for direct stream upload to Firebase Storage
 const storage = multer.memoryStorage();
 
 export const upload = multer({

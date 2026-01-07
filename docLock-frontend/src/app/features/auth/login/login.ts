@@ -13,7 +13,7 @@ import type { RecaptchaVerifier } from 'firebase/auth';
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule, OtpComponent],
     templateUrl: './login.html',
-    styleUrls: ['./login.css']
+    styleUrl: './login.css'
 })
 export class LoginComponent implements OnInit, AfterViewInit {
     readonly authService = inject(AuthService); // Public by default
@@ -39,6 +39,14 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
     ngOnInit(): void {
         this.typeEffect();
+
+        // Check for passed state from Signup (existing user redirection)
+        const nav = this.router.getCurrentNavigation();
+        const state = nav?.extras?.state as { mobile: string } | undefined;
+        if (state?.mobile) {
+            this.mobileNumber = state.mobile;
+            this.toast.show('Welcome back! Please login.', 'info');
+        }
     }
 
     ngAfterViewInit(): void {

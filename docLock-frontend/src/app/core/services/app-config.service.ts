@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { AppSettingsService } from '../services/app-settings.service';
 import { AES, enc } from 'crypto-js';
 
 export interface AppConfig {
@@ -37,7 +37,8 @@ const DEFAULT_CONFIG: AppConfig = {
 })
 export class AppConfigService {
     private http = inject(HttpClient);
-    private apiUrl = `${environment.apiUrl}/api/config`;
+    private appSettings = inject(AppSettingsService);
+    private apiUrl = `${this.appSettings.apiUrl}/api/config`;
 
     // Secure Storage Key (Obfuscation only, not military-grade)
     private readonly STORAGE_KEY = 'enc_app_cfg';

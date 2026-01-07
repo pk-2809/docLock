@@ -18,7 +18,7 @@ interface RouterState {
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule, OtpComponent],
     templateUrl: './signup.html',
-    styleUrls: ['./signup.css']
+    styleUrl: './signup.css'
 })
 export class SignupComponent implements OnInit, AfterViewInit {
     readonly authService = inject(AuthService);
@@ -82,7 +82,10 @@ export class SignupComponent implements OnInit, AfterViewInit {
                         if (res.exists) {
                             this.toast.showError('User already exists. Please login instead.');
                             this.authService.isLoading.set(false);
-                            this.router.navigate(['/login']);
+                            const navigationExtras: NavigationExtras = {
+                                state: { mobile }
+                            };
+                            this.router.navigate(['/login'], navigationExtras);
                         } else if (res.key) {
                             this.signupKey = res.key;
                             // Now trigger OTP with the key

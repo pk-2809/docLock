@@ -5,7 +5,7 @@ import { PeopleService, Friend } from '../../../core/people/people.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { FormsModule } from '@angular/forms';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-// Removed DocumentService/CardService logic from here as it is moved to Fulfillment Flow (Notifications)
+
 
 @Component({
     selector: 'app-friend-list',
@@ -28,22 +28,29 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 })
 export class FriendListComponent implements OnInit {
     peopleService = inject(PeopleService);
-    toastService = inject(ToastService); // Inject Toast
+    toastService = inject(ToastService);
     friends = this.peopleService.friends;
     isLoading = signal(true);
 
-    // Search functionality
+
     searchQuery = signal('');
 
-    // Confirmation Sheet State
+    onSearchInput(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const sanitized = input.value.replace(/[^a-zA-Z _]/g, '');
+        input.value = sanitized;
+        this.searchQuery.set(sanitized);
+    }
+
+
     showConfirmation = signal(false);
     friendToDelete = signal<string | null>(null);
     isDeleting = signal(false);
 
-    // Friend Interaction State (simplified)
+
     selectedFriendId = signal<string | null>(null);
 
-    // Request Functionality
+
     showRequestSheet = signal(false);
     requestType = signal<'document' | 'card'>('document');
     requestQuery = signal('');
@@ -65,7 +72,7 @@ export class FriendListComponent implements OnInit {
         });
     }
 
-    // Enhanced filtering
+
     filteredFriends() {
         const query = this.searchQuery().toLowerCase().trim();
         if (!query) return this.friends();
@@ -76,7 +83,7 @@ export class FriendListComponent implements OnInit {
         );
     }
 
-    // Avatar gradient classes with pink theme
+
     getAvatarGradient(index: number): string {
         const gradients = [
             'bg-gradient-to-br from-pink-500 to-rose-600 shadow-lg shadow-pink-500/20',
@@ -91,8 +98,7 @@ export class FriendListComponent implements OnInit {
         return gradients[index % gradients.length];
     }
 
-    // Stats methods
-    // Stats computed signals
+
     sharedDocsCount = computed(() => this.friends().reduce((acc, curr) => acc + (curr.sharedDocs || 0), 0));
     sharedCardsCount = computed(() => this.friends().reduce((acc, curr) => acc + (curr.sharedCards || 0), 0));
     activeRequestsCount = computed(() => this.friends().reduce((acc, curr) => acc + (curr.activeRequests || 0), 0));
@@ -101,16 +107,14 @@ export class FriendListComponent implements OnInit {
         return (friend.sharedDocs || 0) + (friend.sharedCards || 0);
     }
 
-    // Recent activity
     getRecentActivity(friend: Friend): any[] {
-        // Mock data - replace with actual implementation
         return friend.recentActivity || [
             { id: 1, description: 'Shared passport document', time: '2h ago' },
             { id: 2, description: 'Requested credit card', time: '1d ago' }
         ];
     }
 
-    // Quick action methods (direct request)
+
     quickRequestDocument(friend: Friend) {
         this.openRequestSheet(friend, 'document');
     }
@@ -151,7 +155,7 @@ export class FriendListComponent implements OnInit {
         this.friendToDelete.set(null);
     }
 
-    // Removed friend interaction methods since we removed the interaction card
+
 
     getSelectedFriend(): Friend | null {
         const friendId = this.selectedFriendId();
@@ -177,11 +181,10 @@ export class FriendListComponent implements OnInit {
         const name = this.requestQuery();
 
         if (!friendId) {
-            console.warn('Cannot send request: Missing friend ID');
             return;
         }
 
-        console.log('Sending request...', { friendId, type, name });
+
 
         this.isRequesting.set(true);
         this.peopleService.requestItem(friendId, type, name).subscribe({
@@ -191,7 +194,7 @@ export class FriendListComponent implements OnInit {
                 this.closeRequestSheet();
             },
             error: (err) => {
-                console.error(err);
+
                 this.toastService.showError('Failed to send request');
                 this.isRequesting.set(false);
             }

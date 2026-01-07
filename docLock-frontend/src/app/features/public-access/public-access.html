@@ -1,0 +1,234 @@
+<div class="min-h-screen w-full bg-[#0F172A] relative overflow-hidden flex flex-col items-center justify-center p-4">
+
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="mesh-gradient opacity-30"></div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+    <div class="relative z-10 flex flex-col items-center gap-4 animate-fade-in">
+        <div class="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
+        <p class="text-slate-400 font-medium tracking-wide text-sm uppercase">Verifying Link...</p>
+    </div>
+    }
+
+    <!-- Verified & Loaded -->
+    @else if (!error()) {
+
+    <!-- MPIN Entry Screen -->
+    @if (!isAuthenticated()) {
+    <div class="w-full max-w-sm relative z-10 animate-slide-up">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 mx-auto mb-6 glass-icon-wrapper rounded-3xl flex items-center justify-center">
+                <span class="material-symbols-rounded text-4xl text-white drop-shadow-lg">lock_open</span>
+            </div>
+            <h1 class="text-2xl font-bold text-white mb-2">Secured Access</h1>
+            <p class="text-slate-400 text-sm">Enter PIN to access shared documents</p>
+        </div>
+
+        <!-- PIN Display -->
+        <div class="flex justify-center gap-4 mb-10">
+            <div class="w-4 h-4 rounded-full border-2 transition-all duration-300"
+                [class.bg-indigo-500]="mpinInput().length >= 1" [class.border-indigo-500]="mpinInput().length >= 1"
+                [class.border-slate-600]="mpinInput().length < 1"></div>
+            <div class="w-4 h-4 rounded-full border-2 transition-all duration-300"
+                [class.bg-indigo-500]="mpinInput().length >= 2" [class.border-indigo-500]="mpinInput().length >= 2"
+                [class.border-slate-600]="mpinInput().length < 2"></div>
+            <div class="w-4 h-4 rounded-full border-2 transition-all duration-300"
+                [class.bg-indigo-500]="mpinInput().length >= 3" [class.border-indigo-500]="mpinInput().length >= 3"
+                [class.border-slate-600]="mpinInput().length < 3"></div>
+            <div class="w-4 h-4 rounded-full border-2 transition-all duration-300"
+                [class.bg-indigo-500]="mpinInput().length >= 4" [class.border-indigo-500]="mpinInput().length >= 4"
+                [class.border-slate-600]="mpinInput().length < 4"></div>
+        </div>
+
+        @if (mpinError()) {
+        <p class="text-red-500 text-center text-sm mb-6 animate-shake">{{ mpinError() }}</p>
+        }
+
+        <!-- Keypad -->
+        <div class="keypad-grid grid grid-cols-3 gap-4 max-w-[280px] mx-auto">
+            <button (click)="onKeyPress(1)" class="keypad-btn">1</button>
+            <button (click)="onKeyPress(2)" class="keypad-btn">2</button>
+            <button (click)="onKeyPress(3)" class="keypad-btn">3</button>
+            <button (click)="onKeyPress(4)" class="keypad-btn">4</button>
+            <button (click)="onKeyPress(5)" class="keypad-btn">5</button>
+            <button (click)="onKeyPress(6)" class="keypad-btn">6</button>
+            <button (click)="onKeyPress(7)" class="keypad-btn">7</button>
+            <button (click)="onKeyPress(8)" class="keypad-btn">8</button>
+            <button (click)="onKeyPress(9)" class="keypad-btn">9</button>
+            <div class="keypad-btn opacity-0 pointer-events-none"></div>
+            <button (click)="onKeyPress(0)" class="keypad-btn">0</button>
+            <button (click)="onKeyPress(-2)" class="keypad-btn !bg-transparent !border-0 text-red-400">
+                <span class="material-symbols-rounded">backspace</span>
+            </button>
+        </div>
+    </div>
+    }
+
+    <!-- Document List Screen -->
+    @else {
+    <div class="w-full max-w-2xl relative z-10 animate-fade-in h-[90vh] flex flex-col">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8 px-4">
+            <div>
+                <h1 class="text-2xl font-bold text-white mb-1">{{ qrName() || 'Secure Access' }}</h1>
+                <p class="text-indigo-400 text-sm font-medium">{{ linkedDocuments().length }} Secure Documents</p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
+                <img src="assets/logo.png" alt="Logo" class="w-6 h-6 object-contain">
+            </div>
+        </header>
+
+        <!-- List -->
+        <div class="flex-1 overflow-y-auto px-4 pb-20 space-y-3 custom-scrollbar">
+            @for (doc of linkedDocuments(); track doc.id) {
+            <div (click)="openPreview(doc)"
+                class="group bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer active:scale-[0.98]">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                        <span class="material-symbols-rounded text-2xl font-light">{{ getDocIcon(doc.mimeType) }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-white font-medium truncate pr-2">{{ doc.name }}</h3>
+                        <p class="text-slate-400 text-xs">{{ (doc.size / 1024).toFixed(1) }} KB</p>
+                    </div>
+                    <button (click)="$event.stopPropagation(); downloadDoc(doc)"
+                        class="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                        <span class="material-symbols-rounded">download</span>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+    }
+
+    }
+
+    <!-- Error State -->
+    @else {
+    <div class="relative z-10 text-center animate-fade-in max-w-xs">
+        <div
+            class="w-20 h-20 mx-auto mb-6 bg-red-500/10 rounded-full flex items-center justify-center backdrop-blur-sm border border-red-500/20">
+            <span class="material-symbols-rounded text-4xl text-red-500">error</span>
+        </div>
+        <h2 class="text-xl font-bold text-white mb-2">Access Denied</h2>
+        <p class="text-slate-400 text-sm mb-6">{{ error() }}</p>
+        <a routerLink="/"
+            class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-white text-slate-900 font-semibold text-sm hover:bg-slate-200 transition-colors">
+            Go to Home
+        </a>
+    </div>
+    }
+
+    <!-- Full Screen Document Preview -->
+    @if (showPreview()) {
+    <div class="fixed inset-0 z-50 bg-black animate-fade-in flex flex-col">
+
+        <!-- Top Overlay (Header) -->
+        <div class="absolute top-0 left-0 right-0 z-20 p-4 pt-safe-top bg-gradient-to-b from-black/80 to-transparent backdrop-blur-[2px] pointer-events-none transition-opacity duration-300"
+            [class.opacity-0]="!showControls && isPdf">
+            <div class="flex items-center gap-4 pointer-events-auto">
+                <button (click)="closePreview()"
+                    class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-90 shadow-lg border border-white/5">
+                    <span class="material-symbols-rounded">arrow_back</span>
+                </button>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-white font-semibold truncate text-lg shadow-sm drop-shadow-md">{{ previewDoc?.name
+                        }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content (Scrollable) -->
+        <div class="flex-1 overflow-y-auto px-0 bg-[#0F172A] relative custom-scrollbar touch-pan-y"
+            (click)="toggleControls()">
+
+            <!-- Content Wrapper -->
+            <div class="min-h-full flex flex-col items-center pt-0 pb-0 sm:pt-20 sm:pb-32">
+
+                <!-- Image Mode -->
+                @if (isImage && previewUrl) {
+                <div class="w-full h-full flex items-center justify-center min-h-screen bg-black">
+                    <img [src]="previewUrl" class="w-full h-auto object-contain max-h-screen">
+                </div>
+                }
+
+                <!-- PDF Mode -->
+                @else if (isPdf && pdfPages.length > 0) {
+                <div class="flex flex-col gap-0 w-full max-w-4xl mx-auto px-0">
+                    @for (page of pdfPages; track $index) {
+                    <div class="relative w-full bg-white shadow-xl overflow-hidden">
+                        <img [src]="page.url" class="w-full h-auto block" loading="lazy">
+                    </div>
+                    }
+                </div>
+                }
+
+                <!-- Loading -->
+                @else if (isPdf && pdfPages.length === 0) {
+                <div class="flex flex-col items-center justify-center min-h-screen gap-6">
+                    <div class="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin">
+                    </div>
+                    <p class="text-slate-400 font-medium animate-pulse">Rendering Secure Document...</p>
+                </div>
+                }
+
+                <!-- Fallback -->
+                @else {
+                <div class="flex flex-col items-center justify-center min-h-screen text-center px-6">
+                    <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                        <span class="material-symbols-rounded text-4xl text-slate-500">draft</span>
+                    </div>
+                    <p class="text-slate-300 font-medium text-lg mb-2">Preview Unavailable</p>
+                    <p class="text-slate-500 text-sm mb-8">This file type looks better when downloaded.</p>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Bottom Overlay (Actions) -->
+        <div class="absolute bottom-0 left-0 right-0 z-20 pb-safe-bottom bg-gradient-to-t from-black/95 via-black/70 to-transparent pt-24 pointer-events-none transition-opacity duration-300"
+            [class.opacity-0]="!showControls && isPdf">
+            <div class="flex justify-center items-center gap-8 pb-8 pointer-events-auto">
+
+                <!-- Share -->
+                <button (click)="shareDoc(previewDoc!)" class="group flex flex-col items-center gap-2 w-16">
+                    <div
+                        class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white group-hover:bg-indigo-500 group-hover:scale-110 transition-all duration-300 shadow-lg border border-white/5">
+                        <span class="material-symbols-rounded text-xl">share</span>
+                    </div>
+                    <span class="text-[10px] font-medium text-white/80 uppercase tracking-wider">Share</span>
+                </button>
+
+                <!-- Download (Primary) -->
+                <button (click)="downloadDoc(previewDoc!)"
+                    class="group flex flex-col items-center gap-2 transform -translate-y-2">
+                    <div
+                        class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white group-hover:scale-105 active:scale-95 transition-all duration-300 shadow-xl shadow-indigo-500/30 border border-white/10 ring-4 ring-black/20">
+                        <span class="material-symbols-rounded text-3xl">download</span>
+                    </div>
+                    <span
+                        class="text-xs font-bold text-white uppercase tracking-wider shadow-black drop-shadow-md">Save</span>
+                </button>
+
+                <!-- Close / Delete Style -->
+                <button (click)="closePreview()" class="group flex flex-col items-center gap-2 w-16">
+                    <div
+                        class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white group-hover:bg-red-500/20 group-hover:text-red-400 group-hover:scale-110 transition-all duration-300 shadow-lg border border-white/5">
+                        <span class="material-symbols-rounded text-xl">close</span>
+                    </div>
+                    <span class="text-[10px] font-medium text-white/80 uppercase tracking-wider">Close</span>
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+    }
+
+</div>

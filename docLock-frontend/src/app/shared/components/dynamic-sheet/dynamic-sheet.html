@@ -1,0 +1,76 @@
+@if (isOpen) {
+<div class="fixed inset-0 z-[100] flex items-end justify-center p-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+    (click)="onBackdropClick()" style="overscroll-behavior: none;">
+    <div class="w-full bg-white rounded-t-[2.5rem] md:rounded-[2.5rem] md:mb-4 md:max-w-lg shadow-[0_-10px_40px_rgba(0,0,0,0.2)] overflow-hidden relative animate-slide-up pb-8"
+        (click)="$event.stopPropagation()">
+
+        <!-- Drag Handle -->
+        @if (mergedConfig.showDragHandle) {
+        <div class="w-16 h-1.5 bg-slate-200 rounded-full mx-auto mt-4 mb-6 cursor-grab active:cursor-grabbing"></div>
+        }
+
+        <!-- Custom Content (if provided) -->
+        @if (customContent) {
+        <div class="p-8">
+            <ng-container *ngTemplateOutlet="customContent"></ng-container>
+        </div>
+        } @else {
+        <!-- Default Content -->
+        <div class="p-8 text-center relative z-10">
+            <!-- Icon -->
+            @if (iconConfig) {
+            <div class="w-20 h-20 mx-auto mb-6 rounded-3xl flex items-center justify-center"
+                [ngClass]="iconConfig.bgColor || 'bg-indigo-50'">
+
+                @if (iconConfig.type === 'svg') {
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
+                    [ngClass]="iconConfig.iconColor || 'bg-indigo-600'">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            [attr.d]="iconConfig.content" />
+                    </svg>
+                </div>
+                }
+
+                @if (iconConfig.type === 'emoji') {
+                <span class="text-4xl">{{ iconConfig.content }}</span>
+                }
+
+                @if (iconConfig.type === 'image') {
+                <img [src]="iconConfig.content" class="w-full h-full rounded-3xl object-cover">
+                }
+            </div>
+            }
+
+            <!-- Title -->
+            @if (mergedConfig.title) {
+            <h3 class="text-2xl font-bold text-slate-900 mb-3">{{ mergedConfig.title }}</h3>
+            }
+
+            <!-- Message -->
+            @if (mergedConfig.message) {
+            <div class="text-slate-600 font-medium mb-8 leading-relaxed max-w-[280px] mx-auto text-center"
+                [innerHTML]="mergedConfig.message"></div>
+            }
+        </div>
+
+        <!-- Action Buttons -->
+        @if (mergedConfig.buttons && mergedConfig.buttons.length > 0) {
+        <div class="px-8 space-y-3">
+            @for (button of mergedConfig.buttons; track button.label) {
+            <button (click)="handleButtonClick(button)" [ngClass]="getButtonClass(button)"
+                [disabled]="button.disabled || button.loading">
+                @if (!button.loading) {
+                <span>{{ button.label }}</span>
+                }
+                @if (button.loading) {
+                <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                }
+            </button>
+            }
+        </div>
+        }
+        }
+    </div>
+</div>
+}

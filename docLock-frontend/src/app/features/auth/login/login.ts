@@ -1,6 +1,6 @@
 import { Component, signal, inject, ViewChild, ElementRef, type OnInit, type AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Field, form, pattern, required } from '@angular/forms/signals';
 import { Router, RouterModule, type NavigationExtras } from '@angular/router';
 import { OtpComponent } from '../otp/otp.component';
 import { AuthService } from '../../../core/auth/auth';
@@ -11,7 +11,7 @@ import type { RecaptchaVerifier } from 'firebase/auth';
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, OtpComponent],
+    imports: [CommonModule, Field, RouterModule, OtpComponent],
     templateUrl: './login.html',
     styleUrl: './login.css'
 })
@@ -21,9 +21,16 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private readonly toast = inject(ToastService);
     private readonly notificationService = inject(NotificationService);
 
-    // Standard properties for ngModel
-    mobileNumber = '';
-    showOtp = false;
+    // Signal Form Model
+    loginModel = signal({ mobile: '' });
+
+    // Signal Form
+    loginForm = form(this.loginModel, (f) => {
+        required(f.mobile);
+        pattern(f.mobile, /^[0-9]{10}$/);
+    });
+
+    showOtp = signal(false);
     readonly currentText = signal<string>('');
 
     private recaptchaVerifier: RecaptchaVerifier | null = null;
@@ -44,7 +51,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
         const nav = this.router.getCurrentNavigation();
         const state = nav?.extras?.state as { mobile: string } | undefined;
         if (state?.mobile) {
-            this.mobileNumber = state.mobile;
+            // Update the signal directly, form will sync
+            this.loginModel.update(m => ({ ...m, mobile: state.mobile }));
             this.toast.show('Welcome back! Please login.', 'info');
         }
     }
@@ -83,13 +91,15 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
     onMobileInput(event: Event): void {
         const input = event.target as HTMLInputElement;
-        // Enforce numeric input only
-        input.value = input.value.replace(/[^0-9]/g, '');
-        this.mobileNumber = input.value;
+        // Enforce numeric input only and max 10 chars
+        const cleanValue = input.value.replace(/[^0-9]/g, '').slice(0, 10);
+        // Update signal directly
+        this.loginModel.update(m => ({ ...m, mobile: cleanValue }));
+        input.value = cleanValue; // Ensure input reflects clean value
     }
 
     onLogin(): void {
-        const mobile = this.mobileNumber;
+        const mobile = this.loginModel().mobile;
 
         if (mobile.length !== 10) {
             return;
@@ -115,7 +125,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
                         console.log('🚀 Triggering OTP...');
                         await this.authService.triggerOtp(mobile, this.recaptchaVerifier);
-                        this.showOtp = true;
+                        this.showOtp.set(true);
                         this.toast.showSuccess('OTP sent successfully! Check your phone.');
                     } catch (err: unknown) {
                         console.error('❌ OTP Error', err);
@@ -143,18 +153,18 @@ export class LoginComponent implements OnInit, AfterViewInit {
     }
 
     onOtpClose(): void {
-        this.showOtp = false;
+        this.showOtp.set(false);
     }
 
     @ViewChild(OtpComponent) otpComponent!: OtpComponent;
 
     async onGetOtp(): Promise<void> {
-        if (!this.mobileNumber || !this.recaptchaVerifier) return;
+        if (!this.loginModel().mobile || !this.recaptchaVerifier) return;
 
         this.otpComponent.initiateResend();
 
         try {
-            await this.authService.triggerOtp(this.mobileNumber, this.recaptchaVerifier);
+            await this.authService.triggerOtp(this.loginModel().mobile, this.recaptchaVerifier);
             this.toast.showSuccess('OTP resent successfully!');
             this.otpComponent.finalizeResend(true);
         } catch (err) {
@@ -173,7 +183,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
             // 2. Complete Login with Backend
             this.authService.completeLogin(idToken).subscribe({
                 next: () => {
-                    this.showOtp = false;
+                    this.showOtp.set(false);
                     this.toast.showSuccess('Welcome back!');
 
                     // Fetch notifications then navigate

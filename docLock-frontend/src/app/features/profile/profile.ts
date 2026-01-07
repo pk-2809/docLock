@@ -1,4 +1,4 @@
-import { Component, inject, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -28,7 +28,7 @@ export class ProfileComponent {
     private configService = inject(AppConfigService);
 
     // Computed stats for template
-    get stats() {
+    stats = computed(() => {
         const u = this.user();
         const usedBytes = u?.storageUsed || 0;
         const maxBytes = this.configService.config().maxStorageLimit;
@@ -43,7 +43,7 @@ export class ProfileComponent {
             storageUsed: usedBytes,
             storagePercentage: Math.min(Math.round(percentage * 10) / 10, 100) // 1 decimal place, max 100
         };
-    }
+    });
 
 
 
@@ -160,36 +160,36 @@ export class ProfileComponent {
     }
 
 
-    showMpinSheet = false;
+    showMpinSheet = signal(false);
 
     changeMpin() {
-        this.showMpinSheet = true;
+        this.showMpinSheet.set(true);
         document.body.style.overflow = 'hidden'; // Lock scroll
     }
 
     closeMpinSheet() {
-        this.showMpinSheet = false;
+        this.showMpinSheet.set(false);
         document.body.style.overflow = 'auto'; // Unlock scroll
     }
 
-    showDeleteSheet = false;
-    isDeleting = false; // Add loading state for delete
+    showDeleteSheet = signal(false);
+    isDeleting = signal(false); // Add loading state for delete
 
     initiateDeleteAccount() {
-        this.showDeleteSheet = true;
+        this.showDeleteSheet.set(true);
     }
 
     closeDeleteSheet() {
-        if (this.isDeleting) return;
-        this.showDeleteSheet = false;
+        if (this.isDeleting()) return;
+        this.showDeleteSheet.set(false);
     }
 
     confirmDeleteAccount() {
-        this.isDeleting = true;
+        this.isDeleting.set(true);
         this.authService.deleteAccount().subscribe({
             next: () => {
-                this.isDeleting = false;
-                this.showDeleteSheet = false;
+                this.isDeleting.set(false);
+                this.showDeleteSheet.set(false);
                 this.toastService.showSuccess('Account deleted successfully');
                 this.router.navigate(['/login']);
                 this.authService.user.set(null); // Clear local user state
@@ -197,8 +197,8 @@ export class ProfileComponent {
             error: (err) => {
                 console.error('Failed to delete account', err);
                 setTimeout(() => {
-                    this.isDeleting = false;
-                    this.showDeleteSheet = false;
+                    this.isDeleting.set(false);
+                    this.showDeleteSheet.set(false);
                     this.toastService.showError('Failed to delete account');
                 }, 0);
             }

@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { AppSettingsService } from '../services/app-settings.service';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc } from 'firebase/firestore';
 import { db } from '../auth/firebase';
 import { Observable } from 'rxjs';
 
@@ -34,6 +34,21 @@ export class NotificationService {
     constructor() { }
 
     private unsubscribeNotifications: (() => void) | null = null;
+
+    async addNotification(uid: string, title: string, message: string) {
+        try {
+            const notificationsRef = collection(db, 'users', uid, 'notifications');
+            await addDoc(notificationsRef, {
+                title,
+                message,
+                createdAt: new Date().toISOString(),
+                read: false,
+                icon: 'qr_code'
+            });
+        } catch (error) {
+            console.error('Failed to add notification', error);
+        }
+    }
 
     subscribeToNotifications(uid: string) {
         if (this.unsubscribeNotifications) {

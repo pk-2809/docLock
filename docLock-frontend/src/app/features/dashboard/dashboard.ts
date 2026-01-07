@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ToastService } from '../../core/services/toast.service';
 import { DocumentService, Document, Folder } from '../../core/services/document';
 import { CardService, Card } from '../../core/services/card';
+import { QrService } from '../../core/services/qr';
 import { AppConfigService } from '../../core/services/app-config.service';
 import { finalize } from 'rxjs';
 
@@ -15,7 +16,8 @@ import { finalize } from 'rxjs';
     standalone: true,
     imports: [CommonModule, FormsModule],
     templateUrl: './dashboard.html',
-    styleUrl: './dashboard.css'
+    styleUrl: './dashboard.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit {
     authService = inject(AuthService);
@@ -24,6 +26,7 @@ export class DashboardComponent implements OnInit {
     private toastService = inject(ToastService);
     private documentService = inject(DocumentService);
     private cardService = inject(CardService);
+    qrService = inject(QrService);
     private cdr = inject(ChangeDetectorRef);
     private appConfigService = inject(AppConfigService);
 
@@ -52,7 +55,7 @@ export class DashboardComponent implements OnInit {
     }
 
 
-    get dashboardStats() {
+    dashboardStats = computed(() => {
         const totalSize = this.documents.reduce((acc, doc) => acc + (doc.size || 0), 0);
         // Ensure storageLimitBytes is not 0
         const limit = this.storageLimitBytes || 1;
@@ -67,8 +70,7 @@ export class DashboardComponent implements OnInit {
 
         const cardsPercentage = Math.min((this.cardsCount / this.cardLimit) * 100, 100);
 
-        // Placeholder for QRs as logic isn't fully implemented
-        const qrsCount = 5;
+        const qrsCount = this.qrService.qrs().length;
         const qrsPercentage = Math.min((qrsCount / this.qrLimit) * 100, 100);
 
         return {
@@ -90,10 +92,10 @@ export class DashboardComponent implements OnInit {
                 used: qrsCount,
                 total: this.qrLimit,
                 percentage: qrsPercentage,
-                color: '#22c55e' // Green
+                color: '#F16D34' // Orange
             }
         };
-    }
+    });
 
     get totalStats() {
         const totalDocs = this.documents.length;
@@ -114,15 +116,16 @@ export class DashboardComponent implements OnInit {
 
     // Get current chart display value based on selected stat
     getCurrentChartValue(): number {
+        const stats = this.dashboardStats();
         switch (this.selectedChartStat) {
             case 'storage':
-                return this.dashboardStats.storage.percentage;
+                return stats.storage.percentage;
             case 'cards':
-                return this.dashboardStats.cards.percentage;
+                return stats.cards.percentage;
             case 'qrs':
-                return this.dashboardStats.qrs.percentage;
+                return stats.qrs.percentage;
             default:
-                return this.dashboardStats.storage.percentage;
+                return stats.storage.percentage;
         }
     }
 
@@ -147,33 +150,34 @@ export class DashboardComponent implements OnInit {
 
     // Get details for selected chart stat
     getSelectedStatDetails() {
+        const stats = this.dashboardStats();
         switch (this.selectedChartStat) {
             case 'storage':
                 return {
-                    used: this.dashboardStats.storage.used,
-                    total: this.dashboardStats.storage.total,
-                    unit: this.dashboardStats.storage.unit,
+                    used: stats.storage.used,
+                    total: stats.storage.total,
+                    unit: stats.storage.unit,
                     label: 'Storage'
                 };
             case 'cards':
                 return {
-                    used: this.dashboardStats.cards.used,
-                    total: this.dashboardStats.cards.total,
+                    used: stats.cards.used,
+                    total: stats.cards.total,
                     unit: '',
                     label: 'Cards'
                 };
             case 'qrs':
                 return {
-                    used: this.dashboardStats.qrs.used,
-                    total: this.dashboardStats.qrs.total,
+                    used: stats.qrs.used,
+                    total: stats.qrs.total,
                     unit: '',
                     label: 'QRs'
                 };
             default:
                 return {
-                    used: this.dashboardStats.storage.used,
-                    total: this.dashboardStats.storage.total,
-                    unit: this.dashboardStats.storage.unit,
+                    used: stats.storage.used,
+                    total: stats.storage.total,
+                    unit: stats.storage.unit,
                     label: 'Storage'
                 };
         }
@@ -181,6 +185,7 @@ export class DashboardComponent implements OnInit {
 
     ngOnInit() {
         // Subscriptions are now handled globally in AuthService
+        this.qrService.loadQrs();
     }
 
     // loadData is removed as we use real-time subscriptions now

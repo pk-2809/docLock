@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { DocumentService, Document } from '../../../core/services/document';
 import { AuthService } from '../../../core/auth/auth';
+import { NotificationService } from '../../../core/services/notification.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BottomSheetComponent } from '../../../shared/components/bottom-sheet/bottom-sheet.component';
 import { QrService, QRCode } from '../../../core/services/qr';
@@ -20,6 +21,7 @@ export class QrListComponent implements OnInit {
     private qrService = inject(QrService);
     private documentService = inject(DocumentService);
     private authService = inject(AuthService);
+    private notificationService = inject(NotificationService);
     private toastService = inject(ToastService);
     private cdr = inject(ChangeDetectorRef);
 
@@ -135,6 +137,12 @@ export class QrListComponent implements OnInit {
                     }
                     this.closeModal();
                     this.toastService.showSuccess('Secure QR updated successfully!');
+
+                    const user = this.authService.user();
+                    if (user) {
+                        this.notificationService.addNotification(user.uid, 'Secure QR Updated', `Successfully updated secure QR: ${data.name}`);
+                    }
+
                     this.isProcessing = false;
                     this.cdr.detectChanges();
                 },
@@ -149,6 +157,12 @@ export class QrListComponent implements OnInit {
                     this.qrCodes.unshift(res.qr);
                     this.closeModal();
                     this.toastService.showSuccess('Secure QR created! Default MPIN: 1234');
+
+                    const user = this.authService.user();
+                    if (user) {
+                        this.notificationService.addNotification(user.uid, 'Secure QR Created', `Successfully generated secure QR: ${data.name}`);
+                    }
+
                     this.isProcessing = false;
                     this.cdr.detectChanges();
                 },
@@ -173,6 +187,12 @@ export class QrListComponent implements OnInit {
                 next: () => {
                     this.qrCodes = this.qrCodes.filter(q => q.id !== this.qrToDeleteId);
                     this.toastService.showSuccess('Secure QR deleted successfully');
+
+                    const user = this.authService.user();
+                    if (user) {
+                        this.notificationService.addNotification(user.uid, 'Secure QR Deleted', 'Successfully deleted secure QR from your vault');
+                    }
+
                     this.cancelDelete();
                     this.isProcessing = false;
                 },

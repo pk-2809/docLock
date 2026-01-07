@@ -1,12 +1,15 @@
 @if (isOpen) {
-<div class="fixed inset-0 z-50 flex flex-col justify-end w-full h-full">
+<div class="fixed inset-0 z-50 flex flex-col justify-end items-center w-full h-full md:p-4">
     <!-- Backdrop -->
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" (click)="onClose()"></div>
+    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" (click)="onClose()"></div>
 
-    <!-- Bottom Sheet -->
-    <div class="relative w-full bg-white rounded-t-3xl p-8 animate-slide-up shadow-2xl z-10">
-        <!-- Handle for mobile -->
-        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-8"></div>
+    <!-- Modal Card (Sheet on Mobile, Floating Bottom Popup on Desktop) -->
+    <div
+        class="relative w-full md:w-full md:max-w-[380px] bg-white rounded-t-[2.5rem] md:rounded-[2.5rem] p-6 shadow-2xl shadow-indigo-500/20 z-10 overflow-hidden animate-slide-up md:mb-8">
+        <!-- Drag Handle -->
+        <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-6"></div>
+
+
 
         <div class="text-center mb-8">
             <div class="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">

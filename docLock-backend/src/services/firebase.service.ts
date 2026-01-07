@@ -419,21 +419,33 @@ export class FirebaseService {
             // We await them at the end or let them run. Better to await to report full success.
 
             // 2. Friend Links & Notifications (Complex Queries)
-            const friendsSnapshot = await db.collectionGroup('friends').where('uid', '==', uid).get();
+            // 2. Friend Links & Notifications (Complex Queries)
+            // This query usually requires a composite index. If it fails, we log it but proceed with deletion.
+            try {
+                const friendsSnapshot = await db.collectionGroup('friends').where('uid', '==', uid).get();
 
-            // We need to resolve these asynchronously before adding to refsToDelete
-            for (const friendDoc of friendsSnapshot.docs) {
-                refsToDelete.push(friendDoc.ref);
+                // We need to resolve these asynchronously before adding to refsToDelete
+                for (const friendDoc of friendsSnapshot.docs) {
+                    refsToDelete.push(friendDoc.ref);
 
-                const friendId = friendDoc.ref.parent.parent?.id;
-                if (friendId) {
-                    try {
-                        const notificationsRef = db.collection('users').doc(friendId).collection('notifications');
-                        const requestsQuery = await notificationsRef.where('metadata.requesterId', '==', uid).get();
-                        requestsQuery.docs.forEach(notifDoc => refsToDelete.push(notifDoc.ref));
-                    } catch (err) {
-                        console.warn(`Failed to cleanup notifications for friend ${friendId}:`, err);
+                    const friendId = friendDoc.ref.parent.parent?.id;
+                    if (friendId) {
+                        try {
+                            const notificationsRef = db.collection('users').doc(friendId).collection('notifications');
+                            const requestsQuery = await notificationsRef.where('metadata.requesterId', '==', uid).get();
+                            requestsQuery.docs.forEach(notifDoc => refsToDelete.push(notifDoc.ref));
+                        } catch (err) {
+                            console.warn(`Failed to cleanup notifications for friend ${friendId}:`, err);
+                        }
                     }
+                }
+            } catch (error: any) {
+                console.warn('Failed to cleanup friend links (likely missing index). Proceeding with account deletion.');
+                // Log the index link if present in the error message for the developer
+                if (error.code === 9) {
+                    console.warn('To fix this, create the missing index in Firebase Console. Details:', error.message);
+                } else {
+                    console.warn('Friend cleanup error:', error);
                 }
             }
 

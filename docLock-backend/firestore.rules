@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User Data & Subcollections
+    // Matches users/{userId} and ANY path recursively under it
+    // e.g. users/123/documents/doc1, users/123/folders/folder1, etc.
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default deny for everything else
+    // This blocks access to any root collections not matched above
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

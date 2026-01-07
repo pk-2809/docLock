@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { AppSettingsService } from '../services/app-settings.service';
 
 export interface QRCode {
@@ -20,21 +20,31 @@ export class QrService {
     private appSettings = inject(AppSettingsService);
     private apiUrl = this.appSettings.apiUrl + '/qrs';
 
+    qrs = signal<QRCode[]>([]);
+
     // Protected Methods
     createQR(data: { name: string, mpin: string, linkedDocumentIds: string[] }): Observable<{ status: string, qr: QRCode }> {
-        return this.http.post<{ status: string, qr: QRCode }>(this.apiUrl, data, { withCredentials: true });
+        return this.http.post<{ status: string, qr: QRCode }>(this.apiUrl, data, { withCredentials: true })
+            .pipe(tap(res => this.qrs.update(prev => [res.qr, ...prev])));
     }
 
     updateQR(id: string, data: { name?: string, linkedDocumentIds?: string[] }): Observable<{ status: string, qr: QRCode }> {
-        return this.http.put<{ status: string, qr: QRCode }>(`${this.apiUrl}/${id}`, data, { withCredentials: true });
+        return this.http.put<{ status: string, qr: QRCode }>(`${this.apiUrl}/${id}`, data, { withCredentials: true })
+            .pipe(tap(res => this.qrs.update(prev => prev.map(q => q.id === id ? res.qr : q))));
     }
 
     getQRs(): Observable<{ status: string, qrs: QRCode[] }> {
-        return this.http.get<{ status: string, qrs: QRCode[] }>(this.apiUrl, { withCredentials: true });
+        return this.http.get<{ status: string, qrs: QRCode[] }>(this.apiUrl, { withCredentials: true })
+            .pipe(tap(res => this.qrs.set(res.qrs)));
+    }
+
+    loadQrs() {
+        this.getQRs().subscribe();
     }
 
     deleteQR(id: string): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/${id}`, { withCredentials: true });
+        return this.http.delete(`${this.apiUrl}/${id}`, { withCredentials: true })
+            .pipe(tap(() => this.qrs.update(prev => prev.filter(q => q.id !== id))));
     }
 
     // Public Methods

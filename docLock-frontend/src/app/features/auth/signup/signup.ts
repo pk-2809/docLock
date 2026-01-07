@@ -1,6 +1,6 @@
-import { Component, inject, signal, ViewChild, type OnInit, type AfterViewInit } from '@angular/core';
+import { Component, signal, inject, ViewChild, type OnInit, type AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Field, form, pattern, required } from '@angular/forms/signals';
 import { Router, RouterModule, type NavigationExtras } from '@angular/router';
 import { OtpComponent } from '../otp/otp.component';
 import { AuthService } from '../../../core/auth/auth';
@@ -8,15 +8,10 @@ import { ToastService } from '../../../core/services/toast.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import type { RecaptchaVerifier } from 'firebase/auth';
 
-interface RouterState {
-    mobile: string;
-    key: string;
-}
-
 @Component({
     selector: 'app-signup',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, OtpComponent],
+    imports: [CommonModule, Field, RouterModule, OtpComponent],
     templateUrl: './signup.html',
     styleUrl: './signup.css'
 })
@@ -26,26 +21,35 @@ export class SignupComponent implements OnInit, AfterViewInit {
     private readonly toast = inject(ToastService);
     private readonly notificationService = inject(NotificationService);
 
-    // Form properties (for ngModel binding)
-    name = '';
-    mobileNumber = '';
+    // Form Model
+    signupModel = signal({ name: '', mobile: '' });
+
+    // Signal Form
+    signupForm = form(this.signupModel, (f) => {
+        required(f.name);
+        required(f.mobile);
+        pattern(f.mobile, /^[0-9]{10}$/);
+    });
 
     // Signals for reactive state
-    signupKey = '';
-    showOtp = false;
+    signupKey = signal('');
+    showOtp = signal(false);
 
     private recaptchaVerifier: RecaptchaVerifier | null = null;
 
-    ngOnInit(): void {
-        // Get state from router navigation
+    constructor() {
         const nav = this.router.getCurrentNavigation();
-        const state = nav?.extras?.state as RouterState | undefined;
+        const state = nav?.extras?.state as { mobile: string, key: string } | undefined;
 
-        if (state?.mobile && state?.key) {
-            this.mobileNumber = state.mobile;
-            this.signupKey = state.key;
+        if (state?.mobile) {
+            this.signupModel.update(m => ({ ...m, mobile: state.mobile }));
+        }
+        if (state?.key) {
+            this.signupKey.set(state.key);
         }
     }
+
+    ngOnInit(): void { }
 
     ngAfterViewInit(): void {
         this.recaptchaVerifier =
@@ -58,14 +62,15 @@ export class SignupComponent implements OnInit, AfterViewInit {
 
     onMobileInput(event: Event): void {
         const input = event.target as HTMLInputElement;
-        // Enforce numeric input only
-        input.value = input.value.replace(/[^0-9]/g, '');
-        this.mobileNumber = input.value;
+        // Enforce numeric input only and max 10 chars
+        const cleanValue = input.value.replace(/[^0-9]/g, '').slice(0, 10);
+        this.signupModel.update(m => ({ ...m, mobile: cleanValue }));
+        input.value = cleanValue;
     }
 
     async onSignup(): Promise<void> {
-        const mobile = this.mobileNumber;
-        const name = this.name;
+        const mobile = this.signupModel().mobile;
+        const name = this.signupModel().name;
 
         if (mobile.length !== 10 || !name.trim()) {
             return;
@@ -75,7 +80,7 @@ export class SignupComponent implements OnInit, AfterViewInit {
 
         try {
             // If signup key is missing, fetch it from backend
-            const currentKey = this.signupKey;
+            const currentKey = this.signupKey();
             if (!currentKey) {
                 this.authService.checkUser(mobile).subscribe({
                     next: (res) => {
@@ -83,11 +88,11 @@ export class SignupComponent implements OnInit, AfterViewInit {
                             this.toast.showError('User already exists. Please login instead.');
                             this.authService.isLoading.set(false);
                             const navigationExtras: NavigationExtras = {
-                                state: { mobile }
+                                state: { mobile: this.signupModel().mobile }
                             };
                             this.router.navigate(['/login'], navigationExtras);
                         } else if (res.key) {
-                            this.signupKey = res.key;
+                            this.signupKey.set(res.key);
                             // Now trigger OTP with the key
                             this.triggerOtpWithKey();
                         } else {
@@ -121,10 +126,10 @@ export class SignupComponent implements OnInit, AfterViewInit {
             }
 
             // Trigger OTP
-            const mobile = this.mobileNumber;
+            const mobile = this.signupModel().mobile;
             console.log('🚀 Triggering OTP for signup...');
             await this.authService.triggerOtp(mobile, this.recaptchaVerifier);
-            this.showOtp = true;
+            this.showOtp.set(true);
             this.toast.showSuccess('OTP sent successfully! Check your phone.');
         } catch (err: unknown) {
             console.error('❌ OTP Trigger Error', err);
@@ -136,18 +141,18 @@ export class SignupComponent implements OnInit, AfterViewInit {
     }
 
     onOtpClose(): void {
-        this.showOtp = false;
+        this.showOtp.set(false);
     }
 
     @ViewChild(OtpComponent) otpComponent!: OtpComponent;
 
     async onGetOtp(): Promise<void> {
-        if (!this.mobileNumber || !this.recaptchaVerifier) return;
+        if (!this.signupModel().mobile || !this.recaptchaVerifier) return;
 
         this.otpComponent.initiateResend();
 
         try {
-            await this.authService.triggerOtp(this.mobileNumber, this.recaptchaVerifier);
+            await this.authService.triggerOtp(this.signupModel().mobile, this.recaptchaVerifier);
             this.toast.showSuccess('OTP resent successfully!');
             this.otpComponent.finalizeResend(true);
         } catch (err) {
@@ -159,7 +164,8 @@ export class SignupComponent implements OnInit, AfterViewInit {
 
     async onOtpVerify(code: string): Promise<void> {
         // Ensure we have a signup key before proceeding
-        if (!this.signupKey) return;
+        const key = this.signupKey();
+        if (!key) return;
 
         this.authService.isLoading.set(true); // Show loading immediately
 
@@ -168,9 +174,9 @@ export class SignupComponent implements OnInit, AfterViewInit {
             const idToken = await this.authService.verifyOtp(code);
 
             // 2. Complete Signup with Backend
-            this.authService.completeSignup(this.name, idToken, this.signupKey).subscribe({
+            this.authService.completeSignup(this.signupModel().name, idToken, key).subscribe({
                 next: () => {
-                    this.showOtp = false;
+                    this.showOtp.set(false);
                     this.toast.showSuccess('Account created successfully!');
 
                     // Fetch notifications then navigate

@@ -7,9 +7,9 @@ import { ToastService } from '../../../core/services/toast.service';
     standalone: true,
     imports: [CommonModule],
     template: `
-    <div class="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
+    <div class="fixed top-6 right-4 left-4 md:left-auto md:right-6 md:w-auto z-[9999] flex flex-col gap-3 pointer-events-none">
         @for (toast of toastService.toasts(); track toast.id) {
-            <div class="pointer-events-auto min-w-[400px] max-w-md p-4 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/10 animate-slide-in flex items-center gap-3"
+            <div class="pointer-events-auto w-full md:min-w-[400px] md:w-auto max-w-md p-4 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/10 animate-slide-in flex items-center gap-3"
                  [ngClass]="{
                     'bg-slate-900/90 text-white': true,
                     'shadow-green-500/20 border-green-500/20': toast.type === 'success',

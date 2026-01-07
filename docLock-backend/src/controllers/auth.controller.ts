@@ -6,6 +6,7 @@ import { CustomError } from '../middleware/errorHandler';
 import { asyncHandler } from '../middleware/errorHandler';
 import { NotificationService } from '../services/notification.service';
 import { EncryptionUtil } from '../utils/encryption';
+import { CookieUtil } from '../utils/cookie.util';
 
 export class AuthController {
     static checkUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -24,23 +25,20 @@ export class AuthController {
     static verifyLogin = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const { idToken } = req.body;
 
-
         const decodedToken = await FirebaseService.verifyIdToken(idToken);
         if (!decodedToken) {
             throw new CustomError('Invalid ID Token', 401);
         }
 
-
         const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
         const sessionCookie = await FirebaseService.createSessionCookie(idToken, expiresIn);
 
-        // Set Cookie
-        res.cookie('session', sessionCookie, {
-            maxAge: expiresIn,
-            httpOnly: true,
-            secure: true, // Required for SameSite: None
-            sameSite: 'none', // Required for cross-site (web.app -> run.app)
-        });
+        // Set session cookie with environment-aware configuration
+        const cookieConfig = CookieUtil.getCookieConfig(req);
+        res.cookie('session', sessionCookie, cookieConfig);
+
+        // Generate CSRF token for production
+        CookieUtil.generateCsrfToken(req, res);
 
         res.json({ status: 'success', uid: decodedToken.uid });
     });
@@ -76,22 +74,18 @@ export class AuthController {
         const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
         const sessionCookie = await FirebaseService.createSessionCookie(idToken, expiresIn);
 
-        res.cookie('session', sessionCookie, {
-            maxAge: expiresIn,
-            httpOnly: true,
-            secure: true, // Required for SameSite: None
-            sameSite: 'none', // Required for cross-site (web.app -> run.app)
-        });
+        // Set session cookie with environment-aware configuration
+        const cookieConfig = CookieUtil.getCookieConfig(req);
+        res.cookie('session', sessionCookie, cookieConfig);
+
+        // Generate CSRF token for production
+        CookieUtil.generateCsrfToken(req, res);
 
         res.json({ status: 'success', uid: decodedToken.uid });
     });
 
-    static logout = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
-        res.clearCookie('session', {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-        });
+    static logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        CookieUtil.clearAuthCookies(req, res);
         res.json({ status: 'success' });
     });
 
@@ -258,12 +252,8 @@ export class AuthController {
         // Perform cascading delete
         await FirebaseService.deleteUserAndData(decodedClaims.uid);
 
-        // Clear session cookie
-        res.clearCookie('session', {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-        });
+        // Clear all authentication cookies
+        CookieUtil.clearAuthCookies(req, res);
 
         res.json({ status: 'success', message: 'Account deleted successfully' });
     });

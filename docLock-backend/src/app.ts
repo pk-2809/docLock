@@ -13,6 +13,7 @@ import cardRoutes from './routes/card.routes';
 import configRoutes from './routes/config.routes';
 import qrRoutes from './routes/qr.routes';
 import { errorHandler } from './middleware/errorHandler';
+import { csrfProtection } from './middleware/csrf';
 
 dotenv.config();
 
@@ -37,10 +38,19 @@ if (frontendUrls.length === 0) {
 }
 
 app.use(cors({
-    origin: frontendUrls,
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+
+        if (frontendUrls.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
 }));
 
 // Standard Middleware
@@ -49,6 +59,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// CSRF Protection (production only)
+app.use(csrfProtection);
 
 // API Routes
 app.use('/api/auth', authRoutes);

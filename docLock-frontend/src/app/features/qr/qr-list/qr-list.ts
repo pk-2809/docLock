@@ -69,15 +69,21 @@ export class QrListComponent implements OnInit {
         });
     }
 
+    isLoadingQrs = false;
+
     loadQrs() {
+        this.isLoadingQrs = true;
         this.qrService.getQRs().subscribe({
             next: (res: any) => {
                 this.qrCodes = res.qrs;
+                this.isLoadingQrs = false;
                 this.cdr.detectChanges();
             },
             error: (err) => {
                 console.error('Failed to load QRs', err);
                 this.toastService.showError('Failed to load existing QRs');
+                this.isLoadingQrs = false;
+                this.cdr.detectChanges();
             }
         });
     }
@@ -335,6 +341,7 @@ export class QrListComponent implements OnInit {
             this.toastService.showError(`Download failed: ${error.message || 'Unknown error'}`);
         } finally {
             this.downloadingQrId = null; // Stop loading
+            this.cdr.detectChanges(); // Force UI update
             element.classList.remove('export-mode');
             if (badge) {
                 badge.style.cssText = originalBadgeStyle;
@@ -347,6 +354,7 @@ export class QrListComponent implements OnInit {
                 elements?.forEach(el => el.classList.remove('export-fix'));
             }
             if (title) title.style.cssText = originalTitleStyle;
+            this.cdr.detectChanges();
         }
     }
 }

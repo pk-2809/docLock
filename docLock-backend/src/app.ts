@@ -45,6 +45,7 @@ app.use(cors({
         if (frontendUrls.includes(origin)) {
             callback(null, true);
         } else {
+            console.error('CORS Blocked Origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -70,7 +71,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/cards', cardRoutes);
 app.use('/api/config', configRoutes);
-app.use('/qrs', qrRoutes);
+app.use('/api/qrs', qrRoutes);
 
 // Health Check
 app.get('/health', (_req: Request, res: Response) => {

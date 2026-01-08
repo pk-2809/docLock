@@ -56,4 +56,13 @@ export class StorageService {
             }
         }
     }
+
+    /**
+     * Gets a readable stream of the file content
+     * @param storagePath Path to the file in storage
+     */
+    static getFileStream(storagePath: string): NodeJS.ReadableStream {
+        const file = this.bucket.file(storagePath);
+        return file.createReadStream();
+    }
 }

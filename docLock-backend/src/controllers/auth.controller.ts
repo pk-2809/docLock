@@ -33,12 +33,9 @@ export class AuthController {
         const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
         const sessionCookie = await FirebaseService.createSessionCookie(idToken, expiresIn);
 
-        // Set session cookie with environment-aware configuration
+        // Set session cookie (MUST be named '__session' for Firebase Hosting rewrites)
         const cookieConfig = CookieUtil.getCookieConfig(req);
-        res.cookie('session', sessionCookie, cookieConfig);
-
-        // Generate CSRF token for production
-        CookieUtil.generateCsrfToken(req, res);
+        res.cookie('__session', sessionCookie, cookieConfig);
 
         res.json({ status: 'success', uid: decodedToken.uid });
     });
@@ -74,14 +71,15 @@ export class AuthController {
         const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
         const sessionCookie = await FirebaseService.createSessionCookie(idToken, expiresIn);
 
-        // Set session cookie with environment-aware configuration
+        // Set session cookie (MUST be named '__session' for Firebase Hosting rewrites)
         const cookieConfig = CookieUtil.getCookieConfig(req);
-        res.cookie('session', sessionCookie, cookieConfig);
-
-        // Generate CSRF token for production
-        CookieUtil.generateCsrfToken(req, res);
+        res.cookie('__session', sessionCookie, cookieConfig);
 
         res.json({ status: 'success', uid: decodedToken.uid });
+    });
+
+    static getCsrfToken = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+        res.json({ csrfToken: null });
     });
 
     static logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -90,7 +88,7 @@ export class AuthController {
     });
 
     static checkSession = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
 
         if (!sessionCookie) {
             res.json({ isLoggedIn: false });
@@ -133,7 +131,7 @@ export class AuthController {
         });
     });
     static updateProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
 
         if (!sessionCookie) {
             throw new CustomError('Unauthorized', 401);
@@ -237,7 +235,7 @@ export class AuthController {
 
 
     static deleteAccount = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
 
         if (!sessionCookie) {
             throw new CustomError('Unauthorized', 401);

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { DocumentService, Document } from '../../../core/services/document';
 import { ToastService } from '../../../core/services/toast.service';
 import { BottomSheetComponent } from '../../../shared/components/bottom-sheet/bottom-sheet.component';
@@ -35,7 +35,7 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
     itemToShare: { id: string, name: string, type: 'document' | 'card' } | null = null;
 
     // Preview State
-    previewUrl: SafeResourceUrl | string | null = null;
+    previewUrl: SafeUrl | string | null = null;
     blobUrl: string | null = null;
     isImage = false;
     isPdf = false;
@@ -121,7 +121,7 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
             await this.renderPdf(url);
         } else {
             // Images and others can be displayed directly
-            this.previewUrl = url;
+            this.previewUrl = this.sanitizer.bypassSecurityTrustUrl(url);
         }
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -148,17 +148,16 @@ export class DocumentPreviewComponent implements OnInit, OnDestroy {
         console.log('Fetching content for:', id);
         this.documentService.downloadDocument(id, this.document?.name || 'file')
             .subscribe({
-                next: async (res) => {
-                    console.log('Content URL received:', res.downloadUrl);
-                    // Store URL for download
-                    this.blobUrl = res.downloadUrl; // Reusing variable name for now, though it's a signed URL
+                next: async (blob: Blob) => {
+                    const url = window.URL.createObjectURL(blob);
+                    console.log('Content URL created from blob:', url);
+                    // Store URL for download & preview
+                    this.blobUrl = url;
 
                     if (this.isPdf) {
-                        // PDF.js can load directly from URL
-                        await this.renderPdf(res.downloadUrl);
+                        await this.renderPdf(url);
                     } else {
-                        // Images and others can be displayed directly
-                        this.previewUrl = res.downloadUrl;
+                        this.previewUrl = this.sanitizer.bypassSecurityTrustUrl(url);
                     }
                     this.isLoading = false;
                     this.cdr.detectChanges();

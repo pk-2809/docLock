@@ -211,9 +211,10 @@ export class DocumentService {
         return null;
     }
 
-    downloadDocument(id: string, name: string): Observable<{ status: string, downloadUrl: string }> {
-        return this.http.get<{ status: string, downloadUrl: string }>(`${this.apiUrl}/${id}/download`, {
-            withCredentials: true
+    downloadDocument(id: string, name: string): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/${id}/download`, {
+            withCredentials: true,
+            responseType: 'blob'
         });
     }
 

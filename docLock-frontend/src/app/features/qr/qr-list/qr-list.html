@@ -52,6 +52,17 @@
 
         <!-- QR List -->
         <div class="flex-1 overflow-y-auto px-1 pb-20 custom-scrollbar">
+            @if (isLoadingQrs) {
+            <!-- Loading State -->
+            <div class="flex flex-col items-center justify-center pt-20">
+                <div class="relative w-16 h-16">
+                    <div
+                        class="absolute inset-0 rounded-full border-4 border-orange-100 border-t-[#F16D34] animate-spin">
+                    </div>
+                </div>
+                <p class="mt-4 text-slate-500 font-medium">Loading secure codes...</p>
+            </div>
+            } @else {
             @for (qr of qrCodes; track qr.id; let i = $index) {
             <!-- Card Item -->
             <div class="mb-5 relative group" (click)="viewQR(qr)">
@@ -75,10 +86,7 @@
                         style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 11px); opacity: 0.3;">
                     </div>
 
-                    <!-- Noise Texture (Overlay) -->
-                    <div
-                        style="position: absolute; inset: 0; opacity: 0.15; background-image: url('https://grainy-gradients.vercel.app/noise.svg'); mix-blend-mode: overlay; pointer-events: none;">
-                    </div>
+                    <!-- Noise Texture removed to avoid canvas tainting during export -->
 
                     <!-- Card Content Wrapper (Strict Inline CSS) -->
                     <div
@@ -163,7 +171,7 @@
                         <div class="flex-shrink-0 relative group-hover:scale-105 transition-transform duration-300">
                             <div
                                 style="background-color: white; padding: 0.75rem; border-radius: 1.25rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 4px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(12px);">
-                                <img [src]="generateQRCode(getPublicUrl(qr))"
+                                <img [src]="generateQRCode(getPublicUrl(qr))" crossOrigin="anonymous"
                                     class="w-24 h-24 md:w-28 md:h-28 object-contain rounded-lg">
                             </div>
                         </div>
@@ -185,6 +193,7 @@
                 <h3 class="text-lg font-bold text-slate-800 mb-1">No QR Codes</h3>
                 <p class="text-slate-500 text-sm max-w-[200px]">Create a secure access point for your documents.</p>
             </div>
+            }
             }
         </div>
     </div>

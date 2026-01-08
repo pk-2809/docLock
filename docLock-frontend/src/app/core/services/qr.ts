@@ -18,7 +18,7 @@ export interface QRCode {
 export class QrService {
     private http = inject(HttpClient);
     private appSettings = inject(AppSettingsService);
-    private apiUrl = this.appSettings.apiUrl + '/qrs';
+    private apiUrl = this.appSettings.apiUrl + '/api/qrs';
 
     qrs = signal<QRCode[]>([]);
 

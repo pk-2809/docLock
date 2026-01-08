@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import crypto from 'crypto';
 
 /**
  * Cookie Configuration Utility
@@ -9,41 +8,25 @@ export class CookieUtil {
     /**
      * Get environment-aware cookie configuration
      * - Localhost: sameSite=lax, secure=false (works in Safari)
-     * - Production: sameSite=none, secure=true (cross-origin support)
+     * - Production: SameSite=Strict (effective Same-Origin with Rewrites)
      */
-    static getCookieConfig(req: Request) {
-        const isLocalhost = req.headers.origin?.includes('localhost') || false;
-        const isProd = process.env.NODE_ENV === 'production';
-
+    static getCookieConfig(_req: Request) {
+        // With Firebase Hosting Rewrites, we are effectively Same-Origin even in production.
         return {
             httpOnly: true,
-            sameSite: isLocalhost ? 'lax' as const : 'none' as const,
-            secure: !isLocalhost,
-            domain: isLocalhost ? 'localhost' : undefined,
-            maxAge: isProd && !isLocalhost
-                ? 5 * 24 * 60 * 60 * 1000  // 5 days for production
-                : 24 * 60 * 60 * 1000      // 24 hours for development
+            sameSite: 'strict' as const, // Strict is safe for Same-Origin
+            secure: true, // Always secure in production/firebase
+            path: '/',
+            maxAge: 5 * 24 * 60 * 60 * 1000 // 5 days
         };
     }
 
     /**
      * Generate and set CSRF token (production only)
-     * Returns the generated token or null if localhost
+     * DEPRECATED: With Same-Origin + SameSite=Strict, this is less critical.
+     * Firebase Hosting strips 'csrf-token' cookie anyway.
      */
-    static generateCsrfToken(req: Request, res: Response): string | null {
-        const isLocalhost = req.headers.origin?.includes('localhost') || false;
-
-        if (!isLocalhost) {
-            // Generate CSRF token for production
-            const csrfToken = crypto.randomBytes(32).toString('hex');
-            res.cookie('csrf-token', csrfToken, {
-                httpOnly: false,  // Frontend needs to read this
-                sameSite: 'none',
-                secure: true,
-                maxAge: 5 * 24 * 60 * 60 * 1000  // 5 days
-            });
-            return csrfToken;
-        }
+    static generateCsrfToken(_req: Request, _res: Response): string | null {
         return null;
     }
 
@@ -53,20 +36,11 @@ export class CookieUtil {
     static clearAuthCookies(req: Request, res: Response): void {
         const config = this.getCookieConfig(req);
 
-        res.clearCookie('session', {
+        res.clearCookie('__session', {
             httpOnly: config.httpOnly,
             secure: config.secure,
             sameSite: config.sameSite,
-            domain: config.domain
+            path: '/'
         });
-
-        // Clear CSRF token if exists
-        if (!req.headers.origin?.includes('localhost')) {
-            res.clearCookie('csrf-token', {
-                httpOnly: false,
-                secure: true,
-                sameSite: 'none'
-            });
-        }
     }
 }

@@ -11,7 +11,7 @@ export interface AuthRequest extends Request {
 
 export const authenticate = async (req: AuthRequest, _res: Response, next: NextFunction): Promise<void> => {
     try {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
 
         if (!sessionCookie) {
             throw new CustomError('Unauthorized', 401);

@@ -17,25 +17,34 @@ try {
 
     if (serviceAccountBase64) {
         serviceAccount = JSON.parse(Buffer.from(serviceAccountBase64, 'base64').toString('utf-8'));
+
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+            projectId: serviceAccount.project_id,
+            storageBucket: `${serviceAccount.project_id}.firebasestorage.app`
+        });
     } else if (fs.existsSync(serviceAccountPath)) {
         serviceAccount = require(serviceAccountPath);
+
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+            projectId: serviceAccount.project_id,
+            storageBucket: `${serviceAccount.project_id}.firebasestorage.app`
+        });
     } else {
-        throw new Error('Service account key not found');
+        console.log('No service account found, attempting to use Application Default Credentials...');
+        admin.initializeApp({
+            credential: admin.credential.applicationDefault(),
+            projectId: process.env.FIREBASE_PROJECT_ID || 'doclock-96a20',
+            storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'doclock-96a20.firebasestorage.app'
+        });
     }
 
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-        projectId: serviceAccount.project_id,
-        storageBucket: `${serviceAccount.project_id}.firebasestorage.app`
-    });
-
     db = admin.firestore();
-
     auth = admin.auth();
-
     isFirebaseInitialized = true;
 } catch (error) {
-    console.error('Firebase initialization failed');
+    console.error('Firebase initialization failed:', error);
     isFirebaseInitialized = false;
 }
 

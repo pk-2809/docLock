@@ -6,7 +6,7 @@ import { CustomError, asyncHandler } from '../middleware/errorHandler';
 export class CardController {
 
     static getCards = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -17,7 +17,7 @@ export class CardController {
     });
 
     static createCard = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -76,7 +76,7 @@ export class CardController {
     });
 
     static updateCard = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -128,7 +128,7 @@ export class CardController {
     });
 
     static deleteCard = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);

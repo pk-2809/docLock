@@ -12,5 +12,6 @@ router.post('/logout', AuthController.logout);
 router.post('/update-profile', upload.single('profileImage'), AuthController.updateProfile);
 router.delete('/delete-account', AuthController.deleteAccount);
 router.get('/session', AuthController.checkSession);
+router.get('/csrf-token', AuthController.getCsrfToken);
 
 export default router;

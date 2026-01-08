@@ -516,13 +516,14 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
 
         // Fetch document content first
         this.documentService.downloadDocument(doc.id, doc.name).subscribe({
-            next: (res) => {
+            next: (blob: Blob) => {
                 this.loadingDocumentId = null;
+                const url = window.URL.createObjectURL(blob);
                 // Navigate with preloaded URL in state
                 this.router.navigate(['/documents/preview', doc.id], {
                     queryParams: { folderId: this.currentFolderId },
                     state: {
-                        preloadedUrl: res.downloadUrl,
+                        preloadedUrl: url,
                         document: doc
                     }
                 });
@@ -665,31 +666,21 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
         const targetFolderId = this.currentFolderId;
 
         this.documentService.uploadDocument(this.selectedFile, 'Personal', targetFolderId, this.documentName, this.authService.user()?.storageUsed || 0)
-            .pipe(
-                finalize(() => {
-                    setTimeout(() => {
-                        this.isUploading = false;
-                        // No need for detectChanges() as setTimeout is patched by Zone.js
-                    }, 0);
-                })
-            )
             .subscribe({
                 next: () => {
-                    // Wrap in setTimeout to avoid NG0100 just in case
-                    setTimeout(() => {
-                        this.toastService.showSuccess('Upload complete');
-                        this.closeUploadModal();
-                    }, 0);
+                    this.isUploading = false;
+                    this.toastService.showSuccess('Upload complete');
+                    this.closeUploadModal();
+                    this.cdr.detectChanges(); // Force update
                 },
                 error: (err) => {
+                    this.isUploading = false;
                     console.error('Upload failed', err);
                     const errorMessage = err.message || (err.error && err.error.message) || 'Failed to upload document';
-                    // Error toast is safe to show immediately or in next tick
-                    setTimeout(() => {
-                        this.toastService.showError(errorMessage);
-                        this.selectedFile = null;
-                        this.documentName = '';
-                    }, 0);
+                    this.toastService.showError(errorMessage);
+                    this.selectedFile = null;
+                    this.documentName = '';
+                    this.cdr.detectChanges(); // Force update
                 }
             });
     }
@@ -697,14 +688,17 @@ export class DocumentListComponent implements OnInit, OnDestroy, AfterViewInit {
     downloadDocument(doc: Document) {
         this.toastService.showSuccess(`Downloading ${doc.name}...`);
         this.documentService.downloadDocument(doc.id, doc.name).subscribe({
-            next: (res) => {
+            next: (blob: Blob) => {
+                const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.href = res.downloadUrl;
+                link.href = url;
                 link.download = doc.name;
                 link.target = '_blank';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                // Clean up the URL object after a short delay
+                setTimeout(() => window.URL.revokeObjectURL(url), 100);
                 this.toastService.showSuccess('Download started');
             },
             error: (err: any) => {

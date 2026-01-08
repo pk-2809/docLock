@@ -7,7 +7,7 @@ export class NotificationController {
     static getNotifications = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         // Resolve UID from session cookie
 
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) {
             res.json({ status: 'success', data: [] });
             return;
@@ -28,7 +28,7 @@ export class NotificationController {
     });
 
     static clearAll = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) return;
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
         if (!decodedClaims) return;
@@ -38,7 +38,7 @@ export class NotificationController {
     });
 
     static markAllAsRead = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) return;
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
         if (!decodedClaims) return;

@@ -56,6 +56,7 @@ export class ProfileComponent {
             // Limit size to 5MB (matches backend)
             if (file.size > 5 * 1024 * 1024) {
                 this.toastService.showError('Image size must be less than 5MB');
+                input.value = ''; // Reset input
                 return;
             }
 
@@ -63,6 +64,9 @@ export class ProfileComponent {
 
             // Upload directly
             this.updateProfileImage(file);
+
+            // Reset input to allow selecting the same file again
+            input.value = '';
         }
     }
 
@@ -80,7 +84,8 @@ export class ProfileComponent {
             },
             error: (err) => {
                 console.error('Failed to update profile', err);
-                this.toastService.showError('Failed to update profile'); // Error Toast
+                const msg = err.error?.error || err.error?.message || 'Failed to update profile';
+                this.toastService.showError(msg); // Error Toast with detail
                 this.isUploading.set(false); // Stop loading
             }
         });

@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class DocumentController {
 
     static uploadDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -50,7 +50,7 @@ export class DocumentController {
     });
 
     static downloadDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -67,11 +67,12 @@ export class DocumentController {
         }
 
         try {
-            // 2. Generate Signed URL for direct download
-            const signedUrl = await StorageService.getSignedUrl(doc.storagePath);
+            // 2. Stream File
+            res.setHeader('Content-Type', doc.mimeType || 'application/octet-stream');
+            res.setHeader('Content-Disposition', `inline; filename="${doc.name}"`);
 
-            // Return URL instead of streaming
-            res.json({ status: 'success', downloadUrl: signedUrl });
+            const stream = StorageService.getFileStream(doc.storagePath);
+            stream.pipe(res);
 
         } catch (error) {
             console.error('Download setup error:', error);
@@ -80,7 +81,7 @@ export class DocumentController {
     });
 
     static getDocuments = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -91,7 +92,7 @@ export class DocumentController {
     });
 
     static getDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -106,7 +107,7 @@ export class DocumentController {
     });
 
     static getCards = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -117,7 +118,7 @@ export class DocumentController {
     });
 
     static deleteDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -147,7 +148,7 @@ export class DocumentController {
     });
 
     static createFolder = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -170,7 +171,7 @@ export class DocumentController {
     });
 
     static getFolders = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -181,7 +182,7 @@ export class DocumentController {
     });
 
     static updateFolder = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);
@@ -198,7 +199,7 @@ export class DocumentController {
     });
 
     static deleteFolder = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const sessionCookie = req.cookies.session || '';
+        const sessionCookie = req.cookies.__session || '';
         if (!sessionCookie) throw new CustomError('Unauthorized', 401);
 
         const decodedClaims = await FirebaseService.verifySessionCookie(sessionCookie);

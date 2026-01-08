@@ -192,12 +192,21 @@ export class AuthService {
     }
   }
 
+  private _csrfToken: string | null = null;
+
+  get csrfToken(): string | null {
+    return this._csrfToken;
+  }
+
   /**
    * Step 4a: Complete Login (Exchange ID Token for Session)
    */
   completeLogin(idToken: string): Observable<User> {
     this.isLoading.set(true);
-    return this.http.post<{ status: string; uid: string }>(`${this.apiUrl}/login-verify`, { idToken }, { withCredentials: true }).pipe(
+    return this.http.post<{ status: string; uid: string; csrfToken?: string }>(`${this.apiUrl}/login-verify`, { idToken }, { withCredentials: true }).pipe(
+      tap(res => {
+        if (res.csrfToken) this._csrfToken = res.csrfToken;
+      }),
       switchMap(() => this.checkSession()), // Reload session to get full user details
       catchError(err => {
         setTimeout(() => this.isLoading.set(false), 0);
@@ -221,7 +230,10 @@ export class AuthService {
 
 
     this.isLoading.set(true);
-    return this.http.post<{ status: string; uid: string }>(url, { name, idToken, key }, { withCredentials: true }).pipe(
+    return this.http.post<{ status: string; uid: string; csrfToken?: string }>(url, { name, idToken, key }, { withCredentials: true }).pipe(
+      tap(res => {
+        if (res.csrfToken) this._csrfToken = res.csrfToken;
+      }),
       switchMap(() => this.checkSession()),
       catchError(err => {
         setTimeout(() => this.isLoading.set(false), 0);
@@ -240,8 +252,11 @@ export class AuthService {
    * Checks if the user has a valid HTTP-Only cookie session.
    */
   checkSession(): Observable<User | null> {
-    return this.http.get<{ isLoggedIn: boolean; user?: User }>(`${this.apiUrl}/session`, { withCredentials: true }).pipe(
+    return this.http.get<{ isLoggedIn: boolean; user?: User; csrfToken?: string }>(`${this.apiUrl}/session`, { withCredentials: true }).pipe(
       tap(response => {
+        if (response.csrfToken) {
+          this._csrfToken = response.csrfToken;
+        }
         if (response.isLoggedIn && response.user) {
           this.user.set(response.user);
           // Start Real-time Listeners (Config will be loaded separately by caller)
